@@ -84,3 +84,71 @@ El caso desencadenó un proceso legal que se extendió por años y marcó un ant
 - 🔗 [Reuters – Japan's Coincheck says it lost $400 mln in cryptocurrency to hackers](https://www.reuters.com/article/us-japan-cryptocurrency-hack/japans-coincheck-says-it-lost-400-mln-in-cryptocurrency-to-hackers-idUSKBN1FJ0CX/)
 
 ---
+
+### 6. bZx Flash Loan Attacks
+
+**Fecha:** Febrero 2020 (dos ataques en el mismo mes) **Blockchain:** Ethereum **Tipo de ataque:** Flash Loan + Oracle Manipulation
+
+**Descripción:** bZx fue uno de los primeros protocolos DeFi en sufrir ataques de _flash loan_ a gran escala, y supuso un punto de inflexión en la concienciación sobre este vector. En el primer ataque (14 de febrero de 2020), el atacante tomó un préstamo flash de 10.000 ETH desde dYdX, abrió una posición corta en bZx, y usó parte de los fondos para manipular el precio de WBTC/ETH a través de Uniswap, obteniendo beneficio al cerrar la posición. En el segundo ataque (18 de febrero), el atacante manipuló el oráculo de precio de sUSD en Kyber Network para inflar su valor artificialmente y tomar prestado mucho más valor del que depositó como colateral.
+
+**Coste económico:** ~$954.000 (primer ataque) + ~$600.000 (segundo ataque)
+
+**Fuentes:**
+
+- 🔗 [PeckShield – bZx Hack Analysis](https://peckshield.medium.com/bzx-hack-full-disclosure-with-detailed-profit-analysis-e6b1fa9b18fc)
+
+---
+
+### 7. Harvest Finance
+
+**Fecha:** Octubre 2020 **Blockchain:** Ethereum **Tipo de ataque:** Flash Loan + Oracle Manipulation (USDC/USDT Curve pool)
+
+**Descripción:** El atacante usó un flash loan masivo para manipular el precio de USDC en el pool de Curve Finance. Esto permitió depositar en Harvest Finance a un precio artificialmente bajo, y retirar inmediatamente a un precio normal, obteniendo beneficio. El ciclo se repitió múltiples veces en la misma transacción. El ataque puso de manifiesto los riesgos de depender de precios en tiempo real de pools de liquidez como oráculos de precio.
+
+**Coste económico:** ~$34M
+
+**Fuentes:**
+
+- 🔗 [Rekt.news – Harvest Finance](https://rekt.news/harvest-finance-rekt/)
+
+---
+
+### 8. Compound / Yearn Finance (Cream Finance — múltiples ataques)
+
+**Fecha:** 2021 (tres ataques distintos: febrero, agosto y octubre) **Blockchain:** Ethereum **Tipo de ataque:** Flash Loan + Reentrancy / Price Oracle Manipulation
+
+**Descripción:** Cream Finance sufrió tres ataques relevantes en 2021. El más significativo ocurrió en octubre de 2021, cuando un atacante explotó una vulnerabilidad de reentrancy en el contrato de la versión de Cream que integraba tokens AMP (con callbacks ERC-777). El atacante tomó prestado ETH, disparó el callback del token AMP para re-entrar en la función de préstamo antes de que el saldo fuese actualizado, y repitió la operación 17 veces en una sola transacción.
+
+**Coste económico:** ~$130M (sumando los tres ataques de 2021)
+
+**Fuentes:**
+
+- 🔗 [Rekt.news – Cream Finance](https://rekt.news/cream-rekt-2/)
+
+---
+
+### 9. Poly Network
+
+**Fecha:** 10 de agosto de 2021 **Blockchain:** Ethereum, BNB Chain, Polygon (simultáneamente) **Tipo de ataque:** Access Control (cross-contract function call exploit)
+
+**Descripción:** Poly Network es un protocolo de interoperabilidad cross-chain. El atacante explotó una vulnerabilidad en la función `verifyHeaderAndExecuteTx` del contrato `EthCrossChainManager`, que permitía llamar a la función `PutCurEpochConPubKeyBytes` del contrato `EthCrossChainData`. Esto posibilitó reasignar el rol de _keeper_ (la cuenta con permisos para ejecutar transacciones cross-chain) a la propia dirección del atacante, tomando control sobre los fondos del protocolo en tres blockchains simultáneamente.
+
+En un giro inesperado, el atacante devolvió prácticamente todos los fondos, afirmando haberlo hecho "por diversión" y para demostrar la vulnerabilidad. Poly Network llegó a ofrecerle el puesto de Chief Security Officer.
+
+**Coste económico:** ~$611M (la mayor parte fue devuelta)
+
+**Fuentes:**
+
+- 🔗 [Kudelski Security – Poly Network Hack Explained](https://research.kudelskisecurity.com/2021/08/12/the-poly-network-hack-explained/)
+
+---
+
+### 10. Compound Governance Attack (Proposal 62)
+
+**Fecha:** Septiembre 2021 **Blockchain:** Ethereum **Tipo de ataque:** Logic Error en distribución de recompensas (bug, no ataque intencionado malicioso)
+
+**Descripción:** Una propuesta de gobernanza en Compound Finance (Proposal 62) fue aprobada e implementó un bug en el contrato `Comptroller` que distribuyó erróneamente COMP tokens (recompensas) a usuarios que no las habían ganado. Aunque técnicamente fue un bug y no un exploit activo, ilustra el riesgo de actualizaciones en protocolos de gobernanza on-chain. El fundador del protocolo pidió públicamente a los beneficiarios que devolvieran los fondos. Se estima que ~$80M fueron distribuidos incorrectamente, de los cuales solo una parte fue recuperada.
+
+**Coste económico:** ~$80M en COMP distribuidos incorrectamente
+
+---

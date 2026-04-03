@@ -139,7 +139,7 @@ En paralelo, organismos internacionales y marcos regulatorios están avanzando e
 Disponible en: [https://www.sciencedirect.com/science/article/abs/pii/S2213138822000911](https://www.sciencedirect.com/science/article/abs/pii/S2213138822000911)
 
 [2] L. M. Saldaña Trejo, G. Gallegos García, and R. Aldeco Pérez, “Protocolos criptográficos de consenso en blockchain para el Internet de las Cosas,” _Computación y Sistemas_, vol. 29, no. 2, pp. 643–657, 2025. doi: 10.13053/CyS-29-2-5694.  
-Disponible en: [https://cys.cic.ipn.mx/index.php/CyS/article/download/5694/3961](https://cys.cic.ipn.mx/index.php/CyS/article/download/5694/3961)
+Disponible en: https://www.researchgate.net/publication/395964329_Protocolos_criptograficos_de_consenso_en_blockchain_para_el_Internet_de_las_cosas
 
 [3] Z. Wu, H. Xu, M. Yue, and Y. Lu, “Blockchain security threats: A comprehensive classification and impact assessment,” _Computer Networks_, vol. 265, Art. 111284, 2025. doi: 10.1016/j.comnet.2025.111284.  
 Disponible en: [https://www.sciencedirect.com/science/article/abs/pii/S138912862500252X](https://www.sciencedirect.com/science/article/abs/pii/S138912862500252X)

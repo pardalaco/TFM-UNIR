@@ -16,17 +16,17 @@
 
 ## Ataques por Categoría
 
-|Tipo de Ataque|Descripción breve|
-|---|---|
-|**Reentrancy**|Un contrato malicioso re-invoca una función antes de que se actualice el estado|
-|**Flash Loan Attack**|Uso de préstamos sin colateral dentro de una transacción para manipular precios o protocolos|
-|**Access Control**|Funciones críticas accesibles por actores no autorizados por falta de controles|
-|**Bridge Exploit**|Explotación de vulnerabilidades en puentes cross-chain|
-|**Private Key Compromise**|Robo o filtración de claves privadas de validadores o admins|
-|**Governance Attack**|Manipulación del sistema de votación de un protocolo para aprobación de propuestas maliciosas|
-|**Oracle Manipulation**|Manipulación del precio de un oráculo para beneficiarse en préstamos o liquidaciones|
-|**Logic Error**|Error en la lógica de negocio del smart contract explotado por el atacante|
-|**Rug Pull / Exit Scam**|Los propios desarrolladores drenan el protocolo y desaparecen|
+| Tipo de Ataque             | Descripción breve                                                                             |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| **Reentrancy**             | Un contrato malicioso re-invoca una función antes de que se actualice el estado               |
+| **Flash Loan Attack**      | Uso de préstamos sin colateral dentro de una transacción para manipular precios o protocolos  |
+| **Access Control**         | Funciones críticas accesibles por actores no autorizados por falta de controles               |
+| **Bridge Exploit**         | Explotación de vulnerabilidades en puentes cross-chain                                        |
+| **Private Key Compromise** | Robo o filtración de claves privadas de validadores o admins                                  |
+| **Governance Attack**      | Manipulación del sistema de votación de un protocolo para aprobación de propuestas maliciosas |
+| **Oracle Manipulation**    | Manipulación del precio de un oráculo para beneficiarse en préstamos o liquidaciones          |
+| **Logic Error**            | Error en la lógica de negocio del smart contract explotado por el atacante                    |
+| **Rug Pull / Exit Scam**   | Los propios desarrolladores drenan el protocolo y desaparecen                                 |
 
 ---
 

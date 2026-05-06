@@ -4,3 +4,8 @@
 # Obsidian
 .obsidian/
 docs-TFM-UNIR/.obsidian
+
+# python
+__pycache__/
+*.pyc
+.venv*/

@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import os
 import re
+from collections import Counter
 
 def get_solidity_version(contract_path):
     """Extract Solidity version from pragma statement."""
@@ -80,8 +81,15 @@ def main():
     print(f"Found {len(sol_files)} contract(s)")
     print("=" * 80)
 
+    # Inicializar contador
+    stats = Counter()
+
     for sol_file in sol_files:
         result = test_contract(sol_file)
+
+        # Actualizar contador
+        stats[result['execution']] += 1
+
         print(f"\nContract: {result['contract']}")
         print(f"Path: {result['path']}")
         print(f"Solidity Version: {result['version']}")
@@ -89,6 +97,15 @@ def main():
         if result['output']:
             print(f"Output:\n{result['output']}")
         print("-" * 80)
+
+    # Resumen final
+    print("\n" + "=" * 30)
+    print("       TEST SUMMARY")
+    print("=" * 30)
+    print(f"Total contracts:  {len(sol_files)}")
+    for status, count in stats.items():
+        print(f"{status:15}:  {count}")
+    print("=" * 30)
 
 if __name__ == "__main__":
     main()

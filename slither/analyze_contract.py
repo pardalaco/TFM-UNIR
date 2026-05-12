@@ -38,7 +38,8 @@ def main():
     # Auto-detect and setup Solidity version
     version = get_solidity_version(args.contract)
     if version:
-        setup_solc_version(version)
+        print(f"Detected Solidity version: {version}")
+        # setup_solc_version(version)
     else:
         print("Warning: Could not detect Solidity version from pragma")
 

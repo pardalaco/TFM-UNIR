@@ -1,0 +1,13 @@
+[project]
+name = "mythril-TFM"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "eth>=0.0.1",
+    "mythril>=0.24.8",
+    "pypandoc>=1.17",
+    "setuptools<70.0.0",
+    "solc-select>=1.2.0",
+]

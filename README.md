@@ -43,7 +43,7 @@ Usamos `uv` para gestionar dependencias de Python en un entorno virtual aislado.
 
 ```bash
 uv sync # Instala dependencias en un entorno virtual aislado
-uv shell # Activa el entorno virtual
+source .venv/bin/activate # Activa el entorno virtual
 
 # uv no tiene acceso a solc-select, hay que instalarlo dentro del entorno uv
 solc-select install 0.8.20

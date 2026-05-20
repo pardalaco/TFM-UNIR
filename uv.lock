@@ -2,6 +2,12 @@ version = 1
 revision = 3
 requires-python = ">=3.12"
 
+[manifest]
+members = [
+    "evmaudit",
+    "tfm-unir",
+]
+
 [[package]]
 name = "asn1crypto"
 version = "1.5.1"
@@ -732,6 +738,27 @@ dependencies = [
     { name = "requests" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/88/64/067c42a1d21757ceea7106f5141849f76bcbe2289264a05b700743a7d9e8/ethereum_input_decoder-0.2.2.tar.gz", hash = "sha256:8cf09f22176f82682a25be547e44930e95ef270f3d17df5e7460d651a33c8606", size = 5550, upload-time = "2018-07-04T18:35:07.209Z" }
+
+[[package]]
+name = "evmaudit"
+version = "0.1.0"
+source = { editable = "evmaudit" }
+dependencies = [
+    { name = "eth" },
+    { name = "mythril" },
+    { name = "setuptools" },
+    { name = "slither-analyzer" },
+    { name = "solc-select" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "eth", specifier = ">=0.0.1" },
+    { name = "mythril", specifier = ">=0.24.8" },
+    { name = "setuptools", specifier = "<70.0.0" },
+    { name = "slither-analyzer", specifier = ">=0.9.2" },
+    { name = "solc-select", specifier = ">=1.2.0" },
+]
 
 [[package]]
 name = "filelock"

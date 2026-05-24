@@ -1,0 +1,154 @@
+{
+    "contract": "[Vault",
+    "findings": [
+        {
+            "swc_id": "SWC-105",
+            "vuln_type": "access_control",
+            "severity": "high",
+            "confidence_score": 2,
+            "status": "detected",
+            "lines": [
+                12,
+                13,
+                14
+            ],
+            "confirmed_by": [
+                "slither"
+            ],
+            "evidence": {
+                "slither": {
+                    "check": "arbitrary-send-eth",
+                    "impact": "High",
+                    "description": "Vault.sweep(address) (../contracts/AccessControl.sol#12-14) sends eth to arbitrary user\n\tDangerous calls:\n\t- to.transfer(address(this).balance) (../contracts/AccessControl.sol#13)",
+                    "elements": [
+                        {
+                            "type": "function",
+                            "name": "sweep",
+                            "source_mapping": {
+                                "start": 216,
+                                "length": 95,
+                                "filename_relative": "../contracts/AccessControl.sol",
+                                "filename_absolute": "/Users/paulas.p./Desktop/TFM_25-26/Repositorio/TFM-UNIR/contracts/AccessControl.sol",
+                                "filename_short": "../contracts/AccessControl.sol",
+                                "is_dependency": false,
+                                "lines": [
+                                    12,
+                                    13,
+                                    14
+                                ],
+                                "starting_column": 5,
+                                "ending_column": 6
+                            },
+                            "type_specific_fields": {
+                                "parent": {
+                                    "type": "contract",
+                                    "name": "Vault",
+                                    "source_mapping": {
+                                        "start": 58,
+                                        "length": 290,
+                                        "filename_relative": "../contracts/AccessControl.sol",
+                                        "filename_absolute": "/Users/paulas.p./Desktop/TFM_25-26/Repositorio/TFM-UNIR/contracts/AccessControl.sol",
+                                        "filename_short": "../contracts/AccessControl.sol",
+                                        "is_dependency": false,
+                                        "lines": [
+                                            4,
+                                            5,
+                                            6,
+                                            7,
+                                            8,
+                                            9,
+                                            10,
+                                            11,
+                                            12,
+                                            13,
+                                            14,
+                                            15,
+                                            16,
+                                            17,
+                                            18
+                                        ],
+                                        "starting_column": 1,
+                                        "ending_column": 0
+                                    }
+                                },
+                                "signature": "sweep(address)"
+                            }
+                        },
+                        {
+                            "type": "node",
+                            "name": "to.transfer(address(this).balance)",
+                            "source_mapping": {
+                                "start": 270,
+                                "length": 34,
+                                "filename_relative": "../contracts/AccessControl.sol",
+                                "filename_absolute": "/Users/paulas.p./Desktop/TFM_25-26/Repositorio/TFM-UNIR/contracts/AccessControl.sol",
+                                "filename_short": "../contracts/AccessControl.sol",
+                                "is_dependency": false,
+                                "lines": [
+                                    13
+                                ],
+                                "starting_column": 9,
+                                "ending_column": 43
+                            },
+                            "type_specific_fields": {
+                                "parent": {
+                                    "type": "function",
+                                    "name": "sweep",
+                                    "source_mapping": {
+                                        "start": 216,
+                                        "length": 95,
+                                        "filename_relative": "../contracts/AccessControl.sol",
+                                        "filename_absolute": "/Users/paulas.p./Desktop/TFM_25-26/Repositorio/TFM-UNIR/contracts/AccessControl.sol",
+                                        "filename_short": "../contracts/AccessControl.sol",
+                                        "is_dependency": false,
+                                        "lines": [
+                                            12,
+                                            13,
+                                            14
+                                        ],
+                                        "starting_column": 5,
+                                        "ending_column": 6
+                                    },
+                                    "type_specific_fields": {
+                                        "parent": {
+                                            "type": "contract",
+                                            "name": "Vault",
+                                            "source_mapping": {
+                                                "start": 58,
+                                                "length": 290,
+                                                "filename_relative": "../contracts/AccessControl.sol",
+                                                "filename_absolute": "/Users/paulas.p./Desktop/TFM_25-26/Repositorio/TFM-UNIR/contracts/AccessControl.sol",
+                                                "filename_short": "../contracts/AccessControl.sol",
+                                                "is_dependency": false,
+                                                "lines": [
+                                                    4,
+                                                    5,
+                                                    6,
+                                                    7,
+                                                    8,
+                                                    9,
+                                                    10,
+                                                    11,
+                                                    12,
+                                                    13,
+                                                    14,
+                                                    15,
+                                                    16,
+                                                    17,
+                                                    18
+                                                ],
+                                                "starting_column": 1,
+                                                "ending_column": 0
+                                            }
+                                        },
+                                        "signature": "sweep(address)"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

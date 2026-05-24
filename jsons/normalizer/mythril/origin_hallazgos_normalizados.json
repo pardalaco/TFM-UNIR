@@ -1,0 +1,68 @@
+{
+    "tool": "mythril",
+    "findings": [
+        {
+            "title": "Dependence on tx.origin",
+            "description": "Use of tx.origin as a part of authorization control.\nThe tx.origin environment variable has been found to influence a control flow decision. Note that using tx.origin as a security control might cause a situation where a user inadvertently authorizes a smart contract to perform an action on their behalf. It is recommended to use msg.sender instead.",
+            "severity": "Low",
+            "category": "access_control",
+            "location": {
+                "file": "contracts/mythril_solidity_examples/origin.sol",
+                "line": 21
+            },
+            "swc_id": "SWC-115",
+            "raw": {
+                "address": 373,
+                "code": "require(tx.origin != owner)",
+                "contract": "Origin",
+                "description": "Use of tx.origin as a part of authorization control.\nThe tx.origin environment variable has been found to influence a control flow decision. Note that using tx.origin as a security control might cause a situation where a user inadvertently authorizes a smart contract to perform an action on their behalf. It is recommended to use msg.sender instead.",
+                "filename": "contracts/mythril_solidity_examples/origin.sol",
+                "function": "transferOwnership(address)",
+                "lineno": 21,
+                "max_gas_used": 1527,
+                "min_gas_used": 1102,
+                "severity": "Low",
+                "sourceMap": "345:27",
+                "swc-id": "115",
+                "title": "Dependence on tx.origin",
+                "tx_sequence": {
+                    "initialState": {
+                        "accounts": {
+                            "0xaffeaffeaffeaffeaffeaffeaffeaffeaffeaffe": {
+                                "balance": "0x0",
+                                "code": "",
+                                "nonce": 0,
+                                "storage": "{}"
+                            },
+                            "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef": {
+                                "balance": "0x0",
+                                "code": "",
+                                "nonce": 0,
+                                "storage": "{}"
+                            }
+                        }
+                    },
+                    "steps": [
+                        {
+                            "address": "",
+                            "calldata": "",
+                            "input": "0x608060405234801561001057600080fd5b50336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550610220806100606000396000f3fe60806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680638da5cb5b14610051578063f2fde38b146100a8575b600080fd5b34801561005d57600080fd5b506100666100f9565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156100b457600080fd5b506100f7600480360360208110156100cb57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061011e565b005b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163273ffffffffffffffffffffffffffffffffffffffff161415151561017a57600080fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415156101f157806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505b5056fea165627a7a72305820d7a25469beae81730a009c3aa0400d27f139341946d5c9e0b65afdfbcb5b74ac0029",
+                            "name": "unknown",
+                            "origin": "0xaffeaffeaffeaffeaffeaffeaffeaffeaffeaffe",
+                            "value": "0x0"
+                        },
+                        {
+                            "address": "0x901d12ebe1b195e5aa8748e62bd7734ae19b51f",
+                            "calldata": "0xf2fde38b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b",
+                            "input": "0xf2fde38b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b8b",
+                            "name": "transferOwnership(address)",
+                            "origin": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+                            "resolved_input": null,
+                            "value": "0x0"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

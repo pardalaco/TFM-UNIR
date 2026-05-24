@@ -9,3 +9,4 @@ docs-TFM-UNIR/.obsidian
 __pycache__/
 *.pyc
 .venv*/
+evmaudit

@@ -1,0 +1,66 @@
+{
+    "contract": "exceptions",
+    "findings": [
+        {
+            "swc_id": "110",
+            "vuln_type": "exception_state",
+            "severity": "medium",
+            "confidence_score": 2,
+            "status": "detected",
+            "lines": [
+                7,
+                17,
+                25,
+                35
+            ],
+            "confirmed_by": [
+                "mythril"
+            ],
+            "evidence": {
+                "mythril": {
+                    "title": "Exception State",
+                    "lineno": 7,
+                    "description": "An assertion violation was triggered.\nIt is possible to trigger an assertion violation. Note that Solidity assert() statements should only be used to check invariants. Review the transaction trace generated for this issue and either make sure your program logic is correct, or use require() instead of assert() if your goal is to constrain user inputs or enforce preconditions. Remember to validate inputs from both callers (for instance, via passed arguments) and callees (for instance, via return values).",
+                    "function": "assert1()",
+                    "tx_sequence": {
+                        "initialState": {
+                            "accounts": {
+                                "0xaffeaffeaffeaffeaffeaffeaffeaffeaffeaffe": {
+                                    "balance": "0x0",
+                                    "code": "",
+                                    "nonce": 0,
+                                    "storage": "{}"
+                                },
+                                "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef": {
+                                    "balance": "0x0",
+                                    "code": "",
+                                    "nonce": 0,
+                                    "storage": "{}"
+                                }
+                            }
+                        },
+                        "steps": [
+                            {
+                                "address": "",
+                                "calldata": "",
+                                "input": "0x608060405234801561001057600080fd5b5061030a806100206000396000f3fe60806040526004361061008e576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806301d4277c14610093578063546455b5146100ce57806378375f141461010957806392dd38ea14610144578063a08299f11461017f578063b34c3610146101ba578063b630d706146101d1578063f44f13d81461020c575b600080fd5b34801561009f57600080fd5b506100cc600480360360208110156100b657600080fd5b8101908080359060200190929190505050610223565b005b3480156100da57600080fd5b50610107600480360360208110156100f157600080fd5b8101908080359060200190929190505050610245565b005b34801561011557600080fd5b506101426004803603602081101561012c57600080fd5b8101908080359060200190929190505050610255565b005b34801561015057600080fd5b5061017d6004803603602081101561016757600080fd5b8101908080359060200190929190505050610268565b005b34801561018b57600080fd5b506101b8600480360360208110156101a257600080fd5b8101908080359060200190929190505050610280565b005b3480156101c657600080fd5b506101cf610295565b005b3480156101dd57600080fd5b5061020a600480360360208110156101f457600080fd5b81019080803590602001909291905050506102aa565b005b34801561021857600080fd5b506102216102c9565b005b6008811015610242576000808260088110151561023c57fe5b01549050505b50565b6017811415151561025257fe5b50565b6017811415151561026557600080fd5b50565b6000808260088110151561027857fe5b015490505050565b600081600181151561028e57fe5b0490505050565b6000600190506000811415156102a757fe5b50565b60008111156102c65760008160018115156102c157fe5b049050505b50565b6000600190506000811115156102db57fe5b5056fea165627a7a72305820539575e1d9caf2332ebd293dae48131881f592746b6dfd0184d5f21553ff884e0029",
+                                "name": "unknown",
+                                "origin": "0xaffeaffeaffeaffeaffeaffeaffeaffeaffeaffe",
+                                "value": "0x0"
+                            },
+                            {
+                                "address": "0x901d12ebe1b195e5aa8748e62bd7734ae19b51f",
+                                "calldata": "0xb34c3610",
+                                "input": "0xb34c3610",
+                                "name": "assert1()",
+                                "origin": "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+                                "resolved_input": null,
+                                "value": "0x0"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}

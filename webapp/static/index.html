@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVMAudit</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #12131f;
+  color: #d1d5db;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+nav {
+  background: #1a1c2e;
+  border-bottom: 1px solid #2a2d45;
+  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo { display: flex; align-items: center; gap: 0.6rem; }
+.nav-logo .hex { font-size: 1.4rem; color: #6366f1; }
+.nav-logo span { font-size: 0.95rem; font-weight: 700; color: #e2e8f0; letter-spacing: 0.05em; }
+.nav-links { display: flex; gap: 1.5rem; font-size: 0.82rem; color: #64748b; }
+.nav-links a { color: #64748b; text-decoration: none; }
+.nav-links a:hover { color: #a5b4fc; }
+
+/* ── HERO ── */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+}
+.logo-wrap { display: flex; align-items: center; gap: 1.2rem; margin-bottom: 1rem; }
+.logo-hex {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+}
+.logo-text { font-size: 2.8rem; font-weight: 800; color: #e2e8f0; letter-spacing: 0.04em; }
+.hero-sub { color: #64748b; font-size: 0.95rem; max-width: 520px; line-height: 1.6; margin-bottom: 2.5rem; }
+
+/* ── TABS ── */
+.tabs-wrap { width: 100%; max-width: 700px; }
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #2a2d45;
+  margin-bottom: 0;
+}
+.tab {
+  padding: 0.75rem 2rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+  user-select: none;
+}
+.tab:hover { color: #a5b4fc; }
+.tab.active { color: #6366f1; border-bottom-color: #6366f1; }
+
+/* ── PANELS ── */
+.panel {
+  display: none;
+  background: #1a1c2e;
+  border: 1px solid #2a2d45;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 2.5rem;
+  width: 100%;
+}
+.panel.active { display: block; }
+
+/* FILE panel */
+.drop-zone {
+  border: 2px dashed #2a2d45;
+  border-radius: 10px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.drop-zone:hover, .drop-zone.drag { border-color: #6366f1; background: #1e2040; }
+.drop-zone .dz-icon { font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.6; }
+.drop-zone h3 { font-size: 1rem; color: #e2e8f0; margin-bottom: 0.4rem; }
+.drop-zone p { font-size: 0.85rem; color: #64748b; margin-bottom: 1.2rem; }
+.drop-zone input { display: none; }
+
+.btn-choose {
+  border: 1px solid #6366f1;
+  background: transparent;
+  color: #6366f1;
+  padding: 0.6rem 1.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-choose:hover { background: #6366f1; color: white; }
+
+/* CODE panel */
+.code-label { font-size: 0.82rem; color: #64748b; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.code-name-row { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: flex-end; }
+.code-name-wrap { flex: 1; }
+.code-name-input {
+  width: 100%;
+  background: #12131f;
+  border: 1px solid #2a2d45;
+  border-radius: 6px;
+  padding: 0.6rem 0.9rem;
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.code-name-input:focus { border-color: #6366f1; }
+.code-name-input::placeholder { color: #374151; }
+
+.code-editor {
+  width: 100%;
+  min-height: 280px;
+  background: #0d0e1a;
+  border: 1px solid #2a2d45;
+  border-radius: 8px;
+  padding: 1rem;
+  color: #a5f3fc;
+  font-family: 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border 0.2s;
+}
+.code-editor:focus { border-color: #6366f1; }
+.code-editor::placeholder { color: #1f2937; }
+
+.btn-analyze {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  width: 100%;
+  letter-spacing: 0.04em;
+  transition: opacity 0.2s;
+}
+.btn-analyze:hover { opacity: 0.9; }
+.btn-analyze:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── PROGRESS ── */
+#progress-section {
+  display: none;
+  width: 100%;
+  max-width: 700px;
+  margin-top: 2rem;
+}
+.prog-card {
+  background: #1a1c2e;
+  border: 1px solid #2a2d45;
+  border-radius: 12px;
+  padding: 2rem;
+}
+.prog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+.prog-header h3 { font-size: 0.95rem; color: #e2e8f0; }
+.prog-header h3 span { color: #6366f1; }
+.prog-pct { color: #6366f1; font-weight: 700; font-size: 1.1rem; }
+.prog-bar-bg { background: #2a2d45; border-radius: 999px; height: 6px; overflow: hidden; margin-bottom: 1.5rem; }
+.prog-bar { height: 100%; background: linear-gradient(90deg, #4f46e5, #a78bfa); border-radius: 999px; width: 0%; transition: width 0.5s ease; }
+.prog-steps { display: flex; flex-direction: column; gap: 0.6rem; }
+.step-row { display: flex; align-items: center; gap: 0.8rem; font-size: 0.85rem; color: #374151; }
+.step-row.done { color: #4ade80; }
+.step-row.active { color: #e2e8f0; }
+.step-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; background: #2a2d45; }
+.step-row.done .step-icon { background: #14532d; color: #4ade80; }
+.step-row.active .step-icon { background: #4f46e5; color: white; animation: spin 1.5s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ── RESULTS ── */
+#results-section { display: none; width: 100%; max-width: 900px; margin-top: 2rem; padding-bottom: 4rem; }
+
+.result-hero {
+  background: #1a1c2e;
+  border: 1px solid #2a2d45;
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+.score-circle {
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  border: 5px solid;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.score-num { font-size: 2rem; font-weight: 800; line-height: 1; }
+.score-den { font-size: 0.75rem; color: #64748b; }
+.result-meta h2 { font-size: 1.3rem; color: #e2e8f0; margin-bottom: 0.3rem; }
+.result-meta p { font-size: 0.85rem; color: #64748b; margin-bottom: 0.8rem; }
+.result-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tag { background: #2a2d45; padding: 0.25rem 0.7rem; border-radius: 999px; font-size: 0.75rem; color: #94a3b8; }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-box {
+  background: #1a1c2e;
+  border: 1px solid #2a2d45;
+  border-radius: 10px;
+  padding: 1.2rem;
+  text-align: center;
+}
+.stat-box .n { font-size: 2.2rem; font-weight: 800; }
+.stat-box .l { font-size: 0.78rem; color: #64748b; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.card {
+  background: #1a1c2e;
+  border: 1px solid #2a2d45;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #2a2d45;
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.9rem; font-weight: 600; color: #e2e8f0;
+}
+.card-header .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+table { width: 100%; border-collapse: collapse; }
+th { padding: 0.7rem 1.5rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; border-bottom: 1px solid #2a2d45; text-align: left; }
+td { padding: 0.9rem 1.5rem; font-size: 0.85rem; border-bottom: 1px solid #1a1c2e; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #1e2040; }
+
+.badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+.sev-high   { background: #450a0a; color: #fca5a5; }
+.sev-medium { background: #451a03; color: #fdba74; }
+.sev-low    { background: #0c1a4a; color: #93c5fd; }
+.st-confirmed { background: #052e16; color: #4ade80; }
+.st-detected  { background: #1f2937; color: #94a3b8; }
+.stars { color: #818cf8; }
+
+/* Error */
+.err-card { background: #2d0f0f; border: 1px solid #7f1d1d; border-radius: 12px; padding: 1.5rem; color: #fca5a5; }
+
+.btn-reset {
+  background: transparent;
+  border: 1px solid #2a2d45;
+  color: #64748b;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  transition: all 0.2s;
+}
+.btn-reset:hover { border-color: #6366f1; color: #6366f1; }
+
+/* ── FOOTER ── */
+footer {
+  margin-top: auto;
+  background: #1a1c2e;
+  border-top: 1px solid #2a2d45;
+  padding: 1.5rem 2rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: #374151;
+}
+footer h4 { color: #64748b; margin-bottom: 0.5rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+footer p { margin-bottom: 0.25rem; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <span class="hex">⬡</span>
+    <span>EVMAUDIT</span>
+  </div>
+  <div class="nav-links">
+    <a href="#">Documentación</a>
+    <a href="#">API</a>
+    <a href="#">GitHub</a>
+    <span>TFM UNIR · 2026</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="home-section">
+  <div class="logo-wrap">
+    <div class="logo-hex">⬡</div>
+    <div class="logo-text">EVMAUDIT</div>
+  </div>
+  <p class="hero-sub">
+    Analiza contratos inteligentes de Ethereum de forma automática.<br>
+    Combina Slither · Mythril · Echidna para detectar, correlacionar y priorizar vulnerabilidades.
+  </p>
+
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('file')">📄 FILE</div>
+      <div class="tab" onclick="switchTab('code')">📝 CODE</div>
+    </div>
+
+    <!-- FILE panel -->
+    <div class="panel active" id="panel-file">
+      <div class="drop-zone" id="drop-zone">
+        <div class="dz-icon">🔍</div>
+        <h3>Arrastra aquí tu contrato Solidity</h3>
+        <p>Soporta archivos .sol</p>
+        <input type="file" id="file-input" accept=".sol">
+        <button class="btn-choose" onclick="document.getElementById('file-input').click()">
+          Seleccionar archivo
+        </button>
+      </div>
+    </div>
+
+    <!-- CODE panel -->
+    <div class="panel" id="panel-code">
+      <div class="code-name-row">
+        <div class="code-name-wrap">
+          <div class="code-label">Nombre del contrato</div>
+          <input class="code-name-input" id="code-name" type="text" placeholder="ej: VulnerableBank">
+        </div>
+      </div>
+      <div class="code-label">Código Solidity</div>
+      <textarea class="code-editor" id="code-editor"
+        placeholder="// Pega aquí tu código Solidity...
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract MiContrato {
+    ...
+}"></textarea>
+      <button class="btn-analyze" onclick="analyzeCode()">Analizar código</button>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div id="progress-section">
+    <div class="prog-card">
+      <div class="prog-header">
+        <h3>Analizando <span id="prog-name"></span></h3>
+        <span class="prog-pct" id="prog-pct">0%</span>
+      </div>
+      <div class="prog-bar-bg"><div class="prog-bar" id="prog-bar"></div></div>
+      <div class="prog-steps" id="prog-steps"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ERROR -->
+<div id="error-section" style="display:none; max-width:700px; margin: 0 auto; padding: 1rem 2rem;">
+  <div class="err-card">
+    <strong>Error durante el análisis</strong>
+    <p id="error-msg" style="margin-top:0.5rem; font-family:monospace; font-size:0.82rem;"></p>
+  </div>
+  <button class="btn-reset" onclick="reset()">← Analizar otro contrato</button>
+</div>
+
+<!-- RESULTS -->
+<div id="results-section" style="padding: 0 2rem;">
+
+  <div class="result-hero">
+    <div class="score-circle" id="score-circle">
+      <span class="score-num" id="score-num">—</span>
+      <span class="score-den">/ 10</span>
+    </div>
+    <div class="result-meta">
+      <h2 id="res-contract-name">—</h2>
+      <p id="res-risk-label">—</p>
+      <div class="result-tags">
+        <span class="tag">Slither</span>
+        <span class="tag">Mythril</span>
+        <span class="tag">Echidna</span>
+        <span class="tag" id="res-date"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="n" id="st-total">0</div>
+      <div class="l">Total hallazgos</div>
+    </div>
+    <div class="stat-box">
+      <div class="n" style="color:#4ade80" id="st-confirmed">0</div>
+      <div class="l">Confirmados</div>
+    </div>
+    <div class="stat-box">
+      <div class="n" style="color:#f87171" id="st-high">0</div>
+      <div class="l">Severidad alta</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="dot" style="background:#f87171"></div>Hallazgos correlacionados</div>
+    <table>
+      <thead><tr>
+        <th>Función</th><th>SWC</th><th>Tipo de vulnerabilidad</th>
+        <th>Severidad</th><th>Confianza</th><th>Estado</th>
+      </tr></thead>
+      <tbody id="findings-body"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="dot" style="background:#818cf8"></div>Resultados Echidna (fuzzing)</div>
+    <table>
+      <thead><tr>
+        <th>Propiedad</th><th>SWC</th><th>Testable</th><th>Resultado</th>
+      </tr></thead>
+      <tbody id="echidna-body"></tbody>
+    </table>
+  </div>
+
+  <button class="btn-reset" onclick="reset()">← Analizar otro contrato</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div><h4>EVMAudit</h4><p>Análisis automatizado de vulnerabilidades en contratos inteligentes EVM</p></div>
+  <div><h4>Herramientas</h4><p>Slither 0.9.2</p><p>Mythril 0.24.8</p><p>Echidna 2.3.2</p></div>
+  <div><h4>Equipo</h4><p>Adrián Moreno</p><p>Daniel Rovira</p><p>Paula Suárez</p></div>
+  <div><h4>UNIR · 2026</h4><p>Máster en Ciberseguridad</p><p>TFM — Desarrollo de software</p></div>
+</footer>
+
+<script>
+const STEPS = [
+  "Ejecutando Slither...",
+  "Ejecutando Mythril...",
+  "Normalizando resultados...",
+  "Correlacionando hallazgos...",
+  "Generando wrapper Echidna...",
+  "Ejecutando Echidna (fuzzing)...",
+  "Generando informe...",
+];
+
+let pollInterval = null;
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab:nth-child(${tab === 'file' ? 1 : 2})`).classList.add('active');
+  document.getElementById(`panel-${tab}`).classList.add('active');
+}
+
+// Drag & drop
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f && f.name.endsWith('.sol')) uploadFile(f);
+});
+document.getElementById('file-input').addEventListener('change', e => {
+  if (e.target.files[0]) uploadFile(e.target.files[0]);
+});
+
+async function uploadFile(file) {
+  showProgress(file.name);
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch('/analyze', { method: 'POST', body: form });
+  const { job_id } = await res.json();
+  pollInterval = setInterval(() => poll(job_id), 2000);
+}
+
+async function analyzeCode() {
+  const code = document.getElementById('code-editor').value.trim();
+  const name = document.getElementById('code-name').value.trim() || 'MiContrato';
+  if (!code) { alert('Pega el código Solidity antes de analizar.'); return; }
+  showProgress(name + '.sol');
+  const res = await fetch('/analyze-code', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, contract_name: name }),
+  });
+  const { job_id } = await res.json();
+  pollInterval = setInterval(() => poll(job_id), 2000);
+}
+
+function showProgress(name) {
+  document.getElementById('home-section').querySelector('.tabs-wrap').style.display = 'none';
+  document.getElementById('progress-section').style.display = 'block';
+  document.getElementById('prog-name').textContent = name;
+  renderSteps(0);
+}
+
+async function poll(job_id) {
+  const res = await fetch(`/status/${job_id}`);
+  const data = await res.json();
+  const pct = Math.round((data.step / data.total) * 100);
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+  renderSteps(data.step);
+  if (data.status === 'done') {
+    clearInterval(pollInterval);
+    const r = await (await fetch(`/result/${job_id}`)).json();
+    showResults(r);
+  } else if (data.status === 'error') {
+    clearInterval(pollInterval);
+    showError(data.error);
+  }
+}
+
+function renderSteps(cur) {
+  document.getElementById('prog-steps').innerHTML = STEPS.map((s, i) => {
+    const n = i + 1;
+    const cls = n < cur ? 'done' : n === cur ? 'active' : '';
+    const ic  = n < cur ? '✓' : n === cur ? '↻' : '·';
+    return `<div class="step-row ${cls}"><div class="step-icon">${ic}</div>${s}</div>`;
+  }).join('');
+}
+
+function showResults(report) {
+  document.getElementById('home-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const s = report.summary;
+  const score = s.risk_score;
+  const color = score >= 7 ? '#f87171' : score >= 4 ? '#fbbf24' : '#4ade80';
+  const circle = document.getElementById('score-circle');
+  circle.style.borderColor = color;
+  document.getElementById('score-num').textContent = score;
+  document.getElementById('score-num').style.color = color;
+  document.getElementById('res-contract-name').textContent = report.meta.contract + '.sol';
+  document.getElementById('res-risk-label').textContent =
+    score >= 7 ? '🔴 Riesgo Alto — Requiere atención inmediata' :
+    score >= 4 ? '🟠 Riesgo Medio — Revisar antes del despliegue' :
+                 '🟢 Riesgo Bajo — Sin vulnerabilidades críticas';
+  document.getElementById('res-date').textContent = new Date().toLocaleDateString('es-ES');
+  document.getElementById('st-total').textContent = s.total_findings;
+  document.getElementById('st-confirmed').textContent = s.confirmed;
+  document.getElementById('st-high').textContent = s.high_severity;
+
+  document.getElementById('findings-body').innerHTML = report.findings.map(f => {
+    const sc = f.severity === 'high' ? 'sev-high' : f.severity === 'medium' ? 'sev-medium' : 'sev-low';
+    const st = f.status === 'confirmed' ? 'st-confirmed' : 'st-detected';
+    const stars = '★'.repeat(f.confidence_score) + '☆'.repeat(3 - f.confidence_score);
+    return `<tr>
+      <td><code>${f.function}()</code></td>
+      <td style="color:#818cf8">${f.swc_id}</td>
+      <td>${f.vuln_type}</td>
+      <td><span class="badge ${sc}">${f.severity.toUpperCase()}</span></td>
+      <td><span class="stars">${stars}</span> <span style="color:#64748b">${f.confidence_score}/3</span></td>
+      <td><span class="badge ${st}">${f.status}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#374151">No se detectaron vulnerabilidades</td></tr>';
+
+  document.getElementById('echidna-body').innerHTML = (report.echidna_results || []).map(r => {
+    const res = r.echidna_status === 'passed'  ? '<span style="color:#4ade80">✅ passed</span>' :
+                r.echidna_status === 'failed'  ? '<span style="color:#f87171">❌ failed</span>' :
+                !r.echidna_testable            ? '<span style="color:#fbbf24">⚠ no testable automáticamente</span>' :
+                                                 `<span style="color:#64748b">— ${r.echidna_status}</span>`;
+    return `<tr>
+      <td><code>${r.function}()</code></td>
+      <td style="color:#818cf8">${r.swc_id}</td>
+      <td>${r.echidna_testable ? 'Sí' : '<span style="color:#fbbf24">No</span>'}</td>
+      <td>${res}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;padding:2rem;color:#374151">Sin resultados de Echidna</td></tr>';
+}
+
+function showError(msg) {
+  document.getElementById('home-section').style.display = 'none';
+  document.getElementById('error-section').style.display = 'block';
+  document.getElementById('error-msg').textContent = msg;
+}
+
+function reset() {
+  document.getElementById('home-section').style.display = 'flex';
+  document.getElementById('home-section').querySelector('.tabs-wrap').style.display = 'block';
+  document.getElementById('progress-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('error-section').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  document.getElementById('prog-bar').style.width = '0%';
+}
+</script>
+</body>
+</html>

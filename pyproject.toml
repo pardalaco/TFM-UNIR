@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "eth>=0.0.1",
+    "fastapi>=0.136.3",
     "mythril>=0.24.8",
     "setuptools<70.0.0",
     "slither-analyzer>=0.9.2",

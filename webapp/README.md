@@ -9,10 +9,10 @@ Replica el estilo de VirusTotal con dos modos de entrada: subir archivo `.sol` o
 
 Antes de arrancar la webapp necesitas tener instalado:
 
-| Herramienta | Instalación |
-|---|---|
-| Python 3.12+ | https://python.org |
-| uv | `pip install uv` |
+| Herramienta   | Instalación                  |
+| ------------- | ---------------------------- |
+| Python 3.12+  | https://python.org           |
+| uv            | `pip install uv`             |
 | Echidna 2.3.2 | `brew install echidna` (Mac) |
 
 Slither y Mythril se instalan automáticamente con `uv sync`.
@@ -30,7 +30,7 @@ git pull origin main
 
 source .venv/bin/activate
 
-uv pip install fastapi uvicorn python-multipart
+uv sync
 ```
 
 ### Si partes de cero
@@ -44,7 +44,7 @@ uv pip install -e evmaudit/
 
 source .venv/bin/activate
 
-uv pip install fastapi uvicorn python-multipart
+uv sync
 ```
 
 ---
@@ -65,10 +65,12 @@ Para parar el servidor: `CTRL + C`
 ## Modos de análisis
 
 ### FILE — Subir archivo
+
 Arrastra un archivo `.sol` o usa el botón de selección.  
 El nombre del contrato se detecta automáticamente desde el código fuente, independientemente del nombre del archivo.
 
 ### CODE — Pegar código
+
 Escribe el nombre del contrato, pega el código Solidity en el editor y pulsa **Analizar código**.
 
 ---

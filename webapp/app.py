@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "evmaudit" / "src"))
 
-from evmaudit.runner import run_slither, run_mythril, run_echidna
+from evmaudit.runner import run_slither, run_mythril, run_echidna, detect_contract_name
 from evmaudit.normalizer import normalize_slither_output, normalize_mythril_output
 from evmaudit.correlator import correlate
 from evmaudit.echidna_adapter import generate as generate_echidna_wrapper
@@ -78,13 +78,15 @@ def index():
 @app.post("/analyze")
 async def analyze(file: UploadFile = File(...)):
     content = await file.read()
-    contract_name = Path(file.filename).stem
 
-    # Guardar el contrato en un directorio temporal dentro del workspace
     tmp_dir = Path(__file__).parent.parent / "jsons" / "_uploads"
     tmp_dir.mkdir(parents=True, exist_ok=True)
     contract_path = str(tmp_dir / file.filename)
     Path(contract_path).write_bytes(content)
+
+    # Detectar el nombre real del contrato desde el código fuente
+    # evita el bug cuando el archivo se llama diferente al contrato
+    contract_name = detect_contract_name(contract_path) or Path(file.filename).stem
 
     job_id = str(uuid.uuid4())[:8]
     jobs[job_id] = {"status": "running", "step": 0, "msg": "Iniciando...", "result": None, "error": None}
@@ -106,10 +108,13 @@ async def analyze_code(payload: CodePayload):
     contract_path = str(tmp_dir / f"{payload.contract_name}.sol")
     Path(contract_path).write_text(payload.code)
 
+    # Detectar nombre real del contrato desde el código pegado
+    contract_name = detect_contract_name(contract_path) or payload.contract_name
+
     job_id = str(uuid.uuid4())[:8]
     jobs[job_id] = {"status": "running", "step": 0, "msg": "Iniciando...", "result": None, "error": None}
 
-    thread = threading.Thread(target=run_pipeline, args=(job_id, contract_path, payload.contract_name), daemon=True)
+    thread = threading.Thread(target=run_pipeline, args=(job_id, contract_path, contract_name), daemon=True)
     thread.start()
     return {"job_id": job_id}
 

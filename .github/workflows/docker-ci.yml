@@ -32,8 +32,8 @@ jobs:
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
 
           # Definimos los dos nombres de imagen (con SHA y con latest)
-          IMAGE_SHA=ghcr.io/$REPO_LOWER/my-app:${{ github.sha }}
-          IMAGE_LATEST=ghcr.io/$REPO_LOWER/my-app:latest
+          IMAGE_SHA=ghcr.io/$REPO_LOWER/evmaudit:${{ github.sha }}
+          IMAGE_LATEST=ghcr.io/$REPO_LOWER/evmaudit:latest
 
           # Construimos la imagen asignándole ambas etiquetas (-t)
           docker build --platform linux/amd64 \

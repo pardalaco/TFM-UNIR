@@ -1,0 +1,29 @@
+name: Docker Build and Test CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Descargar el código del repositorio
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Configurar Docker Buildx (permite emular plataformas como linux/amd64 si es necesario)
+    - name: Set up Docker Buildx
+      uses: actions/setup-buildx-action@v3
+
+    # 3. Validar la sintaxis del archivo docker-compose
+    - name: Verify Docker Compose configuration
+      run: docker compose config
+
+    # 4. Construir la imagen usando Docker Compose
+    # Esto probará que tu Dockerfile, solc, echidna y 'uv sync' funcionen correctamente.
+    - name: Build Docker image
+      run: docker compose build

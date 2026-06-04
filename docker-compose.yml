@@ -6,7 +6,7 @@ services:
     container_name: evmaudit_webapp
     platform: linux/amd64
     ports:
-      - "8000:8000"
+      - "8080:8080"
     volumes:
       # Montamos el directorio de resultados para que no se pierdan al apagar el contenedor
       - ./jsons/_uploads:/app/jsons/_uploads

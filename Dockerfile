@@ -48,7 +48,7 @@ COPY . .
 RUN uv sync --frozen --no-cache
 
 # Exponer el puerto en el que corre Uvicorn
-EXPOSE 8000
+EXPOSE 8080
 
 # Arrancar la aplicación usando el entorno virtual creado por uv
-CMD ["uv", "run", "python3", "-m", "uvicorn", "webapp.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "python3", "-m", "uvicorn", "webapp.app:app", "--host", "0.0.0.0", "--port", "8080"]

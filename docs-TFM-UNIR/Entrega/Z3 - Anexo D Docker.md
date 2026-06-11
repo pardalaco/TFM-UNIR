@@ -1,3 +1,4 @@
+# Z3 - Anexo D Docker
 ANEXO D.	CONTENEDORIZACIÓN E INFRAESTRUCTURA DE DESPLIEGUE (DOCKER)
 En el ámbito del desarrollo de software moderno y la ciberseguridad, la reproducibilidad del entorno de ejecución constituye un pilar crítico. Tradicionalmente, el despliegue de aplicaciones que integran múltiples herramientas de análisis (como compiladores de Solidity y motores de ejecución simbólica) se enfrentaba al problema de "funciona en mi máquina", derivado de las discrepancias en las versiones de las dependencias, librerías del sistema operativo y configuraciones locales. Para mitigar este riesgo, el presente proyecto adopta una arquitectura basada en contenedores de aplicación a través del ecosistema de Docker y Docker Compose.
 5.2.11. Fundamentos de Contenedorización: Docker y Docker Compose

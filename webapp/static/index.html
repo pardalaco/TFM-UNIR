@@ -196,7 +196,7 @@ nav {
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* ── RESULTS ── */
-#results-section { display: none; width: 100%; max-width: 900px; margin-top: 2rem; padding-bottom: 4rem; }
+#results-section { display: none; width: 100%; max-width: 900px; margin: 2rem auto 0; padding-bottom: 4rem; }
 
 .result-hero {
   background: #1a1c2e;
@@ -279,6 +279,45 @@ tr:hover td { background: #1e2040; }
 }
 .btn-reset:hover { border-color: #6366f1; color: #6366f1; }
 
+/* ── HELP MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+  background: #1a1c2e;
+  border: 1px solid #2a2d45;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 560px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.modal-box h2 { color: #e2e8f0; font-size: 1.2rem; margin-bottom: 1rem; }
+.modal-box h3 { color: #a5b4fc; font-size: 0.9rem; margin: 1.2rem 0 0.4rem; }
+.modal-box p, .modal-box li { color: #94a3b8; font-size: 0.88rem; line-height: 1.6; }
+.modal-box ul, .modal-box ol { padding-left: 1.3rem; }
+.modal-close {
+  background: transparent;
+  border: 1px solid #2a2d45;
+  color: #64748b;
+  padding: 0.5rem 1.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-top: 1.5rem;
+  transition: all 0.2s;
+}
+.modal-close:hover { border-color: #6366f1; color: #6366f1; }
+
 /* ── FOOTER ── */
 footer {
   margin-top: auto;
@@ -304,9 +343,10 @@ footer p { margin-bottom: 0.25rem; }
     <span>EVMAUDIT</span>
   </div>
   <div class="nav-links">
+    <a href="#" onclick="openHelp(); return false;">Ayuda</a>
     <a href="#">Documentación</a>
     <a href="#">API</a>
-    <a href="#">GitHub</a>
+    <a href="https://github.com/pardalaco/TFM-UNIR" target="_blank" rel="noopener">GitHub</a>
     <span>TFM UNIR · 2026</span>
   </div>
 </nav>
@@ -440,7 +480,39 @@ contract MiContrato {
     </table>
   </div>
 
-  <button class="btn-reset" onclick="reset()">← Analizar otro contrato</button>
+  <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+    <button class="btn-reset" onclick="reset()">← Analizar otro contrato</button>
+    <button class="btn-reset" onclick="downloadReport()">⬇ Descargar informe (PDF)</button>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="modal-overlay" id="help-modal">
+  <div class="modal-box">
+    <h2>⬡ ¿Cómo usar EVMAudit?</h2>
+    <p>EVMAudit analiza contratos inteligentes de Solidity combinando Slither, Mythril y Echidna, y genera un informe de vulnerabilidades con una puntuación de riesgo de 0 a 10.</p>
+
+    <h3>1. Sube tu contrato</h3>
+    <ul>
+      <li>Pestaña <strong>FILE</strong>: arrastra o selecciona un archivo <code>.sol</code>.</li>
+      <li>Pestaña <strong>CODE</strong>: pega directamente el código Solidity y pon un nombre de contrato.</li>
+    </ul>
+
+    <h3>2. Espera el análisis</h3>
+    <p>Verás una barra de progreso con las 7 fases del pipeline (Slither, Mythril, normalización, correlación, wrapper Echidna, fuzzing e informe). Puede tardar 1-2 minutos.</p>
+
+    <h3>3. Revisa los resultados</h3>
+    <ul>
+      <li>Puntuación de riesgo global (0-10) y nivel (bajo/medio/alto).</li>
+      <li>Tabla de hallazgos correlacionados con severidad, confianza y estado (confirmado/detectado).</li>
+      <li>Resultados del fuzzing con Echidna por propiedad.</li>
+    </ul>
+
+    <h3>4. Descarga el informe</h3>
+    <p>Con el botón <strong>"Descargar informe (JSON)"</strong> puedes guardar el resultado completo del análisis.</p>
+
+    <button class="modal-close" onclick="closeHelp()">Cerrar</button>
+  </div>
 </div>
 
 <!-- FOOTER -->
@@ -463,6 +535,32 @@ const STEPS = [
 ];
 
 let pollInterval = null;
+let currentReport = null;
+let currentJobId = null;
+
+function openHelp() {
+  document.getElementById('help-modal').classList.add('active');
+}
+function closeHelp() {
+  document.getElementById('help-modal').classList.remove('active');
+}
+document.getElementById('help-modal').addEventListener('click', e => {
+  if (e.target.id === 'help-modal') closeHelp();
+});
+
+async function downloadReport() {
+  if (!currentJobId) return;
+  const name = (currentReport && currentReport.meta && currentReport.meta.contract) || 'reporte';
+  const res = await fetch(`/result/${currentJobId}/pdf`);
+  if (!res.ok) { alert('No se pudo generar el PDF del informe.'); return; }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${name}_report.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -490,6 +588,7 @@ async function uploadFile(file) {
   form.append('file', file);
   const res = await fetch('/analyze', { method: 'POST', body: form });
   const { job_id } = await res.json();
+  currentJobId = job_id;
   pollInterval = setInterval(() => poll(job_id), 2000);
 }
 
@@ -504,6 +603,7 @@ async function analyzeCode() {
     body: JSON.stringify({ code, contract_name: name }),
   });
   const { job_id } = await res.json();
+  currentJobId = job_id;
   pollInterval = setInterval(() => poll(job_id), 2000);
 }
 
@@ -541,6 +641,7 @@ function renderSteps(cur) {
 }
 
 function showResults(report) {
+  currentReport = report;
   document.getElementById('home-section').style.display = 'none';
   document.getElementById('results-section').style.display = 'block';
   const s = report.summary;

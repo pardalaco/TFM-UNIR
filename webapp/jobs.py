@@ -10,8 +10,13 @@ from evmaudit.correlator import correlate
 from evmaudit.echidna_adapter import generate as generate_echidna_wrapper
 from evmaudit.reporter import generate_report
 
+# Número de fases del pipeline, usado por el frontend para pintar la barra
+# de progreso (step / TOTAL_STEPS).
 TOTAL_STEPS = 7
 
+# Almacén de jobs en memoria. Suficiente para una instancia única del
+# servicio; si en algún momento se necesita escalar a varios workers habría
+# que moverlo a algo compartido (Redis, base de datos, etc.).
 jobs: dict = {}
 
 
@@ -29,6 +34,7 @@ def create() -> str:
 
 
 def launch(job_id: str, contract_path: str, contract_name: str) -> None:
+    """Lanza el pipeline en segundo plano para no bloquear la petición HTTP."""
     thread = threading.Thread(
         target=_run_pipeline, args=(job_id, contract_path, contract_name), daemon=True
     )
@@ -36,6 +42,8 @@ def launch(job_id: str, contract_path: str, contract_name: str) -> None:
 
 
 def _run_pipeline(job_id: str, contract_path: str, contract_name: str) -> None:
+    """Ejecuta las 7 fases del análisis y actualiza el estado del job a medida
+    que avanza, para que /status pueda informar al frontend en tiempo real."""
     job = jobs[job_id]
 
     def set_step(step: int, msg: str) -> None:
@@ -46,8 +54,10 @@ def _run_pipeline(job_id: str, contract_path: str, contract_name: str) -> None:
         set_step(1, "Ejecutando Slither...")
         slither_raw = run_slither(contract_path)
 
-        set_step(2, "Ejecutando Mythril (puede tardar 1-2 min)...")
-        mythril_raw = run_mythril(contract_path, timeout=120, depth=22)
+        # 180s de margen para Mythril: con el timeout por defecto (120s)
+        # algunos contratos más complejos lo agotaban y tiraban el job entero.
+        set_step(2, "Ejecutando Mythril (puede tardar 2-3 min)...")
+        mythril_raw = run_mythril(contract_path, timeout=180, depth=22)
 
         set_step(3, "Normalizando resultados...")
         slither_norm = normalize_slither_output(slither_raw)
@@ -59,6 +69,8 @@ def _run_pipeline(job_id: str, contract_path: str, contract_name: str) -> None:
         set_step(5, "Generando wrapper Echidna...")
         meta = generate_echidna_wrapper(corr, contract_path, contract_name)
 
+        # No todos los hallazgos son "fuzzeables" (p.ej. requieren un actor
+        # externo concreto), así que el adapter puede no generar wrapper.
         echidna_raw = {}
         if meta.get("wrapper_path"):
             set_step(6, "Ejecutando Echidna (fuzzing)...")

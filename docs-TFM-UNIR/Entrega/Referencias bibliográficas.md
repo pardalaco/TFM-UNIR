@@ -1,3 +1,4 @@
+# Referencias bibliográficas
 [1]       S. Nakamoto, “Bitcoin: A Peer-to-Peer Electronic Cash System.” [Online]. Available: www.bitcoin.org
 
 [2]       D. Yaga, P. Mell, N. Roby, and K. Scarfone, “Blockchain Technology Overview,” Jun. 2019, doi: 10.6028/NIST.IR.8202.

@@ -398,7 +398,35 @@ Total calls: 10152
 
 ---
 
-## 6. Tabla comparativa de detección
+## 6. Despliegue con Docker
+
+El proyecto incluye dos archivos de `docker-compose` para levantar la aplicación web.
+
+### `docker-compose.yml` — Build local
+
+Construye la imagen localmente desde el `Dockerfile` y expone la webapp en el puerto `8080`.
+
+```bash
+docker compose up -d
+```
+
+La web estará disponible en `http://localhost:8080`.
+
+### `docker-compose.gh-img.yml` — Imagen pre-construida (GitHub Container Registry)
+
+Usa la imagen publicada en `ghcr.io/pardalaco/tfm-unir/evmaudit:latest` sin necesidad de construir localmente. Expone la webapp en el puerto `8081`.
+
+```bash
+docker compose -f docker-compose.gh-img.yml up -d
+```
+
+La web estará disponible en `http://localhost:8081`.
+
+> Ambos archivos montan los directorios `./jsons/_uploads` (resultados persistentes) y `./contracts` (contratos locales para pruebas).
+
+---
+
+## 7. Tabla comparativa de detección
 
 | Vulnerabilidad          | Slither       | Mythril   | Echidna                        |
 | ----------------------- | ------------- | --------- | ------------------------------ |
@@ -410,7 +438,7 @@ Total calls: 10152
 
 ---
 
-## 7. Conclusiones preliminares
+## 8. Conclusiones preliminares
 
 1. **Slither y Mythril son complementarios:** Slither es más rápido y produce menos ruido en reentrancy/access control; Mythril detecta overflow en `unchecked` donde Slither falla y aporta secuencias de transacciones reproducibles.
 2. **Echidna tiene un modelo diferente:** No hace análisis automático — requiere que el desarrollador escriba propiedades. Su valor está en validar invariantes de negocio complejas, no en detectar patrones.

@@ -18,11 +18,14 @@ app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), na
 
 
 class CodePayload(BaseModel):
+    """Body de /analyze-code: contrato pegado directamente desde el editor."""
     code: str
     contract_name: str = "MiContrato"
 
 
 def _start_analysis(contract_path: Path, fallback_name: str) -> str:
+    """Punto común a /analyze y /analyze-code: detecta el nombre real del
+    contrato (si lo hay) y arranca el pipeline en background."""
     contract_name = detect_contract_name(str(contract_path)) or fallback_name
     job_id = jobs.create()
     jobs.launch(job_id, str(contract_path), contract_name)

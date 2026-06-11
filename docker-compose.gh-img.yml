@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  evmaudit-web:
+    image: ghcr.io/pardalaco/tfm-unir/evmaudit:latest
+    container_name: evmaudit_webapp_gh-img
+    platform: linux/amd64
+    ports:
+      - "8081:8080"
+    volumes:
+      # Montamos el directorio de resultados para que no se pierdan al apagar el contenedor
+      - ./jsons/_uploads:/app/jsons/_uploads
+      # Opcional: si quieres probar contratos locales sin subirlos por la web
+      - ./contracts:/app/contracts
+    environment:
+      - ENV=production
+    restart: unless-stopped

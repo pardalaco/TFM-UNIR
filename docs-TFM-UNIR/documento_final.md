@@ -1,4 +1,15 @@
 # 0. Abstract + Coordinación
+
+---
+title: "EVMAudit: Librería multiherramienta para la detección automatizada de vulnerabilidades en contratos inteligentes de Ethereum"
+author:
+  - "Daniel Rovira Martínez"
+  - "Paula Suárez Prieto"
+  - "Adrián Moreno Martín"
+toc: true
+toc-depth: 3
+toc-title: "Índice de Contenidos"
+---
 ## Resumen
 
 La seguridad de los contratos inteligentes se ha convertido en un aspecto crítico dentro del ecosistema blockchain debido al elevado impacto económico que pueden provocar las vulnerabilidades presentes en este tipo de software. Aunque existen herramientas especializadas para su análisis, como Slither, Mythril o Echidna, sus resultados suelen presentarse de forma heterogénea y con dificultades para correlacionar y priorizar los hallazgos obtenidos. En este Trabajo Fin de Máster se presenta EVMAudit, una librería desarrollada en Python orientada a la ejecución conjunta de múltiples herramientas de análisis de seguridad para contratos inteligentes compatibles con la Ethereum Virtual Machine (EVM). La solución propuesta incorpora mecanismos de normalización, correlación y priorización de resultados, permitiendo ofrecer una visión unificada y más estructurada de las vulnerabilidades detectadas. Además, la herramienta se distribuye mediante PyPI y dispone de una infraestructura de despliegue y automatización basada en Docker y CI/CD.
@@ -16,7 +27,11 @@ Con el objetivo de garantizar un seguimiento continuo del trabajo y mantener la 
 
 Como herramientas de comunicación y colaboración se utilizaron principalmente WhatsApp para la comunicación diaria, Microsoft Teams para la realización de reuniones telemáticas, un repositorio compartido en GitHub para la gestión y sincronización del código fuente, y un documento compartido de Microsoft Word para la elaboración conjunta de la memoria.
 
-Adicionalmente, tras cada una de las entregas parciales previstas en la planificación del Trabajo Fin de Máster, se mantuvo una reunión de seguimiento con el director del trabajo. Estas sesiones permitieron revisar el progreso realizado, recibir retroalimentación sobre los resultados obtenidos y definir las acciones necesarias para las siguientes fases del proyecto.# 1. Introducción
+Adicionalmente, tras cada una de las entregas parciales previstas en la planificación del Trabajo Fin de Máster, se mantuvo una reunión de seguimiento con el director del trabajo. Estas sesiones permitieron revisar el progreso realizado, recibir retroalimentación sobre los resultados obtenidos y definir las acciones necesarias para las siguientes fases del proyecto.
+
+## Keywords: 
+smart contracts, Ethereum, cybersecurity, vulnerability analysis, blockchain
+# 1. Introducción
 
 La tecnología blockchain ha evolucionado significativamente desde la aparición de Bitcoin en 2008 como sistema de dinero electrónico descentralizado. Con la llegada de plataformas como Ethereum, blockchain dejó de utilizarse únicamente para la transferencia de activos digitales y pasó a convertirse en una infraestructura capaz de ejecutar aplicaciones descentralizadas mediante contratos inteligentes. Estos contratos permiten automatizar lógica de negocio y gestionar activos sin necesidad de intermediarios, lo que ha impulsado el crecimiento de sectores como las finanzas descentralizadas (DeFi), los sistemas de tokenización y los protocolos de interoperabilidad blockchain.
 
@@ -52,15 +67,12 @@ Por un lado, los contratos inteligentes operan en un entorno especialmente adver
 
 Por otro lado, las herramientas automáticas de análisis existentes presentan limitaciones relevantes. Soluciones ampliamente utilizadas como Slither, Mythril o Echidna aplican técnicas diferentes y generan resultados heterogéneos tanto en formato como en nivel de detalle. Esto provoca problemas como:
 
-·       Detección redundante de una misma vulnerabilidad por múltiples herramientas.
-
-·       Generación de falsos positivos.
-
-·       Dificultad para correlacionar hallazgos relacionados.
-
-·       Ausencia de criterios homogéneos de priorización.
-
-·       Escasa contextualización del impacto real de las vulnerabilidades.
+- Detección redundante de una misma vulnerabilidad por múltiples
+  herramientas.
+- Generación de falsos positivos.
+- Dificultad para correlacionar hallazgos relacionados.
+- Ausencia de criterios homogéneos de priorización.
+- Escasa contextualización del impacto real de las vulnerabilidades.
 
 Como consecuencia, los procesos de auditoría continúan dependiendo en gran medida de la revisión manual realizada por expertos, especialmente para validar resultados y diferenciar vulnerabilidades críticas de hallazgos con impacto reducido.
 
@@ -117,13 +129,27 @@ No obstante, no todos los algoritmos de consenso contemplan este modelo adversar
 
 A partir de estos fundamentos, las redes blockchain han desarrollado mecanismos de consenso específicos que permiten mantener la coherencia del sistema en entornos descentralizados y potencialmente hostiles. [2]Entre los más relevantes destacan:
 
-·       **Proof of Work (PoW)**: basado en la resolución de problemas criptográficos que requieren un elevado coste computacional. Este mecanismo, utilizado por Bitcoin, proporciona seguridad al hacer económicamente inviable la manipulación de la cadena, aunque presenta limitaciones en términos de eficiencia energética y escalabilidad.
+- **Proof of Work (PoW)**: basado en la resolución de problemas
+  criptográficos que requieren un elevado coste computacional. Este
+  mecanismo, utilizado por Bitcoin, proporciona seguridad al hacer
+  económicamente inviable la manipulación de la cadena, aunque presenta
+  limitaciones en términos de eficiencia energética y escalabilidad.
 
-·       **Proof of Stake (PoS)**: sustituye el esfuerzo computacional por la participación económica, donde los validadores son seleccionados en función de la cantidad de activos bloqueados (_stake_). Este enfoque mejora la eficiencia energética, pero introduce nuevos riesgos, como la concentración de poder o ataques derivados del problema _nothing-at-stake_.
+- **Proof of Stake (PoS)**: sustituye el esfuerzo computacional por la
+  participación económica, donde los validadores son seleccionados en
+  función de la cantidad de activos bloqueados (*stake*). Este enfoque
+  mejora la eficiencia energética, pero introduce nuevos riesgos, como
+  la concentración de poder o ataques derivados del
+  problema *nothing-at-stake*.
 
-·       **Delegated Proof of Stake (DPoS)**: variante de PoS en la que los validadores son elegidos mediante mecanismos de votación. Aumenta el rendimiento del sistema, aunque reduce el grado de descentralización.
+- **Delegated Proof of Stake (DPoS)**: variante de PoS en la que los
+  validadores son elegidos mediante mecanismos de votación. Aumenta el
+  rendimiento del sistema, aunque reduce el grado de descentralización.
 
-·       **Proof of Authority (PoA)**: modelo en el que un conjunto limitado de nodos autorizados valida las transacciones. Se utiliza principalmente en blockchains privadas, donde la identidad de los participantes es conocida.
+- **Proof of Authority (PoA)**: modelo en el que un conjunto limitado de
+  nodos autorizados valida las transacciones. Se utiliza principalmente
+  en blockchains privadas, donde la identidad de los participantes es
+  conocida.
 
 Cada uno de estos mecanismos implica distintos compromisos entre seguridad, descentralización y rendimiento, lo que en la literatura se describe frecuentemente como un conjunto de _trade-offs_ inherentes al diseño de sistemas blockchain, comúnmente denominado el “trilema de blockchain”. [5], [6]
 
@@ -143,11 +169,9 @@ La adopción generalizada de contratos inteligentes se consolidó con la aparici
 
 El funcionamiento interno de Ethereum se describe formalmente en el _Yellow Paper_, elaborado por Gavin Wood, donde se definen:
 
-·       La arquitectura y semántica de la EVM
-
-·       El modelo de ejecución de contratos y transacciones
-
-·       El sistema de gas como mecanismo de control de recursos
+- La arquitectura y semántica de la EVM
+- El modelo de ejecución de contratos y transacciones
+- El sistema de gas como mecanismo de control de recursos
 
 La EVM es una máquina virtual basada en pila (_stack-based_), donde cada operación tiene un coste asociado en gas. Este mecanismo permite limitar el consumo de recursos computacionales y actúa como protección frente a ataques de denegación de servicio, al imponer un coste económico a la ejecución de operaciones complejas o potencialmente abusivas. [9]
 
@@ -155,27 +179,29 @@ La EVM es una máquina virtual basada en pila (_stack-based_), donde cada operac
 
 Desde un punto de vista técnico, los contratos inteligentes presentan una serie de propiedades fundamentales[2]:
 
-·       **Determinismo**: la ejecución debe producir el mismo resultado en todos los nodos, garantizando la coherencia del sistema distribuido.
-
-·       **Inmutabilidad**: una vez desplegados, los contratos no pueden modificarse directamente, lo que dificulta la corrección de errores.
-
-·       **Transparencia**: en redes públicas, el código y el estado del contrato son accesibles, favoreciendo la auditabilidad.
-
-·       **Ejecución descentralizada**: no existe un punto único de control, eliminando dependencias de entidades centrales.
+- **Determinismo**: la ejecución debe producir el mismo resultado en
+  todos los nodos, garantizando la coherencia del sistema distribuido.
+- **Inmutabilidad**: una vez desplegados, los contratos no pueden
+  modificarse directamente, lo que dificulta la corrección de errores.
+- **Transparencia**: en redes públicas, el código y el estado del
+  contrato son accesibles, favoreciendo la auditabilidad.
+- **Ejecución descentralizada**: no existe un punto único de control,
+  eliminando dependencias de entidades centrales.
 
 ### 2.1.6. Limitaciones y riesgos
 
 A pesar de sus ventajas, los contratos inteligentes presentan importantes desafíos desde el punto de vista de la ciberseguridad [2]:
 
-·      **Vulnerabilidades en el código**: errores de implementación pueden derivar en fallos críticos explotables.
-
-·      **Problemas de control de acceso**: una gestión incorrecta de permisos puede permitir operaciones no autorizadas.
-
-·      **Dependencia de oráculos externos**: introduce confianza en terceros y posibles vectores de manipulación.
-
-·      **Inmutabilidad del código**: dificulta la corrección de vulnerabilidades tras el despliegue.
-
-·      **Costes de ejecución**: el modelo de gas puede ser explotado para provocar condiciones de denegación de servicio.
+- **Vulnerabilidades en el código**: errores de implementación pueden
+  derivar en fallos críticos explotables.
+- **Problemas de control de acceso**: una gestión incorrecta de permisos
+  puede permitir operaciones no autorizadas.
+- **Dependencia de oráculos externos**: introduce confianza en terceros
+  y posibles vectores de manipulación.
+- **Inmutabilidad del código**: dificulta la corrección de
+  vulnerabilidades tras el despliegue.
+- **Costes de ejecución**: el modelo de gas puede ser explotado para
+  provocar condiciones de denegación de servicio.
 
 Estas características hacen que los errores en contratos inteligentes puedan tener consecuencias críticas, como la pérdida irreversible de activos digitales. [2], [10]
 
@@ -257,23 +283,27 @@ Esta representación, basada en _Static Single Assignment_ (SSA), permite realiz
 
 De acuerdo con sus especificaciones técnicas y su repositorio oficial [19], Slither ofrece un conjunto de funcionalidades críticas para el desarrollo seguro:
 
-·      **Detección de Vulnerabilidades:** Capacidad para identificar código vulnerable con una tasa reducida de falsos positivos, documentada en una extensa lista de "trofeos" (vulnerabilidades reales detectadas en protocolos principales).
-
-·      **Trazabilidad:** Localiza con exactitud el punto del código fuente donde se produce la condición de error, facilitando la remediación inmediata.
-
-·      **Integración en el Ciclo de Vida del Software (DevSecOps):** Se integra de forma nativa en entornos de desarrollo como **Hardhat** y **Foundry**, además de permitir su implementación en flujos de Integración Continua (CI) y escaneo de código en GitHub.
-
-·      **Herramientas de Visualización (Printers):** Incluye funciones integradas para generar informes rápidos sobre la información crucial del contrato (jerarquía de herencia, permisos, etc.).
-
-·      **Extensibilidad:** Dispone de una API de detección que permite a los investigadores programar análisis personalizados y detectores específicos en Python.
-
-·      **Rendimiento y Compatibilidad:**
-
-o   Soporte para contratos en Solidity desde la versión 0.4 en adelante.
-
-o   Capacidad de procesamiento del 99.9% del código público de Solidity.
-
-o   Tiempo de ejecución promedio inferior a **1 segundo** por contrato, lo que lo hace ideal para despliegues a gran escala.
+- **Detección de Vulnerabilidades:** Capacidad para identificar código
+  vulnerable con una tasa reducida de falsos positivos, documentada en
+  una extensa lista de \"trofeos\" (vulnerabilidades reales detectadas
+  en protocolos principales).
+- **Trazabilidad:** Localiza con exactitud el punto del código fuente
+  donde se produce la condición de error, facilitando la remediación
+  inmediata.
+- **Integración en el Ciclo de Vida del Software (DevSecOps):** Se
+  integra de forma nativa en entornos de desarrollo como Hardhat y
+  Foundry, además de permitir su implementación en flujos de Integración
+  Continua (CI) y escaneo de código en GitHub.
+- **Herramientas de Visualización (Printers):** Incluye funciones
+  integradas para generar informes rápidos sobre la información crucial
+  del contrato (jerarquía de herencia, permisos, etc.).
+- **Extensibilidad:** Dispone de una API de detección que permite a los
+  investigadores programar análisis personalizados y detectores
+  específicos en Python.
+- **Rendimiento y Compatibilidad:**
+	- Soporte para contratos en Solidity desde la versión 0.4 en adelante.
+	- Capacidad de procesamiento del 99.9% del código público de Solidity.
+	- Tiempo de ejecución promedio inferior a 1 segundo por contrato, lo que lo hace ideal para despliegues a gran escala.
 
 #### 2.4.1.3. Impacto en la Seguridad de Contratos Inteligentes
 
@@ -297,11 +327,21 @@ Mythril es una herramienta de seguridad de código abierto diseñada para el an�
 
 El núcleo de Mythril se basa en la **ejecución simbólica con resolución SMT (_Satisfiability Modulo Theories_)****.** Su funcionamiento se puede desglosar en tres fases técnicas:
 
-·      **Desensamblado y Grafo de Flujo de Control (CFG):** Mythril descompone el _bytecode_ en instrucciones de la EVM y construye un grafo que representa todos los caminos posibles que puede tomar una transacción.
-
-·      **Exploración de Estados Simbólicos:** En lugar de usar valores fijos (ej. enviar 1 ETH), utiliza variables simbólicas (x). La herramienta "ejecuta" el contrato de forma virtual, acumulando restricciones matemáticas sobre estas variables a medida que atraviesa bifurcaciones condicionales (`if`, `require`).
-
-·      **Resolución mediante Z3:** Para determinar si un estado vulnerable es alcanzable, Mythril consulta a **Z3**, un potente probador de teoremas desarrollado por Microsoft Research. Si el _solver_ encuentra un conjunto de valores que satisfacen las condiciones para un ataque (por ejemplo, que el saldo sea cero y el llamante no sea el propietario), Mythril confirma la existencia de la vulnerabilidad.
+- **Desensamblado y Grafo de Flujo de Control (CFG):** Mythril
+  descompone el *bytecode* en instrucciones de la EVM y construye un
+  grafo que representa todos los caminos posibles que puede tomar una
+  transacción.
+- **Exploración de Estados Simbólicos:** En lugar de usar valores fijos
+  (ej. enviar 1 ETH), utiliza variables simbólicas (x). La herramienta
+  \"ejecuta\" el contrato de forma virtual, acumulando restricciones
+  matemáticas sobre estas variables a medida que atraviesa bifurcaciones
+  condicionales (if, require).
+- **Resolución mediante Z3:** Para determinar si un estado vulnerable es
+  alcanzable, Mythril consulta a Z3, un potente probador de teoremas
+  desarrollado por Microsoft Research. Si el *solver* encuentra un
+  conjunto de valores que satisfacen las condiciones para un ataque (por
+  ejemplo, que el saldo sea cero y el llamante no sea el propietario),
+  Mythril confirma la existencia de la vulnerabilidad.
 
 #### 2.4.2.3. Capacidades y Características Principales
 
@@ -369,13 +409,10 @@ Por este motivo, una vulnerabilidad en Solidity no debe entenderse solo como un 
 
 Para su análisis, resulta útil agrupar las vulnerabilidades en cuatro categorías principales:
 
-·      Vulnerabilidades técnicas de ejecución
-
-·      Vulnerabilidades de control y privilegios
-
-·      Vulnerabilidades económicas y dependencia del entorno
-
-·      Errores lógicos de negocio
+- Vulnerabilidades técnicas de ejecución
+- Vulnerabilidades de control y privilegios
+- Vulnerabilidades económicas y dependencia del entorno
+- Errores lógicos de negocio
 
 ### 2.5.1. Vulnerabilidades técnicas de ejecución
 
@@ -429,7 +466,7 @@ Esto implica que una auditoría efectiva debe analizar no solo el código, sino 
 
 El estudio de incidentes reales constituye una fuente de conocimiento imprescindible en el ámbito de la seguridad de contratos inteligentes. A diferencia de los entornos de prueba, los ataques producidos en redes de producción demuestran cómo las vulnerabilidades teóricas se traducen en pérdidas económicas concretas e irreversibles.
 
-En esta sección se analizan cuatro casos históricos representativos, seleccionados por su relevancia técnica y su correspondencia directa con cada una de las categorías de vulnerabilidades descritas en la sección anterior (4.4.    Vulnerabilidades de seguridad en contratos inteligentes de Ethereum).
+En esta sección se analizan cuatro casos históricos representativos, seleccionados por su relevancia técnica y su correspondencia directa con cada una de las categorías de vulnerabilidades descritas en la sección anterior (4.4. Vulnerabilidades de seguridad en contratos inteligentes de Ethereum).
 
 ### 2.6.1. Vulnerabilidad técnica de ejecución: The DAO (2016)
 
@@ -494,17 +531,20 @@ La propuesta busca facilitar el análisis de vulnerabilidades en contratos desar
 
 Para alcanzar el objetivo general se plantean los siguientes objetivos específicos:
 
-·       Analizar las principales vulnerabilidades de seguridad presentes en contratos inteligentes desarrollados en Solidity y las técnicas utilizadas para su detección.
-
-·       Estudiar el funcionamiento, capacidades y limitaciones de herramientas de análisis como Slither, Mythril y Echidna.
-
-·       Diseñar una arquitectura modular en Python que permita integrar distintas herramientas de análisis de contratos inteligentes.
-
-·       Implementar mecanismos de normalización y correlación de resultados para unificar hallazgos procedentes de diferentes herramientas.
-
-·       Desarrollar un sistema de generación de informes que facilite la interpretación de vulnerabilidades detectadas durante el análisis.
-
-·       Evaluar el funcionamiento de la librería utilizando contratos vulnerables conocidos y contratos reales de código abierto compatibles con la EVM.
+- Analizar las principales vulnerabilidades de seguridad presentes en
+  contratos inteligentes desarrollados en Solidity y las técnicas
+  utilizadas para su detección.
+- Estudiar el funcionamiento, capacidades y limitaciones de herramientas
+  de análisis como Slither, Mythril y Echidna.
+- Diseñar una arquitectura modular en Python que permita integrar
+  distintas herramientas de análisis de contratos inteligentes.
+- Implementar mecanismos de normalización y correlación de resultados
+  para unificar hallazgos procedentes de diferentes herramientas.
+- Desarrollar un sistema de generación de informes que facilite la
+  interpretación de vulnerabilidades detectadas durante el análisis.
+- Evaluar el funcionamiento de la librería utilizando contratos
+  vulnerables conocidos y contratos reales de código abierto compatibles
+  con la EVM.
 
 ## 3.3. Metodología del trabajo
 
@@ -519,424 +559,1264 @@ A continuación, se llevó a cabo la implementación de la solución utilizando 
 Finalmente, se realizó una evaluación experimental utilizando contratos inteligentes vulnerables y casos reales obtenidos de repositorios públicos. Los resultados obtenidos permitieron analizar el comportamiento de la solución propuesta y valorar su utilidad como apoyo al análisis de seguridad de contratos inteligentes compatibles con la Ethereum Virtual Machine (EVM).
 # 4. Desarrollo de la solución propuesta
 
-Una vez estudiado el problema y definida la metodología de trabajo, en este capítulo se presenta la solución desarrollada para dar respuesta a los objetivos planteados.
+Una vez estudiadas las principales vulnerabilidades presentes en los contratos inteligentes y analizadas las herramientas existentes para su detección, en este capítulo se presenta la solución desarrollada para dar respuesta a los objetivos planteados en el presente Trabajo Fin de Máster.
 
-La propuesta realizada, denominada **EVMAudit**, consiste en una librería desarrollada en Python orientada al análisis de seguridad de contratos inteligentes compatibles con la Ethereum Virtual Machine (EVM). La herramienta integra distintas técnicas de análisis mediante la ejecución combinada de Slither, Mythril y Echidna, con el objetivo de aprovechar las capacidades de cada una de ellas y proporcionar una visión más completa de las vulnerabilidades detectadas.
+La propuesta realizada, denominada **EVMAudit**, consiste en una librería desarrollada en Python orientada al análisis de seguridad de contratos inteligentes compatibles con la Ethereum Virtual Machine (EVM). La herramienta integra diferentes técnicas de análisis mediante la ejecución combinada de Slither, Mythril y Echidna, con el objetivo de aprovechar las capacidades específicas de cada una de ellas y proporcionar una visión más completa de las vulnerabilidades detectadas.
 
-Con el fin de facilitar la mantenibilidad y la extensibilidad de la solución, se adoptó una arquitectura modular en la que cada componente implementa una responsabilidad específica dentro del proceso de análisis. De este modo, la herramienta permite automatizar la ejecución de las distintas herramientas externas, normalizar sus resultados, correlacionar hallazgos equivalentes y generar información adicional que facilite la validación y el análisis posterior de las vulnerabilidades identificadas.
+Con el fin de favorecer la mantenibilidad y la extensibilidad del sistema, se adoptó una arquitectura modular en la que cada componente implementa una responsabilidad específica dentro del proceso de análisis. De este modo, la solución permite automatizar la ejecución de las herramientas externas, procesar y correlacionar los resultados obtenidos y generar información adicional que facilite la validación posterior de las vulnerabilidades identificadas.
 
-En las siguientes secciones se describen los requisitos que guiaron el desarrollo de la librería, la arquitectura diseñada y los distintos módulos implementados, finalizando con la evaluación experimental realizada para validar el comportamiento de la solución propuesta.
+A lo largo de este capítulo se describen los requisitos que guiaron el desarrollo de la herramienta, la arquitectura diseñada y los distintos módulos implementados. Finalmente, se presenta la evaluación experimental realizada con el objetivo de analizar el comportamiento de la solución propuesta y valorar su utilidad como apoyo al proceso de auditoría de contratos inteligentes.
+
+!TODO: referencia cruzada a la Sección 3.1 (objetivo general).
+
+!TODO: referencia cruzada a la Sección 3.2 (objetivos específicos).
+
+!TODO: referencia cruzada a la Sección 3.3 (metodología).
+# 4.1.Requisitos
+## 4.1. Identificación de requisitos
+
+A partir del análisis realizado durante el estudio del estado del arte y de las limitaciones observadas en las herramientas existentes, se definieron una serie de requisitos que sirvieron como base para el diseño e implementación de EVMAudit.
+
+Los requisitos establecidos se clasifican en requisitos funcionales, requisitos no funcionales y requisitos de seguridad.
+
+### 4.1.1. Requisitos funcionales
+
+Los requisitos funcionales describen las capacidades que debe proporcionar la herramienta para satisfacer los objetivos del trabajo.
+
+| ID    | Descripción                                                                                                                                |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| RF-01 | La herramienta debe permitir analizar contratos inteligentes desarrollados en Solidity.                                                    |
+| RF-02 | La herramienta debe detectar automáticamente el nombre del contrato cuando no se especifique manualmente.                                  |
+| RF-03 | La herramienta debe configurar automáticamente la versión del compilador Solidity necesaria para el análisis.                              |
+| RF-04 | La herramienta debe ejecutar Slither como herramienta de análisis estático.                                                                |
+| RF-05 | La herramienta debe ejecutar Mythril como herramienta de análisis mediante ejecución simbólica.                                            |
+| RF-06 | La herramienta debe almacenar las salidas originales de las herramientas utilizadas.                                                       |
+| RF-07 | La herramienta debe normalizar los resultados generados por Slither y Mythril a una estructura común.                                      |
+| RF-08 | La herramienta debe asociar los hallazgos detectados con identificadores SWC.                                                              |
+| RF-09 | La herramienta debe correlacionar hallazgos equivalentes procedentes de distintas herramientas.                                            |
+| RF-10 | La herramienta debe indicar el nivel de confianza de los hallazgos en función de las herramientas que hayan detectado cada vulnerabilidad. |
+| RF-11 | La herramienta debe generar automáticamente propiedades para su validación mediante Echidna.                                               |
+| RF-12 | La herramienta debe ejecutar Echidna sobre los wrappers generados.                                                                         |
+| RF-13 | La herramienta debe generar un informe final consolidado.                                                                                  |
+| RF-14 | La herramienta debe conservar la trazabilidad de los resultados originales.                                                                |
+
+### 4.1.2. Requisitos no funcionales
+
+Los requisitos no funcionales definen las características de calidad que debe presentar la solución desarrollada.
+
+| ID     | Descripción                                                                                    |
+| ------ | ---------------------------------------------------------------------------------------------- |
+| RNF-01 | La arquitectura de la herramienta debe ser modular.                                            |
+| RNF-02 | La solución debe permitir la incorporación de nuevas herramientas en futuras versiones.        |
+| RNF-03 | Los resultados intermedios deben almacenarse para garantizar la reproducibilidad del análisis. |
+| RNF-04 | La solución debe presentar un bajo acoplamiento entre módulos.                                 |
+| RNF-05 | La herramienta debe facilitar el mantenimiento y evolución futura del sistema.                 |
+| RNF-06 | La lógica de análisis debe permanecer desacoplada de las interfaces de usuario.                |
+
+### 4.1.3. Requisitos de seguridad
+
+Debido a la naturaleza del trabajo, se definieron además una serie de requisitos orientados a mejorar la robustez del proceso de análisis.
+
+| ID    | Descripción                                                                                    |
+| ----- | ---------------------------------------------------------------------------------------------- |
+| RS-01 | La herramienta debe detectar la ausencia de dependencias externas necesarias para el análisis. |
+| RS-02 | La herramienta debe gestionar errores producidos por herramientas externas.                    |
+| RS-03 | La herramienta debe controlar tiempos máximos de ejecución.                                    |
+| RS-04 | La herramienta debe preservar las evidencias originales obtenidas durante el análisis.         |
+| RS-05 | La herramienta debe permitir reproducir los resultados obtenidos.                              |
+
+!TODO: insertar tabla definitiva con formato Word.
+
+!TODO: referencia cruzada a las herramientas descritas en la Sección 2.X.
+
+!TODO: referencia cruzada a las vulnerabilidades descritas en la Sección 2.X.
+
+# 4.10. Flujo completo
+## 4.10. Flujo completo del análisis
+
+Una vez descritos los distintos módulos que componen EVMAudit, resulta posible analizar el funcionamiento global de la solución.
+
+El proceso completo implementado por la herramienta se compone de varias fases consecutivas que permiten transformar un contrato inteligente en un informe consolidado de vulnerabilidades.
+
+### 4.10.1. Recepción del contrato
+
+El proceso comienza con la recepción del contrato inteligente que se desea analizar.
+
+El contrato puede proceder de distintos orígenes:
+
+* ejecución directa de la librería
+* aplicación web desarrollada
+* futuras integraciones externas.
+
+Tras recibir el contrato, EVMAudit detecta automáticamente el nombre del contrato y configura la versión adecuada del compilador Solidity.
+
+### 4.10.2. Obtención de resultados mediante Slither y Mythril
+
+La siguiente fase consiste en ejecutar las herramientas de análisis principales.
+
+En primer lugar se ejecuta Slither, aprovechando las ventajas del análisis estático.
+
+Posteriormente se ejecuta Mythril, incorporando las capacidades derivadas de la ejecución simbólica.
+
+La combinación de ambas técnicas permite obtener una cobertura superior a la proporcionada por cada herramienta de forma individual.
+
+!TODO: referencia cruzada a la Sección 2.X (herramientas de análisis).
+
+### 4.10.3. Normalización de resultados
+
+Las salidas generadas por las herramientas se transforman posteriormente a una estructura común.
+
+Este proceso elimina las diferencias existentes entre ambas herramientas y permite trabajar con una representación homogénea de las vulnerabilidades.
+
+La normalización constituye el paso previo necesario para aplicar el mecanismo de correlación.
+
+### 4.10.4. Correlación de vulnerabilidades
+
+Una vez normalizados los resultados, EVMAudit agrupa aquellas vulnerabilidades equivalentes detectadas por varias herramientas.
+
+La correlación permite:
+
+* reducir duplicidades
+* aumentar la confianza de determinados hallazgos
+* simplificar la interpretación del informe final.
+
+Esta fase representa uno de los principales elementos diferenciadores de la solución desarrollada.
+
+### 4.10.5. Generación de propiedades y fuzzing
+
+A partir de las vulnerabilidades correlacionadas, el sistema consulta el catálogo SWC y genera automáticamente las propiedades necesarias para ejecutar Echidna.
+
+Posteriormente se construye un wrapper Solidity específico y se realiza una fase adicional de validación mediante fuzzing.
+
+Este proceso proporciona información complementaria sobre determinadas vulnerabilidades detectadas durante las fases anteriores.
+
+### 4.10.6. Generación del informe final
+
+Finalmente, toda la información obtenida durante el análisis es consolidada en un informe único.
+
+El informe incluye:
+
+* vulnerabilidades detectadas
+* herramientas que las han identificado
+* nivel de confianza asociado
+* resultados del fuzzing
+* metadatos adicionales.
+
+De este modo, el auditor dispone de una visión unificada del estado de seguridad del contrato analizado.
+
+### 4.10.7. Resumen del proceso
+
+El flujo general implementado por EVMAudit puede resumirse en las siguientes etapas:
+
+1. Recepción del contrato.
+2. Configuración del entorno.
+3. Ejecución de Slither.
+4. Ejecución de Mythril.
+5. Normalización.
+6. Correlación.
+7. Consulta del catálogo SWC.
+8. Generación del wrapper.
+9. Ejecución de Echidna.
+10. Generación del informe.
+
+La secuencia completa permite combinar distintas técnicas de análisis dentro de una arquitectura unificada y automatizada.
+
+!TODO: insertar diagrama de secuencia del pipeline completo.
+
+!TODO: insertar diagrama de flujo del proceso.
+
+!TODO: insertar referencia a la Figura X.
+
+!TODO: insertar referencia cruzada a las secciones 4.3 a 4.9.
+# 4.11.Evaluación experimental
+## 4.11. Flujo completo del análisis
+
+Una vez descritos los distintos módulos que componen EVMAudit, resulta posible analizar el funcionamiento global de la solución.
+
+El proceso completo implementado por la herramienta se compone de varias fases consecutivas que permiten transformar un contrato inteligente en un informe consolidado de vulnerabilidades.
+
+### 4.11.1. Recepción del contrato
+
+El proceso comienza con la recepción del contrato inteligente que se desea analizar.
+
+El contrato puede proceder de distintos orígenes:
+
+* ejecución directa de la librería
+* aplicación web desarrollada
+* futuras integraciones externas.
+
+Tras recibir el contrato, EVMAudit detecta automáticamente el nombre del contrato y configura la versión adecuada del compilador Solidity.
+
+### 4.11.2. Obtención de resultados mediante Slither y Mythril
+
+La siguiente fase consiste en ejecutar las herramientas de análisis principales.
+
+En primer lugar se ejecuta Slither, aprovechando las ventajas del análisis estático.
+
+Posteriormente se ejecuta Mythril, incorporando las capacidades derivadas de la ejecución simbólica.
+
+La combinación de ambas técnicas permite obtener una cobertura superior a la proporcionada por cada herramienta de forma individual.
+
+!TODO: referencia cruzada a la Sección 2.X (herramientas de análisis).
+
+### 4.11.3. Normalización de resultados
+
+Las salidas generadas por las herramientas se transforman posteriormente a una estructura común.
+
+Este proceso elimina las diferencias existentes entre ambas herramientas y permite trabajar con una representación homogénea de las vulnerabilidades.
+
+La normalización constituye el paso previo necesario para aplicar el mecanismo de correlación.
+
+### 4.11.4. Correlación de vulnerabilidades
+
+Una vez normalizados los resultados, EVMAudit agrupa aquellas vulnerabilidades equivalentes detectadas por varias herramientas.
+
+La correlación permite:
+
+* reducir duplicidades
+* aumentar la confianza de determinados hallazgos
+* simplificar la interpretación del informe final.
+
+Esta fase representa uno de los principales elementos diferenciadores de la solución desarrollada.
+
+### 4.11.5. Generación de propiedades y fuzzing
+
+A partir de las vulnerabilidades correlacionadas, el sistema consulta el catálogo SWC y genera automáticamente las propiedades necesarias para ejecutar Echidna.
+
+Posteriormente se construye un wrapper Solidity específico y se realiza una fase adicional de validación mediante fuzzing.
+
+Este proceso proporciona información complementaria sobre determinadas vulnerabilidades detectadas durante las fases anteriores.
+
+### 4.11.6. Generación del informe final
+
+Finalmente, toda la información obtenida durante el análisis es consolidada en un informe único.
+
+El informe incluye:
+
+* vulnerabilidades detectadas
+* herramientas que las han identificado
+* nivel de confianza asociado
+* resultados del fuzzing
+* metadatos adicionales.
+
+De este modo, el auditor dispone de una visión unificada del estado de seguridad del contrato analizado.
+
+### 4.11.7. Resumen del proceso
+
+El flujo general implementado por EVMAudit puede resumirse en las siguientes etapas:
+
+1. Recepción del contrato.
+2. Configuración del entorno.
+3. Ejecución de Slither.
+4. Ejecución de Mythril.
+5. Normalización.
+6. Correlación.
+7. Consulta del catálogo SWC.
+8. Generación del wrapper.
+9. Ejecución de Echidna.
+10. Generación del informe.
+
+La secuencia completa permite combinar distintas técnicas de análisis dentro de una arquitectura unificada y automatizada.
+
+!TODO: insertar diagrama de secuencia del pipeline completo.
+
+!TODO: insertar diagrama de flujo del proceso.
+
+!TODO: insertar referencia a la Figura X.
+
+!TODO: insertar referencia cruzada a las secciones 4.3 a 4.9.
 
 
-## 4.1 Identificación de requisitos
+### 4.11.X. Evaluación del contrato con una vulnerabilidad conocida: [NOMBRE DEL CONTRATO]
 
-Con el objetivo de satisfacer las necesidades identificadas durante el estudio del problema, se definieron una serie de requisitos funcionales, no funcionales y de seguridad que guiaron el diseño e implementación de EVMAudit.
+#### Descripción del contrato
 
-### 4.1.1 Requisitos funcionales
+El contrato **[NOMBRE DEL CONTRATO]** fue seleccionado debido a que presenta una vulnerabilidad conocida relacionada con **[TIPO DE VULNERABILIDAD]**.
 
-|ID|Descripción|
-|||
-|RF-01|La herramienta debe analizar contratos inteligentes escritos en Solidity.|
-|RF-02|La herramienta debe detectar automáticamente el nombre del contrato cuando no se especifique manualmente.|
-|RF-03|La herramienta debe configurar automáticamente la versión del compilador Solidity a partir del pragma del contrato.|
-|RF-04|La herramienta debe ejecutar Slither para realizar análisis estático.|
-|RF-05|La herramienta debe ejecutar Mythril para realizar análisis mediante ejecución simbólica.|
-|RF-06|La herramienta debe almacenar las salidas originales de las herramientas en formato JSON.|
-|RF-07|La herramienta debe normalizar los resultados obtenidos por Slither y Mythril a un formato común.|
-|RF-08|La herramienta debe asociar los hallazgos detectados con identificadores SWC.|
-|RF-09|La herramienta debe correlacionar hallazgos equivalentes procedentes de distintas herramientas.|
-|RF-10|La herramienta debe calcular un nivel de confianza asociado a cada vulnerabilidad.|
-|RF-11|La herramienta debe generar automáticamente propiedades para Echidna.|
-|RF-12|La herramienta debe ejecutar Echidna sobre el wrapper generado.|
-|RF-13|La herramienta debe generar un informe final consolidado.|
-|RF-14|La herramienta debe conservar la trazabilidad de los resultados originales.|
+Este contrato pertenece a **[FUENTE DEL CONTRATO]** y fue incluido en la evaluación con el objetivo de analizar el comportamiento de EVMAudit frente a escenarios representativos.
 
-### 4.1.2 Requisitos no funcionales
+La vulnerabilidad esperada en este caso corresponde a:
 
-|ID|Descripción|
-|||
-|RNF-01|La arquitectura debe ser modular y extensible.|
-|RNF-02|La herramienta debe permitir incorporar nuevas herramientas de análisis en el futuro.|
-|RNF-03|Los resultados intermedios deben almacenarse para garantizar reproducibilidad.|
-|RNF-04|La herramienta debe ser mantenible y desacoplada.|
-|RNF-05|Debe existir separación entre análisis, correlación y generación de pruebas.|
+* TODO.
 
-### 4.1.3 Requisitos de seguridad
+!TODO: referencia cruzada a la Sección 2.X (descripción de la vulnerabilidad).
 
-|ID|Descripción|
-|||
-|RS-01|La herramienta debe gestionar errores de ejecución de herramientas externas.|
-|RS-02|La herramienta debe controlar tiempos máximos de análisis.|
-|RS-03|La herramienta debe preservar la salida original para facilitar auditorías posteriores.|
-|RS-04|La herramienta debe detectar la ausencia de dependencias externas.|
+---
+
+#### Resultados obtenidos por las herramientas
+
+En primer lugar, el contrato fue procesado individualmente por Slither y Mythril.
+
+Los resultados obtenidos se resumen en la Tabla X.
+
+| Herramienta | Vulnerabilidades detectadas |
+| ----------- | --------------------------- |
+| Slither     | TODO                        |
+| Mythril     | TODO                        |
+
+!TODO: insertar referencia a la Tabla X.
+
+---
+
+#### Resultados tras la correlación
+
+Una vez aplicados los mecanismos de normalización y correlación implementados por EVMAudit, se obtuvo un total de **TODO** vulnerabilidades consolidadas.
+
+La Tabla X muestra la relación entre los hallazgos originales y los resultados finales.
+
+| Métrica                      | Valor |
+| ---------------------------- | ----- |
+| Hallazgos originales         | TODO  |
+| Hallazgos correlacionados    | TODO  |
+| Vulnerabilidades confirmadas | TODO  |
+| Reducción de duplicidades    | TODO  |
+
+!TODO: insertar referencia a la Tabla X.
+
+---
+
+#### Resultados del fuzzing mediante Echidna
+
+A partir de las vulnerabilidades obtenidas se generaron automáticamente las propiedades correspondientes para Echidna.
+
+Los resultados obtenidos fueron los siguientes:
+
+* Propiedades generadas: TODO.
+* Propiedades ejecutadas correctamente: TODO.
+* Vulnerabilidades verificadas: TODO.
+* Limitaciones observadas: TODO.
+
+!TODO: insertar captura o fragmento representativo del resultado de Echidna.
+
+---
+
+#### Discusión
+
+Los resultados obtenidos muestran que **[OBSERVACIÓN PRINCIPAL]**.
+
+En particular:
+
+* TODO.
+* TODO.
+* TODO.
+
+Este caso pone de manifiesto **[CONCLUSIÓN PRINCIPAL DEL CONTRATO]**.
+
+
+### 4.11.X. Evaluación del contrato con varias vulnerabilidades: [NOMBRE DEL CONTRATO]
+
+#### Descripción del contrato
+
+El contrato **[NOMBRE]** incorpora una vulnerabilidad relacionada con **[TIPO]**, lo que permite estudiar la capacidad de detección de las herramientas integradas cuando existen varias debilidades simultáneas.
+
+!TODO: describir brevemente el funcionamiento del contrato.
+
+---
+
+#### Comparativa entre herramientas
+
+La Tabla X resume las vulnerabilidades detectadas por cada herramienta.
+
+| Vulnerabilidad | Slither | Mythril |
+| :--- | :---: | :---: |
+| TODO | [X] | [X] |
+| TODO | [X] | [-] |
+| TODO | [-] | [X] |
+Los resultados muestran que ambas herramientas presentan comportamientos complementarios.
+
+---
+
+#### Efecto del mecanismo de correlación
+
+La aplicación del proceso de correlación permitió:
+
+* eliminar duplicidades;
+* unificar nomenclaturas;
+* aumentar la confianza de determinados hallazgos.
+
+!TODO: insertar número real de vulnerabilidades correlacionadas.
+
+---
+
+#### Resultados del fuzzing
+
+El proceso de generación automática produjo un total de **TODO** propiedades.
+
+Durante la ejecución de Echidna se observó:
+
+* TODO.
+
+!TODO: describir vulnerabilidades no testables.
+
+---
+
+#### Discusión
+
+Este contrato evidencia que las distintas técnicas de análisis empleadas por EVMAudit permiten obtener información complementaria y mejorar la cobertura respecto al uso individual de cada herramienta.
 
 
 
-# 4.2 Arquitectura general de EVMAudit
+### 4.11.X. Evaluación del contrato real [NOMBRE DEL CONTRATO]
 
-La arquitectura de EVMAudit se diseñó siguiendo una aproximación modular con el objetivo de desacoplar las distintas fases del proceso de análisis. Cada módulo implementa una responsabilidad concreta y se comunica con el resto mediante estructuras de datos intermedias.
+#### Descripción del contrato
 
-El flujo de procesamiento implementado por la herramienta es el siguiente:
+Además de los contratos vulnerables de referencia, se incluyó el contrato **[NOMBRE]**, obtenido de **[REPOSITORIO O FUENTE]**, con el objetivo de analizar el comportamiento de EVMAudit en un escenario más próximo a un entorno real.
+
+!TODO: describir brevemente la finalidad del contrato.
+
+---
+
+#### Resultados obtenidos
+
+La Tabla X resume las vulnerabilidades detectadas durante el análisis.
+
+| Métrica                                 | Valor |
+| --------------------------------------- | ----- |
+| Vulnerabilidades detectadas por Slither | TODO  |
+| Vulnerabilidades detectadas por Mythril | TODO  |
+| Vulnerabilidades finales                | TODO  |
+| Vulnerabilidades confirmadas            | TODO  |
+
+---
+
+#### Observaciones sobre la correlación
+
+En este caso se observó que:
+
+* TODO.
+
+Asimismo, se identificaron diferencias entre ambas herramientas en relación con:
+
+* TODO.
+
+---
+
+#### Resultados del fuzzing
+
+La fase de fuzzing permitió:
+
+* TODO.
+
+No obstante, algunas vulnerabilidades no pudieron validarse automáticamente debido a:
+
+* TODO.
+
+---
+
+#### Discusión
+
+El análisis realizado demuestra que EVMAudit puede aplicarse también sobre contratos reales y no únicamente sobre ejemplos académicos diseñados específicamente para contener vulnerabilidades.
+
+!TODO: indicar limitaciones observadas durante el análisis.
+# 4.2.Arquitectura
+## 4.2. Arquitectura general de EVMAudit
+
+Con el objetivo de satisfacer los requisitos definidos anteriormente, se diseñó una arquitectura modular que permitiese separar las distintas fases del proceso de análisis y facilitar la incorporación de nuevas funcionalidades en futuras versiones.
+
+La arquitectura implementada divide el sistema en varios módulos especializados encargados de:
+
+* ejecutar las herramientas externas
+* procesar y normalizar los resultados obtenidos
+* correlacionar vulnerabilidades equivalentes
+* generar propiedades para Echidna
+* ejecutar pruebas de fuzzing
+* construir el informe final.
+
+Esta separación de responsabilidades permite reducir el acoplamiento entre componentes y facilita la mantenibilidad del sistema.
+
+### 4.2.1. Pipeline de análisis
+
+El flujo general seguido por EVMAudit comienza con la recepción del contrato inteligente que se desea analizar. Posteriormente, la herramienta ejecuta Slither y Mythril para obtener resultados procedentes de análisis estático y ejecución simbólica.
+
+Una vez finalizada esta fase, los resultados generados son normalizados y transformados a una estructura común. Posteriormente, se aplica el mecanismo de correlación implementado por EVMAudit con el objetivo de unificar vulnerabilidades equivalentes y aumentar la confianza de los hallazgos obtenidos.
+
+A partir de los resultados correlacionados, se generan automáticamente propiedades para Echidna, construyendo un wrapper específico que permite realizar una fase adicional de validación mediante fuzzing.
+
+Finalmente, la herramienta genera un informe consolidado que agrupa toda la información obtenida durante el proceso.
+
+!TODO: insertar diagrama del pipeline completo.
+
+!TODO: insertar referencia a la Figura X.
+
+### 4.2.2. Estructura modular
+
+La implementación de EVMAudit se organiza en varios módulos independientes, cada uno de ellos responsable de una fase concreta del análisis.
+
+Los principales componentes que forman la solución son:
+
+* Runner.
+* Normalizer.
+* Correlator.
+* SWC Catalog.
+* Echidna Adapter.
+* Reporter.
+* Exceptions.
+
+Esta organización permite modificar o ampliar cada componente de forma independiente, favoreciendo la reutilización y evolución futura de la herramienta.
+
+!TODO: insertar diagrama UML de paquetes.
+
+!TODO: revisar nombres definitivos de los módulos.
+
+### 4.2.3. Separación entre lógica de análisis e interfaces
+
+Uno de los principios de diseño adoptados durante el desarrollo fue desacoplar completamente la lógica de análisis de las interfaces de usuario.
+
+Por este motivo, EVMAudit fue implementada como una librería independiente, permitiendo que la funcionalidad principal pueda ser reutilizada desde distintos entornos sin necesidad de modificar el código interno.
+
+Esta decisión permitió desarrollar posteriormente una aplicación web que utiliza la librería como motor de análisis, demostrando la reutilización de la solución propuesta.
+
+Los detalles relacionados con la aplicación web desarrollada y los mecanismos de distribución utilizados se describen en los anexos del documento.
+
+!TODO: referencia cruzada al apartado 4.9.
+
+!TODO: referencia cruzada al Anexo A.
+
+!TODO: referencia cruzada al Anexo B.
+
+!TODO: referencia cruzada al Anexo C.
+# 4.3.Runner
+## 4.3. Módulo Runner
+
+El módulo Runner constituye la capa encargada de la interacción con las herramientas externas utilizadas durante el proceso de análisis. Su principal responsabilidad consiste en gestionar la ejecución de Slither, Mythril y Echidna, así como preparar el entorno necesario para garantizar la correcta realización del análisis.
+
+La existencia de un módulo específico para esta tarea permite desacoplar la lógica propia de EVMAudit de las particularidades de cada herramienta, facilitando la incorporación de nuevas soluciones de análisis en futuras versiones.
+
+!TODO: insertar referencia a la Figura X (diagrama de arquitectura).
+
+### 4.3.1. Responsabilidades del módulo
+
+Las principales responsabilidades implementadas por el módulo Runner son las siguientes:
+
+* detección automática del nombre del contrato
+* configuración de la versión del compilador Solidity
+* ejecución de Slither
+* ejecución de Mythril
+* ejecución de Echidna
+* almacenamiento de resultados intermedios
+* gestión de errores producidos durante la ejecución.
+
+Gracias a esta aproximación, el resto de módulos del sistema pueden trabajar de forma independiente sin necesidad de conocer los detalles específicos de cada herramienta externa.
+
+### 4.3.2. Detección automática del nombre del contrato
+
+Durante las primeras fases de desarrollo se observó que el nombre del fichero Solidity no siempre coincide con el nombre del contrato definido en su interior.
+
+Por este motivo se implementó un mecanismo de detección automática que analiza el código fuente y extrae el nombre real del contrato utilizando expresiones regulares.
+
+Esta decisión permite evitar errores durante las fases posteriores del análisis y elimina la necesidad de que el usuario proporcione manualmente dicha información.
+
+Además, este mecanismo resulta especialmente útil cuando la librería es utilizada desde otras aplicaciones externas, ya que reduce la cantidad de parámetros que deben proporcionarse.
+
+!TODO: insertar fragmento de código de `detect_contract_name()`.
+
+### 4.3.3. Configuración automática del compilador
+
+Las herramientas de análisis empleadas dependen de la versión del compilador Solidity utilizada por el contrato.
+
+Con el objetivo de garantizar la reproducibilidad del análisis y evitar incompatibilidades entre versiones, EVMAudit analiza automáticamente la directiva `pragma solidity` presente en el contrato y configura la versión correspondiente mediante la utilidad `solc-select`.
+
+Este mecanismo permite adaptar dinámicamente el entorno de ejecución y facilita el análisis de contratos desarrollados con diferentes versiones del lenguaje.
+
+!TODO: insertar referencia cruzada a la Sección 2.X (Solidity y compilador).
+
+!TODO: insertar fragmento de código de `_set_solc_version()`.
+
+### 4.3.4. Ejecución de Slither
+
+Slither constituye la primera herramienta utilizada durante el proceso de análisis debido a su rapidez y a la gran cantidad de detectores disponibles.
+
+La función encargada de su ejecución verifica previamente que la herramienta se encuentre instalada y posteriormente lanza el análisis sobre el contrato proporcionado.
+
+Una vez finalizada la ejecución, la salida obtenida se almacena en formato JSON para garantizar la trazabilidad de los resultados.
+
+Durante la implementación fue necesario contemplar ciertos comportamientos específicos de Slither. En particular, la herramienta devuelve el código de salida 255 cuando detecta vulnerabilidades, aunque dicho comportamiento no representa un error real.
+
+Por este motivo, EVMAudit incorpora una lógica específica para interpretar correctamente este caso y continuar con el proceso de análisis.
+
+!TODO: insertar fragmento de código de `run_slither()`.
+
+!TODO: referencia cruzada a la Sección 2.X (Slither).
+
+### 4.3.5. Ejecución de Mythril
+
+La segunda fase del análisis se realiza mediante Mythril, herramienta basada en ejecución simbólica.
+
+A diferencia de Slither, Mythril presenta tiempos de ejecución superiores y requiere parámetros adicionales relacionados con la profundidad máxima de exploración y el tiempo máximo permitido para completar el análisis.
+
+Durante el desarrollo se incorporaron mecanismos para:
+
+* limitar el tiempo máximo de ejecución
+* controlar posibles errores durante el análisis
+* procesar las salidas generadas por la herramienta
+* preservar los resultados originales.
+
+Estas medidas permiten evitar que un contrato especialmente complejo bloquee el proceso completo de análisis.
+
+!TODO: insertar fragmento de código de `run_mythril()`.
+
+!TODO: referencia cruzada a la Sección 2.X (Mythril).
+
+### 4.3.6. Ejecución de Echidna
+
+Una vez generadas las propiedades correspondientes, EVMAudit ejecuta Echidna para realizar una fase adicional de validación mediante fuzzing.
+
+La integración de Echidna presentó una complejidad superior a la observada en Slither y Mythril debido a ciertas particularidades de la herramienta y a las diferencias existentes entre versiones.
+
+Durante el desarrollo fue necesario incorporar mecanismos específicos para:
+
+* reconstruir nombres de propiedades
+* interpretar adecuadamente las salidas generadas
+* distinguir entre pruebas superadas y vulnerabilidades explotables
+* gestionar posibles inconsistencias en los resultados.
+
+Estas adaptaciones permitieron integrar Echidna dentro del flujo general de EVMAudit sin alterar el resto de componentes de la arquitectura.
+
+!TODO: insertar fragmento de código de `run_echidna()`.
+
+!TODO: referencia cruzada a la Sección 2.X (Echidna).
+
+### 4.3.7. Persistencia de resultados intermedios
+
+Con el fin de favorecer la trazabilidad y la reproducibilidad del análisis, EVMAudit almacena las salidas originales generadas por las distintas herramientas utilizadas.
+
+Esta decisión permite:
+
+* inspeccionar manualmente los resultados obtenidos
+* reproducir análisis posteriores
+* depurar posibles errores
+* conservar evidencias originales.
+
+La preservación de las salidas originales resulta especialmente relevante en el contexto de auditorías de seguridad, donde la trazabilidad de los hallazgos constituye un aspecto fundamental.
+
+# 4.4.Normalizer
+## 4.4. Módulo de normalización
+
+Uno de los principales problemas identificados durante el estudio de las herramientas existentes fue la heterogeneidad de los formatos utilizados para representar las vulnerabilidades detectadas.
+
+Slither y Mythril generan estructuras JSON completamente diferentes, tanto en la forma de representar la severidad como en la descripción de los hallazgos o la identificación de las localizaciones afectadas.
+
+Esta situación dificulta la comparación directa de resultados y hace necesaria una fase previa de transformación antes de poder aplicar mecanismos de correlación.
+
+Para resolver este problema se desarrolló un módulo de normalización encargado de transformar las salidas heterogéneas en una estructura común.
+
+### 4.4.1. Objetivos del proceso de normalización
+
+El proceso de normalización persigue varios objetivos:
+
+* unificar la representación de vulnerabilidades;
+* facilitar la correlación entre herramientas;
+* preservar las evidencias originales;
+* simplificar la generación posterior de informes;
+* desacoplar el resto de módulos de las particularidades de cada herramienta.
+
+Gracias a ello, los componentes posteriores pueden operar sobre una estructura homogénea independientemente del origen de los resultados.
+
+### 4.4.2. Estructura común de los hallazgos
+
+Cada vulnerabilidad normalizada se representa mediante un conjunto común de atributos.
+
+Entre los campos principales se encuentran:
+
+* título;
+* descripción;
+* severidad;
+* categoría;
+* contrato afectado;
+* función afectada;
+* localización;
+* identificador SWC;
+* herramienta de origen;
+* evidencia original.
+
+La inclusión de la salida original permite mantener la trazabilidad del análisis y facilita la revisión manual de los resultados.
+
+!TODO: insertar diagrama UML del objeto Finding.
+
+!TODO: revisar nombres exactos de los atributos.
+
+### 4.4.3. Normalización de resultados de Slither
+
+La función de normalización correspondiente a Slither transforma la estructura JSON generada por la herramienta y extrae la información relevante necesaria para construir los hallazgos comunes utilizados por EVMAudit.
+
+Durante esta fase se realiza además la asociación de los detectores propios de Slither con los identificadores SWC correspondientes.
+
+Este proceso permite traducir la terminología específica de Slither a una representación independiente de la herramienta utilizada.
+
+!TODO: insertar fragmento de código de `normalize_slither_output()`.
+
+### 4.4.4. Normalización de resultados de Mythril
+
+De forma análoga, la salida generada por Mythril es procesada para obtener una representación equivalente a la utilizada por Slither.
+
+La transformación permite unificar:
+
+* niveles de severidad;
+* nombres de vulnerabilidades;
+* identificadores SWC;
+* información contextual del hallazgo.
+
+Gracias a ello, ambas herramientas pueden ser tratadas posteriormente de forma transparente por el módulo de correlación.
+
+!TODO: insertar fragmento de código de `normalize_mythril_output()`.
+
+### 4.4.5. Clasificación de vulnerabilidades
+
+Además de unificar la representación de los hallazgos, el módulo de normalización clasifica las vulnerabilidades detectadas siguiendo las categorías definidas durante el estudio del estado del arte.
+
+Entre las categorías utilizadas se encuentran:
+
+* vulnerabilidades de control de acceso;
+* vulnerabilidades económicas;
+* vulnerabilidades relacionadas con la lógica de negocio;
+* vulnerabilidades asociadas a la ejecución del contrato.
+
+Esta clasificación permite mantener la coherencia entre la parte teórica del trabajo y la implementación desarrollada.
+
+!TODO: referencia cruzada a la Sección 2.X (clasificación de vulnerabilidades).
+
+### 4.4.6. Preservación de evidencias
+
+Uno de los principios adoptados durante el diseño de EVMAudit fue evitar la pérdida de información durante las fases intermedias del análisis.
+
+Por este motivo, cada hallazgo normalizado conserva una referencia a la salida original generada por la herramienta correspondiente.
+
+Esta decisión facilita:
+
+* la revisión manual por parte del auditor;
+* la trazabilidad del proceso;
+* la depuración de errores;
+* la reproducibilidad de los resultados.
+
+La conservación de evidencias resulta especialmente importante en entornos de auditoría y análisis forense, donde es necesario justificar el origen de cada vulnerabilidad identificada.
+
+!TODO: insertar diagrama del proceso de normalización.
+
+!TODO: insertar referencia a la Figura X.
+# 4.5.Correlator
+## 4.5. Módulo de correlación
+
+Una vez normalizados los resultados obtenidos por las herramientas de análisis, EVMAudit aplica un proceso de correlación cuyo objetivo consiste en identificar vulnerabilidades equivalentes detectadas por distintas herramientas y agruparlas en un único hallazgo.
+
+Este módulo constituye el núcleo de la contribución desarrollada en el presente Trabajo Fin de Máster, ya que permite reducir la redundancia de información y proporcionar una visión más estructurada de las vulnerabilidades detectadas.
+
+La necesidad de incorporar esta fase surge de una de las principales limitaciones observadas durante el estudio del estado del arte. Aunque herramientas como Slither y Mythril son capaces de detectar un gran número de vulnerabilidades, cada una de ellas presenta los resultados utilizando nomenclaturas y estructuras diferentes, generando además múltiples duplicidades que dificultan la revisión manual por parte del auditor.
+
+Por este motivo, EVMAudit incorpora un mecanismo propio de correlación encargado de consolidar la información procedente de ambas herramientas.
+
+### 4.5.1. Objetivos del proceso de correlación
+
+Los objetivos perseguidos por este módulo son los siguientes:
+
+* reducir la redundancia de información
+* agrupar vulnerabilidades equivalentes
+* incrementar la confianza en los hallazgos detectados
+* facilitar la interpretación de resultados
+* proporcionar una representación unificada de las vulnerabilidades.
+
+La correlación no pretende eliminar completamente los falsos positivos generados por las herramientas utilizadas, sino proporcionar una capa adicional de análisis que facilite el trabajo posterior del auditor.
+
+### 4.5.2. Estrategia de correlación
+
+El proceso implementado en EVMAudit se basa en una estrategia de correlación mediante reglas.
+
+Dos vulnerabilidades se consideran equivalentes cuando cumplen simultáneamente las siguientes condiciones:
+
+* afectan al mismo contrato
+* afectan a la misma función
+* poseen el mismo identificador SWC.
+
+De este modo, la clave utilizada para la correlación puede expresarse de la siguiente forma:
 
 ```text
-Contrato Solidity
-        ↓
-Runner
-        ↓
-Slither + Mythril
-        ↓
-Normalizer
-        ↓
-Correlator
-        ↓
-SWC Catalog
-        ↓
-Echidna Adapter
-        ↓
-Wrapper Solidity
-        ↓
-Echidna
-        ↓
-Reporter
-        ↓
-Informe final
+Contrato + Función + SWC
 ```
 
-Esta arquitectura permite separar claramente las fases de:
+Esta aproximación permite agrupar vulnerabilidades que, aunque procedan de herramientas diferentes, representan realmente el mismo problema de seguridad.
 
-- obtención de resultados
-    
-- normalización
-    
-- correlación
-    
-- generación de propiedades
-    
-- validación mediante fuzzing
-    
-- generación de informes
-    
+La elección del identificador SWC como criterio común permite disponer de una referencia independiente de la nomenclatura utilizada por cada herramienta.
 
-La modularidad facilita la incorporación futura de nuevas herramientas de análisis sin modificar el resto del pipeline.
+!TODO: insertar referencia cruzada a la Sección 2.X (SWC Registry).
 
+!TODO: insertar pseudocódigo del algoritmo de correlación.
 
-# 4.3 Módulo de ejecución de herramientas
+### 4.5.3. Hallazgos confirmados y hallazgos detectados
 
-El módulo Runner constituye la capa encargada de interactuar con las herramientas externas utilizadas durante el proceso de auditoría.
+Una vez realizado el proceso de agrupación, EVMAudit distingue entre dos tipos de vulnerabilidades.
 
-Las principales responsabilidades de este módulo son:
+#### Hallazgos confirmados
 
-- detectar automáticamente el nombre real del contrato
-    
-- configurar la versión adecuada del compilador Solidity
-    
-- ejecutar Slither
-    
-- ejecutar Mythril
-    
-- ejecutar Echidna
-    
-- almacenar las salidas originales en formato JSON.
-    
+Se consideran confirmados aquellos hallazgos que han sido detectados por más de una herramienta.
 
-## Detección automática del contrato
+La coincidencia entre distintas técnicas de análisis aumenta la confianza asociada a la vulnerabilidad y proporciona una mayor evidencia de su existencia.
 
-La función `detect_contract_name()` analiza el código fuente y extrae el nombre del primer contrato definido, evitando depender del nombre del fichero.
+#### Hallazgos detectados
 
-Esta decisión permite evitar errores cuando el nombre del archivo y el nombre del contrato no coinciden.
+Corresponden a vulnerabilidades identificadas por una única herramienta.
 
-## Configuración automática del compilador
+Aunque presentan un menor nivel de confianza, siguen siendo incluidas en el informe final con el objetivo de evitar la pérdida de información potencialmente relevante.
 
-Antes de ejecutar las herramientas, EVMAudit analiza el pragma del contrato y configura automáticamente la versión correspondiente del compilador mediante `solc-select`.
+Esta clasificación permite priorizar posteriormente la revisión manual realizada por el auditor.
 
-De este modo se mejora la reproducibilidad del análisis y se reducen problemas de compatibilidad entre versiones.
+### 4.5.4. Nivel de confianza
 
-## Ejecución de Slither
+Con el objetivo de proporcionar información adicional sobre la fiabilidad de cada hallazgo, EVMAudit asigna un nivel de confianza basado en las herramientas que han detectado la vulnerabilidad.
 
-La función `run_slither()` realiza:
+La confianza asociada no representa una medida probabilística, sino un indicador orientativo derivado del número de herramientas que coinciden en el mismo hallazgo.
 
-- comprobación previa de disponibilidad de la herramienta
-    
-- ejecución del análisis
-    
-- gestión de timeouts
-    
-- almacenamiento de resultados.
-    
+Este mecanismo permite distinguir aquellas vulnerabilidades respaldadas por varias herramientas de aquellas detectadas únicamente por una de ellas.
 
-Además, se contempla el comportamiento específico de Slither, que devuelve el código 255 cuando encuentra vulnerabilidades, sin que ello represente un error.
+No obstante, la interpretación final continúa dependiendo del criterio del auditor, ya que la correlación implementada no sustituye la validación manual.
 
-## Ejecución de Mythril
+!TODO: revisar nomenclatura definitiva utilizada por el código (`confidence_score`).
 
-La función `run_mythril()` permite configurar:
+### 4.5.5. Gestión de severidades
 
-- profundidad máxima de exploración
-    
-- tiempo máximo de ejecución
-    
-- captura y parseo del JSON generado.
-    
+Cuando una vulnerabilidad es detectada por varias herramientas, puede ocurrir que cada una de ellas asigne niveles de severidad diferentes.
 
-## Ejecución de Echidna
+Para resolver esta situación, EVMAudit conserva la severidad más alta reportada por las herramientas implicadas.
 
-La función `run_echidna()` ejecuta las propiedades generadas automáticamente por el adaptador.
+Este enfoque se adopta siguiendo un criterio conservador, priorizando la revisión de aquellas vulnerabilidades que potencialmente puedan tener un mayor impacto.
 
-Durante su implementación fue necesario incorporar mecanismos adicionales para corregir ciertas anomalías observadas en la versión 2.3.2 de Echidna, como:
+### 4.5.6. Preservación de evidencias
 
-- nombres incorrectos de las propiedades
-    
-- estados de ejecución inconsistentes
-    
-- mezcla de logs y JSON en la salida estándar.
-    
+Durante el proceso de correlación se mantiene la información procedente de todas las herramientas que han participado en la detección.
+
+De esta forma, cada hallazgo correlacionado conserva:
+
+* las herramientas que lo han identificado
+* las evidencias originales asociadas
+* las localizaciones afectadas
+* la información contextual proporcionada por cada herramienta.
+
+Esta decisión garantiza la trazabilidad del análisis y facilita la revisión manual posterior.
+
+### 4.5.7. Beneficios del proceso de correlación
+
+La incorporación de esta fase proporciona diversas ventajas:
+
+* reducción de duplicidades
+* mejora de la legibilidad del informe final
+* aumento de la confianza en determinados hallazgos
+* simplificación del proceso de auditoría
+* independencia respecto a las herramientas utilizadas.
+
+La correlación constituye, por tanto, uno de los principales elementos diferenciadores de EVMAudit frente al uso individual de las herramientas integradas.
+
+!TODO: insertar diagrama del proceso de correlación.
+
+!TODO: insertar ejemplo real antes y después de la correlación.
+
+!TODO: insertar referencia a la Figura X.
 
 
+# 4.6.SWC Catalog
+## 4.6. Catálogo de vulnerabilidades SWC
 
-# 4.4 Módulo de normalización
+Con el objetivo de desacoplar la fase de detección de vulnerabilidades de las fases posteriores de validación y generación de pruebas, se implementó un catálogo de vulnerabilidades basado en la clasificación Smart Contract Weakness Classification (SWC).
 
-Uno de los principales problemas identificados durante el estudio preliminar fue la heterogeneidad de los formatos de salida generados por las distintas herramientas.
+Este catálogo constituye una capa intermedia que permite asociar los hallazgos detectados con información adicional independiente de las herramientas utilizadas.
 
-Slither y Mythril utilizan estructuras JSON completamente diferentes, lo que dificulta su comparación directa.
+Gracias a ello, EVMAudit puede reutilizar la información obtenida durante el proceso de correlación y emplearla posteriormente para la generación automática de propiedades orientadas a Echidna.
 
-Para resolver este problema se implementó un módulo de normalización encargado de transformar ambos formatos en una estructura común.
+### 4.6.1. Objetivos del catálogo
 
-Cada hallazgo normalizado contiene:
+El catálogo desarrollado persigue los siguientes objetivos:
 
-- título
-    
-- descripción
-    
-- severidad
-    
-- categoría
-    
-- contrato afectado
-    
-- función afectada
-    
-- localización
-    
-- identificador SWC
-    
-- evidencia original.
-    
+* unificar la representación de vulnerabilidades
+* desacoplar la lógica de generación de pruebas
+* facilitar la incorporación de nuevas plantillas
+* centralizar información sobre las debilidades conocidas
+* favorecer la mantenibilidad del sistema.
 
-La conservación de la salida original permite mantener la trazabilidad del análisis.
+Esta aproximación permite que las fases posteriores del análisis no dependan directamente de las particularidades de Slither o Mythril.
 
-Además, durante la normalización se realiza la traducción de detectores de Slither a identificadores SWC mediante una tabla de correspondencia específica.
+### 4.6.2. Estructura del catálogo
 
-Las vulnerabilidades se clasifican siguiendo las categorías definidas en el estado del arte:
+Cada entrada del catálogo contiene información asociada a una vulnerabilidad concreta.
 
-- control de acceso
-    
-- económicas
-    
-- lógica de negocio
-    
-- ejecución.
-    
+Entre los datos almacenados se encuentran:
 
+* identificador SWC
+* nombre de la vulnerabilidad
+* descripción
+* severidad
+* plantilla asociada
+* limitaciones conocidas
+* posibilidad de validación automática.
 
+La información almacenada permite enriquecer los hallazgos correlacionados y proporcionar información adicional durante las fases posteriores del análisis.
 
-# 4.5 Módulo de correlación
+!TODO: insertar tabla con varios ejemplos del catálogo.
 
-El módulo de correlación constituye el núcleo de la contribución desarrollada.
+### 4.6.3. Asociación entre detectores y SWC
 
-Su objetivo es reducir duplicidades y aumentar la confianza en los hallazgos obtenidos.
+Una de las principales dificultades observadas durante el desarrollo fue la ausencia de una correspondencia directa entre los detectores utilizados por cada herramienta.
 
-La correlación se realiza agrupando las vulnerabilidades que cumplen simultáneamente:
+Para resolver este problema se definieron tablas de asociación que permiten traducir los detectores específicos a identificadores SWC.
 
-- mismo contrato
-    
-- misma función
-    
-- mismo identificador SWC.
-    
+Gracias a esta estrategia es posible utilizar un lenguaje común durante todo el proceso de análisis y evitar dependencias directas respecto a la nomenclatura propia de cada herramienta.
 
-Cuando una vulnerabilidad es detectada por Slither y Mythril, se considera confirmada.
+Esta decisión resulta especialmente relevante para el módulo de correlación descrito anteriormente.
 
-En caso contrario, se mantiene como detectada por una única herramienta.
+!TODO: insertar referencia cruzada a la Sección 4.4.
 
-Asimismo, se conserva la severidad más alta de las reportadas por ambas herramientas.
+### 4.6.4. Reutilización del catálogo
 
-El resultado final incorpora:
+Además de servir como mecanismo de clasificación, el catálogo es utilizado posteriormente durante la generación de propiedades para Echidna.
 
-- severidad
-    
-- herramientas que la han detectado
-    
-- líneas afectadas
-    
-- evidencias originales
-    
-- nivel de confianza.
-    
+A partir del identificador SWC asociado a cada vulnerabilidad, EVMAudit recupera automáticamente la plantilla correspondiente y genera las estructuras necesarias para la fase de fuzzing.
 
-Este enfoque permite obtener una representación unificada del análisis y reducir la cantidad de información redundante que debe revisar el auditor.
+Esta aproximación permite separar claramente:
 
+* detección
+* correlación
+* generación de pruebas.
 
+La independencia entre estas fases facilita futuras ampliaciones y simplifica el mantenimiento del sistema.
 
-# 4.6 Catálogo SWC y generación de propiedades
+### 4.6.5. Extensibilidad del catálogo
 
-Con el objetivo de reutilizar la información obtenida durante la correlación, se desarrolló un catálogo de vulnerabilidades basado en la clasificación SWC.
+La utilización de un catálogo independiente permite incorporar nuevas vulnerabilidades sin necesidad de modificar el resto de módulos implementados.
 
-Cada entrada del catálogo incluye:
+De esta forma, la incorporación de nuevas entradas únicamente requiere:
 
-- identificador SWC
-    
-- nombre de la vulnerabilidad
-    
-- severidad
-    
-- plantilla asociada
-    
-- limitaciones conocidas
-    
-- posibilidad de validación automática.
-    
+1. definir el identificador SWC correspondiente
+2. añadir la información descriptiva asociada
+3. incorporar la plantilla de generación deseada.
 
-Este catálogo permite desacoplar la detección de vulnerabilidades de la generación posterior de pruebas.
+Este diseño favorece la evolución futura de la herramienta y permite adaptar EVMAudit a nuevas versiones del ecosistema Ethereum.
 
-Gracias a ello, una misma vulnerabilidad puede asociarse automáticamente a diferentes propiedades de Echidna.
+!TODO: insertar diagrama de relación entre SWC Catalog y Echidna Adapter.
 
+!TODO: insertar referencia a la Figura X.
+# 4.7.Echidna adaptar
+## 4.7. Adaptador para Echidna y generación automática de propiedades
 
+Una vez finalizado el proceso de correlación, EVMAudit incorpora una fase adicional orientada a la validación dinámica de determinadas vulnerabilidades mediante fuzzing.
 
-# 4.7 Adaptador para Echidna
+Para ello, se desarrolló un adaptador específico encargado de transformar los hallazgos correlacionados en propiedades compatibles con Echidna, permitiendo complementar los resultados obtenidos mediante análisis estático y ejecución simbólica.
 
-Una vez correlacionadas las vulnerabilidades, el adaptador genera automáticamente un contrato wrapper que hereda del contrato original e incorpora las propiedades correspondientes.
+La incorporación de esta fase responde a uno de los objetivos específicos planteados en el trabajo, consistente en combinar distintas técnicas de análisis con el fin de obtener una visión más completa del estado de seguridad del contrato analizado.
 
-El proceso consta de las siguientes etapas:
+!TODO: referencia cruzada a la Sección 3.2 (objetivos específicos).
+
+### 4.7.1. Objetivos del adaptador
+
+El módulo desarrollado persigue los siguientes objetivos:
+
+* reutilizar la información obtenida durante la fase de correlación
+* generar automáticamente propiedades para Echidna
+* reducir la intervención manual del auditor
+* proporcionar una fase adicional de validación
+* mantener desacopladas las distintas fases del análisis.
+
+La existencia de este componente permite integrar el fuzzing dentro del pipeline general de EVMAudit sin introducir dependencias directas entre las herramientas utilizadas.
+
+### 4.7.2. Generación de wrappers
+
+Echidna requiere que las propiedades de seguridad estén implementadas como funciones Solidity dentro de un contrato específico.
+
+Con el objetivo de automatizar este proceso, EVMAudit genera dinámicamente un contrato wrapper que hereda del contrato original e incorpora las propiedades correspondientes a las vulnerabilidades detectadas.
+
+El proceso seguido puede resumirse en las siguientes etapas:
 
 1. Recepción de los hallazgos correlacionados.
-    
-2. Obtención de las plantillas asociadas a cada SWC.
-    
-3. Sustitución de parámetros en las plantillas.
-    
-4. Construcción del wrapper Solidity.
-    
-5. Generación de metadatos adicionales.
-    
+2. Consulta del catálogo SWC.
+3. Obtención de las plantillas asociadas.
+4. Sustitución de parámetros.
+5. Generación del wrapper final.
+6. Ejecución de Echidna.
 
-El adaptador distingue entre:
+Gracias a esta aproximación, la generación de pruebas se realiza de forma completamente automática.
 
-### Vulnerabilidades testables
+!TODO: insertar diagrama del proceso de generación de wrappers.
 
-Aquellas que pueden verificarse automáticamente mediante fuzzing.
+!TODO: insertar referencia a la Figura X.
 
-### Vulnerabilidades no testables
+### 4.7.3. Plantillas de propiedades
 
-Aquellas que requieren condiciones adicionales para su explotación.
+Cada vulnerabilidad soportada dispone de una plantilla específica que describe la propiedad que deberá ser evaluada por Echidna.
 
-Un ejemplo representativo es la reentrancia, cuya explotación requiere un contrato atacante externo. En estos casos la propiedad se incluye igualmente, pero acompañada de advertencias explícitas.
+Estas plantillas permiten traducir información abstracta procedente del análisis estático a estructuras ejecutables compatibles con el motor de fuzzing.
 
+La utilización de plantillas aporta varias ventajas:
 
+* reutilización de código
+* independencia respecto a las herramientas de detección
+* facilidad de mantenimiento
+* incorporación sencilla de nuevas vulnerabilidades.
 
-# 4.8 Gestión de errores
+!TODO: insertar ejemplo de una plantilla real.
 
-Con el fin de mejorar la robustez de la herramienta, se implementó una jerarquía propia de excepciones.
+### 4.7.4. Vulnerabilidades testables y no testables
 
-La clase base es:
+Durante el desarrollo se observó que no todas las vulnerabilidades pueden verificarse automáticamente mediante fuzzing.
 
-- `EVMAuditError`
-    
+Por este motivo, el adaptador distingue entre:
 
-A partir de ella se derivan:
+#### Vulnerabilidades testables
 
-### ToolNotFoundError
+Son aquellas que pueden expresarse mediante propiedades directamente evaluables por Echidna.
 
-Se utiliza cuando una herramienta externa no se encuentra instalada.
+Algunos ejemplos incluyen:
 
-### AnalysisError
+* determinadas restricciones de acceso
+* invariantes económicas
+* comprobaciones relacionadas con balances
+* validaciones de lógica de negocio.
 
-Se emplea cuando se produce un fallo crítico durante el análisis.
+#### Vulnerabilidades no testables
 
-Esta separación permite diferenciar problemas de configuración del entorno de errores propios del análisis.
+Corresponden a aquellas situaciones cuya explotación requiere condiciones externas o escenarios complejos difíciles de reproducir automáticamente.
 
-# 4.9 Distribución e integración de la solución
+Entre ellas destacan:
 
-Con el objetivo de facilitar la reutilización de la herramienta desarrollada y demostrar su aplicabilidad en diferentes escenarios, EVMAudit fue distribuida como una librería independiente y utilizada posteriormente como núcleo de una aplicación web de análisis de contratos inteligentes.
+* ataques de reentrancia
+* determinados problemas de interacción entre contratos
+* escenarios dependientes del contexto de despliegue.
 
-La librería se publicó como un paquete Python instalable, permitiendo su incorporación en otros proyectos y facilitando su ejecución desde diferentes entornos. Esta decisión permite desacoplar la lógica de análisis de cualquier interfaz concreta y favorece la extensibilidad de la solución.
+En estos casos, EVMAudit conserva la información asociada a la vulnerabilidad y genera advertencias específicas, pero no intenta forzar una validación automática que pudiera producir resultados incorrectos.
 
-Con el fin de validar esta capacidad de reutilización, se desarrolló una aplicación web que emplea EVMAudit como motor de análisis. La aplicación recibe contratos inteligentes proporcionados por el usuario y ejecuta internamente el pipeline implementado por la librería, incluyendo la ejecución de Slither, Mythril y Echidna, la normalización y correlación de resultados y la generación del informe final.
+Esta decisión se adoptó con el objetivo de evitar conclusiones erróneas y mantener un comportamiento conservador.
 
-La aplicación proporciona dos mecanismos de entrada diferentes:
+### 4.7.5. Integración con Echidna
 
-* carga de contratos Solidity desde un fichero;
-* introducción directa del código fuente mediante una interfaz web.
+Una vez generado el wrapper correspondiente, el módulo Runner ejecuta Echidna y recupera los resultados obtenidos durante el proceso de fuzzing.
 
-Una vez recibido el contrato, la aplicación inicia el proceso de análisis en segundo plano y proporciona información sobre el progreso de cada una de las fases ejecutadas. Finalmente, los resultados obtenidos se presentan de forma estructurada, mostrando las vulnerabilidades correlacionadas y los resultados del proceso de fuzzing.
+La salida generada por la herramienta se procesa posteriormente para incorporarla al informe final.
 
-La existencia de esta aplicación demuestra que la arquitectura adoptada permite reutilizar EVMAudit como componente central en diferentes contextos de uso, sin necesidad de modificar la lógica interna de la herramienta.
+De esta manera, EVMAudit consigue integrar tres técnicas de análisis diferentes:
 
-Los detalles relativos a la publicación de la librería, la implementación de la aplicación web y los aspectos relacionados con el despliegue e infraestructura se incluyen en los anexos del documento, al no constituir el núcleo de la contribución en materia de ciberseguridad.
+* análisis estático
+* ejecución simbólica
+* fuzzing.
 
-* Anexo A. Distribución de EVMAudit como paquete Python.
-* Anexo B. Aplicación web desarrollada.
-* Anexo C. Contenedorización mediante Docker.
-* Anexo D. Despliegue de la aplicación.
+La combinación de estas aproximaciones permite aprovechar las fortalezas de cada una de ellas y compensar parcialmente sus limitaciones individuales.
 
+!TODO: referencia cruzada a la Sección 2.X (análisis estático).
 
-# 4.10 Flujo completo del análisis
+!TODO: referencia cruzada a la Sección 2.X (ejecución simbólica).
 
-El proceso completo implementado por EVMAudit puede resumirse en las siguientes fases:
+!TODO: referencia cruzada a la Sección 2.X (fuzzing).
 
-1. Recepción del contrato Solidity.
-    
-2. Ejecución de Slither.
-    
-3. Ejecución de Mythril.
-    
-4. Normalización de resultados.
-    
-5. Correlación de vulnerabilidades.
-    
-6. Generación automática de propiedades.
-    
-7. Construcción del wrapper para Echidna.
-    
-8. Ejecución del fuzzing.
-    
-9. Generación del informe final.
-    
+### 4.7.6. Beneficios de la generación automática
 
+La generación automática de propiedades aporta diversas ventajas:
 
+* reducción del trabajo manual
+* mayor reutilización de resultados
+* integración transparente con Echidna
+* facilidad para incorporar nuevas vulnerabilidades
+* mejora del flujo general de análisis.
 
-# 4.11 Limitaciones de la solución
+No obstante, la validación automática obtenida no sustituye la revisión manual realizada por el auditor, sino que constituye una capa adicional de apoyo.
 
-Aunque EVMAudit automatiza gran parte del proceso de análisis, presenta varias limitaciones.
+# 4.8.Gestion de errores
+## 4.8. Gestión de errores y robustez de la solución
 
-En primer lugar, depende de herramientas externas, por lo que la calidad del análisis está condicionada por sus capacidades.
+Debido a la dependencia de herramientas externas y a la complejidad del proceso de análisis, durante el diseño de EVMAudit se prestó especial atención a la gestión de errores y a la robustez del sistema.
 
-La correlación implementada se basa exclusivamente en el identificador SWC, el contrato y la función afectada, por lo que determinados casos complejos podrían no agruparse correctamente.
+La existencia de múltiples componentes externos hace necesario disponer de mecanismos que permitan detectar y manejar situaciones anómalas sin comprometer el funcionamiento global de la herramienta.
 
-Asimismo, algunas vulnerabilidades, como la reentrancia, no pueden verificarse completamente mediante Echidna sin incorporar contratos atacantes específicos.
+### 4.8.1. Necesidad de una gestión centralizada
 
-Finalmente, la herramienta no contempla análisis inter-contrato ni mecanismos avanzados de priorización basados en métricas CVSS.
+Durante el proceso de análisis pueden producirse diferentes tipos de errores:
 
+* ausencia de herramientas instaladas
+* incompatibilidades entre versiones
+* contratos inválidos
+* timeouts durante el análisis
+* errores internos de las herramientas utilizadas
+* problemas durante la generación de wrappers.
 
+La gestión individual de cada una de estas situaciones complicaría considerablemente el mantenimiento del sistema.
 
-# 4.12 Evaluación experimental
+Por este motivo se implementó una jerarquía de excepciones propia que centraliza el tratamiento de los errores.
 
-Este apartado se dedicará a la validación práctica de la herramienta mediante la ejecución de diferentes contratos vulnerables y la comparación de los resultados obtenidos por las distintas herramientas integradas.
+### 4.8.2. Jerarquía de excepciones
 
-La evaluación analizará:
+La arquitectura implementada incorpora una clase base común a partir de la cual se derivan los distintos tipos de error utilizados por EVMAudit.
 
-- vulnerabilidades detectadas
-    
-- coincidencias entre herramientas
-    
-- vulnerabilidades exclusivas
-    
-- tiempo de ejecución
-    
-- reducción de duplicidades
-    
-- comportamiento del fuzzing mediante Echidna.
-    
+Esta aproximación permite distinguir claramente entre:
 
-Este capítulo permitirá determinar el grado de efectividad de la solución propuesta y valorar su utilidad como apoyo a las auditorías de contratos inteligentes.# 5. Conclusiones y trabajo futuro
+* errores de configuración
+* errores de análisis
+* errores producidos por herramientas externas.
+
+La utilización de excepciones específicas simplifica la depuración y mejora la legibilidad del código.
+
+!TODO: insertar diagrama UML de excepciones.
+
+### 4.8.3. Detección de dependencias externas
+
+Antes de ejecutar las herramientas integradas, EVMAudit verifica que las dependencias necesarias se encuentren correctamente instaladas.
+
+Este mecanismo permite detectar problemas de configuración de forma temprana y proporcionar mensajes de error más descriptivos.
+
+La validación previa evita que el proceso de análisis falle de forma inesperada en fases posteriores.
+
+### 4.8.4. Gestión de timeouts
+
+Algunas herramientas, especialmente aquellas basadas en ejecución simbólica, pueden presentar tiempos de análisis elevados dependiendo de la complejidad del contrato.
+
+Con el objetivo de evitar bloqueos indefinidos, EVMAudit incorpora límites temporales para determinadas operaciones.
+
+La utilización de timeouts permite:
+
+* mejorar la estabilidad del sistema
+* evitar consumos excesivos de recursos
+* garantizar la finalización del análisis.
+
+### 4.8.5. Preservación de resultados ante errores
+
+Cuando se produce un fallo durante alguna fase del análisis, EVMAudit intenta conservar la información obtenida hasta ese momento.
+
+Esta estrategia permite:
+
+* facilitar la depuración
+* conservar evidencias parciales
+* evitar la pérdida completa del trabajo realizado.
+
+La preservación de resultados resulta especialmente relevante en entornos de auditoría, donde incluso los análisis incompletos pueden aportar información útil.
+
+### 4.8.6. Robustez frente a comportamientos específicos de las herramientas
+
+Durante el desarrollo se detectaron determinados comportamientos particulares en las herramientas integradas.
+
+Entre ellos destacan:
+
+* códigos de retorno no convencionales
+* formatos de salida inconsistentes
+* diferencias entre versiones
+* mensajes mezclados con datos estructurados.
+
+Para hacer frente a estas situaciones se implementaron mecanismos específicos de adaptación y validación.
+
+Estas medidas permitieron integrar las herramientas seleccionadas sin modificar su funcionamiento interno.
+
+### 4.8.7. Beneficios de la estrategia adoptada
+
+La incorporación de mecanismos de gestión de errores proporciona diversas ventajas:
+
+* mayor estabilidad
+* mejora de la experiencia de usuario
+* facilidad de mantenimiento
+* simplificación de la depuración
+* incremento de la robustez general del sistema.
+
+La existencia de una capa de gestión de errores independiente contribuye además a mantener desacoplados los distintos módulos que forman la arquitectura de EVMAudit.
+
+!TODO: insertar referencia cruzada al módulo Runner.
+
+!TODO: insertar referencia cruzada al diagrama de arquitectura general.
+# 4.9.Integración y distribución
+## 4.9. Distribución e integración de la solución
+
+Uno de los objetivos perseguidos durante el desarrollo de EVMAudit fue diseñar una solución desacoplada de cualquier interfaz concreta y suficientemente flexible para poder ser reutilizada en distintos contextos.
+
+Por este motivo, la lógica principal de análisis se implementó como una librería independiente, separando completamente las funcionalidades relacionadas con la detección y procesamiento de vulnerabilidades de los mecanismos de interacción con el usuario.
+
+Esta decisión permitió demostrar la reutilización de la solución desarrollada mediante su integración en otros componentes software sin necesidad de modificar el núcleo de la herramienta.
+
+### 4.9.1. Distribución de la librería
+
+La implementación de EVMAudit como una librería independiente permite desacoplar el motor de análisis de cualquier entorno concreto de ejecución.
+
+Este enfoque proporciona diversas ventajas:
+
+* reutilización de la herramienta desde otros proyectos
+* separación entre lógica de negocio e interfaces de usuario
+* facilidad de mantenimiento
+* posibilidad de incorporar nuevas interfaces en el futuro.
+
+La distribución de la librería permite que el proceso de análisis pueda ejecutarse desde aplicaciones externas sin necesidad de duplicar funcionalidades.
+
+!TODO: referencia cruzada al Anexo A (publicación en PyPI).
+
+### 4.9.2. Aplicación web como caso de uso
+
+Con el objetivo de validar la reutilización de la arquitectura desarrollada, se implementó una aplicación web que utiliza EVMAudit como motor de análisis.
+
+La aplicación no implementa mecanismos propios de detección de vulnerabilidades, sino que delega completamente las tareas de análisis en la librería desarrollada.
+
+Esta aproximación permite mantener una única implementación del proceso de análisis y garantiza la consistencia de los resultados obtenidos.
+
+La aplicación actúa, por tanto, como una capa de presentación encargada de:
+
+* recibir contratos inteligentes proporcionados por el usuario
+* invocar las funciones de EVMAudit
+* mostrar el progreso del análisis
+* presentar los resultados obtenidos.
+
+De esta forma, la aplicación web constituye una demostración práctica de la reutilización de la solución desarrollada.
+
+### 4.9.3. Flujo de funcionamiento de la aplicación
+
+La aplicación desarrollada permite dos mecanismos de entrada:
+
+* carga de contratos Solidity mediante fichero
+* introducción directa del código fuente a través de la interfaz web.
+
+Una vez recibido el contrato, la aplicación inicia el proceso de análisis y ejecuta internamente el pipeline implementado por EVMAudit.
+
+Las distintas fases del proceso se ejecutan de forma secuencial:
+
+1. ejecución de Slither
+2. ejecución de Mythril
+3. normalización de resultados
+4. correlación de vulnerabilidades
+5. generación de propiedades
+6. ejecución de Echidna
+7. generación del informe final.
+
+Durante la ejecución, la aplicación informa al usuario del progreso alcanzado y permite recuperar el informe una vez finalizado el análisis.
+
+Este comportamiento demuestra que la arquitectura modular adoptada permite integrar EVMAudit en aplicaciones externas sin modificar la lógica interna del sistema.
+
+!TODO: insertar diagrama simplificado de la aplicación web.
+
+!TODO: insertar captura de pantalla de la interfaz.
+
+!TODO: referencia cruzada al Anexo B (aplicación web).
+
+### 4.9.4. Separación entre presentación y lógica de análisis
+
+La decisión de implementar EVMAudit como una librería independiente permite mantener separadas las responsabilidades del sistema.
+
+Mientras que la librería se encarga de:
+
+* ejecutar herramientas externas
+* procesar resultados
+* correlacionar vulnerabilidades
+* generar informes
+
+la aplicación web únicamente proporciona los mecanismos de interacción con el usuario.
+
+Esta separación favorece:
+
+* la mantenibilidad del sistema
+* la reutilización de la solución
+* la incorporación de nuevas interfaces
+* la evolución independiente de cada componente.
+
+En consecuencia, la aplicación web debe entenderse como una demostración de la capacidad de integración de EVMAudit y no como la contribución principal del trabajo.
+
+### 4.9.5. Consideraciones sobre infraestructura
+
+Los aspectos relacionados con la publicación de la librería, el despliegue de la aplicación y la infraestructura utilizada no constituyen el núcleo de la contribución desarrollada en este Trabajo Fin de Máster.
+
+Por este motivo, dichos elementos se incluyen en los anexos del documento.
+
+!TODO: referencia cruzada al Anexo A (PyPI).
+
+!TODO: referencia cruzada al Anexo B (Aplicación web).
+
+!TODO: referencia cruzada al Anexo C (Docker).
+
+!TODO: referencia cruzada al Anexo D (Despliegue).
+
+# 5. Conclusiones y trabajo futuro
 
 ## 5.1 Conclusiones
 
@@ -1009,9 +1889,9 @@ Este capítulo permitirá determinar el grado de efectividad de la solución pro
 
 [23]     “ConsenSysDiligence/mythril: Mythril is a symbolic-execution-based securty analysis tool for EVM bytecode. It detects security vulnerabilities in smart contracts built for Ethereum and other EVM-compatible blockchains.” Accessed: Apr. 14, 2026. [Online]. Available: https://github.com/ConsenSysDiligence/mythril
 
-[24]     B. Mueller, “File 1 of 1 HITB SECCONF Amsterd4m and ConsenSys Dilig3nce bring you XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Smashing Ethereum Smart Contracts for Fun and Real Profit XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX,” 2018.
+[24]     B. Mueller, “File 1 of 1 HITB SECCONF Amsterd4m and ConsenSys Dilig3nce bring you Smashing Ethereum Smart Contracts for Fun and Real Profit” 2018.
 
-[25]     “🛡️ Smart Contract Security Wars: The Ultimate Slither vs Mythril Battle Guide That Saves Your Protocol From Million-Dollar Hacks | by PMartin | CoinsBench.” Accessed: Apr. 14, 2026. [Online]. Available: https://coinsbench.com/%EF%B8%8F-smart-contract-security-wars-the-ultimate-slither-vs-mythril-battle-guide-that-saves-your-837d67c49121
+[25]     “Smart Contract Security Wars: The Ultimate Slither vs Mythril Battle Guide That Saves Your Protocol From Million-Dollar Hacks | by PMartin | CoinsBench.” Accessed: Apr. 14, 2026. [Online]. Available: https://coinsbench.com/%EF%B8%8F-smart-contract-security-wars-the-ultimate-slither-vs-mythril-battle-guide-that-saves-your-837d67c49121
 
 [26]     T. Durieux, J. F. Ferreira, R. Abreu, and P. Cruz, “Empirical Review of Automated Analysis Tools on 47,587 Ethereum Smart Contracts,” _Proceedings - International Conference on Software Engineering_, pp. 530–541, Feb. 2020, doi: 10.1145/3377811.3380364.
 
@@ -1051,15 +1931,15 @@ Este capítulo permitirá determinar el grado de efectividad de la solución pro
 
 [44]     “Deep Dive Exploit Analysis: Euler Finance.” Accessed: Apr. 15, 2026. [Online]. Available: https://www.cyfrin.io/blog/how-did-the-euler-finance-hack-happen-hack-analysis
 
-[45]     “Euler Finance Flash Loan Attack Explained.” Accessed: Apr. 15, 2026. [Online]. Available: https://www.chainalysis.com/blog/euler-finance-flash-loan-attack/# Anexo A. Ejemplos de vulnerabilidades en contratos inteligentes
+[45]     “Euler Finance Flash Loan Attack Explained.” Accessed: Apr. 15, 2026. [Online]. Available: https://www.chainalysis.com/blog/euler-finance-flash-loan-attack/# ANEXO A. Ejemplos de vulnerabilidades en contratos inteligentes
 
 Este anexo presenta ejemplos simplificados de vulnerabilidades representativas en contratos inteligentes desarrollados en Solidity. El objetivo es ilustrar de forma práctica los principales tipos de debilidades descritas en la sección 4.4, facilitando su comprensión y su posterior detección mediante herramientas automáticas.
 
 Cada ejemplo incluye: descripción, fragmento de código vulnerable, impacto y estrategia de mitigación.
 
-## A.1. Vulnerabilidades técnicas de ejecución
+## ANEXO A.1. Vulnerabilidades técnicas de ejecución
 
-### A.1.1. Reentrancy
+### ANEXO A.1.1. Reentrancy
 
 La vulnerabilidad de [**reentrancy**](https://www.cyfrin.io/blog/what-is-a-reentrancy-attack-solidity-smart-contracts) se produce cuando un contrato realiza una llamada externa antes de actualizar su estado interno, permitiendo que el contrato receptor reingrese en la función original en un estado inconsistente.
 
@@ -1089,20 +1969,17 @@ contract VulnerableBank {
 
 }
 ```
-·      **Impacto**: Un atacante puede drenar fondos repitiendo la llamada antes de que el balance sea actualizado.
 
-·      Mitigación:
-
-o   Patrón [_Checks-Effects-Interactions_](https://fravoll.github.io/solidity-patterns/checks_effects_interactions.html)
-
-o   Uso de ReentrancyGuard
-
-o   Actualizar el estado antes de llamadas externas
+- **Impacto**: Un atacante puede drenar fondos repitiendo la llamada antes de que el balance sea actualizado.
+- Mitigación:
+	- Patrón [_Checks-Effects-Interactions_](https://fravoll.github.io/solidity-patterns/checks_effects_interactions.html)
+	- Uso de ReentrancyGuard
+	- Actualizar el estado antes de llamadas externas
 
   
-### A.1.2. Integer Overflow / Underflow
+### ANEXO A.1.2. Integer Overflow / Underflow
 
-Errores aritméticos que provocan desbordamientos en operaciones enteras. Aunque mitigados en Solidity ≥0.8, siguen siendo relevantes en bloques unchecked.
+Errores aritméticos que provocan desbordamientos en operaciones enteras. Aunque mitigados en Solidity >= 0.8, siguen siendo relevantes en bloques unchecked.
 
 Código vulnerable
 ```js
@@ -1116,15 +1993,13 @@ function increment(uint256 x) public pure returns (uint256) {
 
 }
 ```
-·      **Impacto**: Puede alterar balances o condiciones lógicas críticas.
 
-·      Mitigación:
+- **Impacto**: Puede alterar balances o condiciones lógicas críticas.
+- Mitigación:
+	- Evitar unchecked salvo casos justificados
+	- Uso de validaciones explícitas
 
-o   Evitar unchecked salvo casos justificados
-
-o   Uso de validaciones explícitas
-
-### A.1.3. Uso inseguro de delegatecall
+### ANEXO A.1.3. Uso inseguro de delegatecall
 
 La función delegatecall ejecuta código externo en el contexto de almacenamiento del contrato llamador.
 
@@ -1144,20 +2019,18 @@ contract Proxy {
 
 }
 ```
-·      **Impacto**: Compromiso total del almacenamiento del contrato.
 
-·      Mitigación:
+- **Impacto**: Compromiso total del almacenamiento del contrato.
+- Mitigación:
+	- Control estricto de la dirección implementation
+	- Uso de patrones proxy auditados ([EIP-1967](https://eips.ethereum.org/EIPS/eip-1967), [UUPS](https://docs.openzeppelin.com/contracts-stylus/uups-proxy))
 
-o   Control estricto de la dirección implementation
-
-o   Uso de patrones proxy auditados ([EIP-1967](https://eips.ethereum.org/EIPS/eip-1967), [UUPS](https://docs.openzeppelin.com/contracts-stylus/uups-proxy))
-
-### A.1.4. Denegación de servicio (DoS)
+### ANEXO A.1.4. Denegación de servicio (DoS)
 
 Bloqueo de ejecución debido a fallos en llamadas externas o estructuras no acotadas.
 
 Código vulnerable
-```
+```js
 function payout(address[] memory recipients) public {
 
     for (uint i = 0; i < recipients.length; i++) {
@@ -1168,22 +2041,19 @@ function payout(address[] memory recipients) public {
 
 }
 ```
-·      **Impacto**: Un solo fallo revierte toda la operación.
+- **Impacto**: Un solo fallo revierte toda la operación.
+- Mitigación
+	- Uso de [patrón _pull over push_](https://medium.com/@markojauregui/the-pull-over-push-model-in-solidity-a-secure-pattern-for-fund-withdrawals-10c2e6628626)
+	- Evitar bucles dependientes de input externo
 
-·      Mitigación
+## ANEXO A.2. Vulnerabilidades técnicas de control y privilegios
 
-o   Uso de [patrón _pull over push_](https://medium.com/@markojauregui/the-pull-over-push-model-in-solidity-a-secure-pattern-for-fund-withdrawals-10c2e6628626)
-
-o   Evitar bucles dependientes de input externo
-
-## A.2. Vulnerabilidades técnicas de control y privilegios
-
-### A.2.1. Falta de control de acceso
+### ANEXO A.2.1. Falta de control de acceso
 
 Funciones críticas accesibles por cualquier usuario.
 
 Código vulnerable
-```
+```js
 contract Ownable {
 
     address public owner;
@@ -1196,20 +2066,18 @@ contract Ownable {
 
 }
 ```
-·      **Impacto**: Pérdida total de fondos.
 
-·      Mitigación:
+- **Impacto**: Pérdida total de fondos.
+- Mitigación:
+	- Uso de onlyOwner
+	- Librerías como [OpenZeppelin AccessControl](https://docs.openzeppelin.com/contracts/5.x/access-control)
 
-o   Uso de onlyOwner
-
-o   Librerías como [OpenZeppelin AccessControl](https://docs.openzeppelin.com/contracts/5.x/access-control)
-
-### A.2.2. Uso de tx.origin
+### ANEXO A.2.2. Uso de tx.origin
 
 Uso incorrecto de tx.origin para autenticación.
 
 Código vulnerable
-```
+```js
 function withdraw() public {
 
     require(tx.origin == owner);
@@ -1218,38 +2086,34 @@ function withdraw() public {
 
 }
 ```
-·      **Impacto**: Ataques mediante contratos intermediarios.
+- **Impacto**: Ataques mediante contratos intermediarios.
+- **Mitigación**: Usar msg.sender para autenticación
 
-·      **Mitigación**: Usar msg.sender para autenticación
-
-### A.2.3. Inicialización insegura (contratos upgradeables)
+### ANEXO A.2.3. Inicialización insegura (contratos upgradeables)
 
 En contratos upgradeables, la inicialización se realiza mediante funciones externas (initialize) en lugar de constructores. Si no están protegidas, cualquier usuario puede ejecutarlas y asumir el control del contrato.
 
 Código vulnerable
-```
+```js
 function initialize(address _owner) public {
 
     owner = _owner;
 
 }
 ```
-·      **Impacto**: Un atacante puede inicializar el contrato antes que el legítimo propietario.
+- **Impacto**: Un atacante puede inicializar el contrato antes que el legítimo propietario.
+- Mitigación:
+	- Uso de [initializer (OpenZeppelin)](https://docs.openzeppelin.com/upgrades-plugins/writing-upgradeable)
+	- Bloqueo de inicialización tras ejecución
 
-·      Mitigación:
+## ANEXO A.3. Vulnerabilidades económicas y del entorno
 
-o   Uso de [initializer (OpenZeppelin)](https://docs.openzeppelin.com/upgrades-plugins/writing-upgradeable)
+### ANEXO A.3.1. Front-running / MEV
 
-o   Bloqueo de inicialización tras ejecución
-
-A.3. Vulnerabilidades económicas y del entorno
-
-### A.3.1. Front-running / MEV
-
-Un atacante observa la mempool y ejecuta transacciones antes que la víctima.
+Un atacante observa la mempool y ejecuta transacciones antes que la víctimANEXO A.
 
 Código vulnerable
-```
+```js
 function buy(uint price) public {
 
     require(price == currentPrice);
@@ -1258,22 +2122,18 @@ function buy(uint price) public {
 
 }
 ```
-·      **Impacto**: Manipulación de operaciones (arbitraje, liquidaciones, subastas).
+- **Impacto**: Manipulación de operaciones (arbitraje, liquidaciones, subastas).
+- Mitigación:
+	- [_Commit-reveal_](https://medium.com/coinmonks/commit-reveal-scheme-in-solidity-c06eba4091bb)
+	- Subastas ciegas
+	- Uso de _relayers_ privados
 
-·      Mitigación:
-
-o   [_Commit-reveal_](https://medium.com/coinmonks/commit-reveal-scheme-in-solidity-c06eba4091bb)
-
-o   Subastas ciegas
-
-o   Uso de _relayers_ privados
-
-A.3.2. Dependencia de oráculos
+### ANEXO A.3.2. Dependencia de oráculos
 
 Uso de datos externos manipulables.
 
 Código vulnerable
-```
+```js
 function getPrice() public view returns (uint) {
 
     return externalOracle.price();
@@ -1281,42 +2141,36 @@ function getPrice() public view returns (uint) {
 }
 ```
 
-·      **Impacto**: Manipulación de precios en DeFi.
+- **Impacto**: Manipulación de precios en DeFi.
+- Mitigación:
+	- Oráculos descentralizados (ej. [Chainlink](https://chain.link/))
+	- Promedios temporales ([TWAP](https://www.binance.com/es-MX/support/faq/detail/80655cc54d8a4b2bb8ea097001844fd1))
 
-·      Mitigación:
-
-o   Oráculos descentralizados (ej. [Chainlink](https://chain.link/))
-
-o   Promedios temporales ([TWAP](https://www.binance.com/es-MX/support/faq/detail/80655cc54d8a4b2bb8ea097001844fd1))
-
-### A.3.3. Uso de block.timestamp
+### ANEXO A.3.3. Uso de block.timestamp
 
 El uso de block.timestamp como fuente de aleatoriedad o para decisiones críticas es inseguro, ya que su valor puede ser parcialmente manipulado por mineros o validadores dentro de ciertos límites.
 
 Código vulnerable
-```
+```js
 function random() public view returns (uint) {
 
     return uint(keccak256(abi.encodePacked(block.timestamp)));
 
 }
 ```
-·      **Impacto**: Resultados predecibles o manipulables por mineros/validadores.
+- **Impacto**: Resultados predecibles o manipulables por mineros/validadores.
+- Mitigación:
+	- VRF ([Verifiable Random Functions](https://chain.link/education-hub/verifiable-random-function-vrf))
+	- Fuentes externas verificables
 
-·      Mitigación:
+## ANEXO A.4. Errores lógicos de negocio
 
-o   VRF ([Verifiable Random Functions](https://chain.link/education-hub/verifiable-random-function-vrf))
-
-o   Fuentes externas verificables
-
-## A.4. Errores lógicos de negocio
-
-### A.4.1. Error en cálculo de balances
+### ANEXO A.4.1. Error en cálculo de balances
 
 Errores en operadores lógicos o condiciones de validación pueden provocar inconsistencias en la gestión de balances, especialmente en casos límite donde las condiciones no cubren todos los escenarios posibles.
 
 Código vulnerable
-```
+```js
 function withdraw(uint amount) public {
 
     require(balances[msg.sender] > amount);
@@ -1325,18 +2179,16 @@ function withdraw(uint amount) public {
 
 }
 ```
-·      **Impacto**: Comportamiento incorrecto en condiciones límite.
+- **Impacto**: Comportamiento incorrecto en condiciones límite.
+- Mitigación:
+	- Uso de > en lugar de >=.
 
-·      Mitigación:
-
-o   Uso de > en lugar de >=.
-
-### A.4.2. Distribución incorrecta de recompensas
+### ANEXO A.4.2. Distribución incorrecta de recompensas
 
 La lógica de distribución puede introducir errores debido a divisiones enteras o falta de gestión de restos, provocando pérdida de precisión y fondos no asignados correctamente.
 
 Código vulnerable
-```
+```js
 function distribute() public {
 
     uint reward = total / users.length;
@@ -1349,32 +2201,24 @@ function distribute() public {
 
 }
 ```
-·      Impacto:
+- Impacto:
+	- Pérdida de fondos debido a errores de redondeo (truncamiento en división entera)
+	- Acumulación de saldo no distribuido en el contrato
+	- Distribuciones injustas entre usuarios
+	- Posibles vectores de explotación si un atacante manipula el número de participantes
 
-o   Pérdida de fondos debido a errores de redondeo (truncamiento en división entera)
+- Mitigación:
+	- Uso de patrones de distribución que gestionen residuos (por ejemplo, acumuladores o “_remainder handling_”)
+	- Empleo de mayor precisión mediante escalado ([_fixed-point arithmetic_](https://rareskills.io/post/solidity-fixed-point))
+	- Validación de invariantes económicas (la suma distribuida debe coincidir con el total)
+	- Testing específico de casos límite (número de usuarios, valores pequeños, etc.)
 
-o   Acumulación de saldo no distribuido en el contrato
-
-o   Distribuciones injustas entre usuarios
-
-o   Posibles vectores de explotación si un atacante manipula el número de participantes
-
-·      Mitigación:
-
-o   Uso de patrones de distribución que gestionen residuos (por ejemplo, acumuladores o “_remainder handling_”)
-
-o   Empleo de mayor precisión mediante escalado ([_fixed-point arithmetic_](https://rareskills.io/post/solidity-fixed-point))
-
-o   Validación de invariantes económicas (la suma distribuida debe coincidir con el total)
-
-o   Testing específico de casos límite (número de usuarios, valores pequeños, etc.)
-
-### A.4.3. Estados inconsistentes
+### ANEXO A.4.3. Estados inconsistentes
 
 La falta de control adecuado sobre las transiciones de estado puede permitir la ejecución de funciones en condiciones no válidas, generando comportamientos inconsistentes en el contrato.
 
 Código vulnerable
-```
+```js
 enum State { Open, Closed }
 
 State public state;
@@ -1391,83 +2235,108 @@ function bid() public payable {
 
 }
 ```
-·      Impacto:
+- Impacto:
+	- Ejecución de funciones en estados no válidos
+	- Comportamiento inesperado del contrato
+	- Bloqueo o bypass de lógica de negocio
+	- Posible explotación combinada con otras vulnerabilidades (por ejemplo, _front-running_ o _reentrancy_
+- Mitigación:
+	- Implementación de máquinas de estados explícitas y completas
+	- Uso de modificadores para validar estado (inState(State.Open))
+	- Restricción de transiciones de estado válidas
+	- Aplicación de patrones [_state machines_](https://fravoll.github.io/solidity-patterns/state_machine.html)
 
-o   Ejecución de funciones en estados no válidos
+## ANEXO A.5. Resumen de vulnerabilidades
 
-o   Comportamiento inesperado del contrato
+| **_ID_** | **Categoría** | **Vulnerabilidad**    | **Tipo**            | **Impacto** | **Detectable automáticamente** | **Ejemplo sección** |
+| -------- | ------------- | --------------------- | ------------------- | ----------- | ------------------------------ | ------------------- |
+| _V1_     | Técnica       | Reentrancy            | Ejecución           | Crítico     | Sí (Slither/Mythril)           | ANEXO A.1.1               |
+| _V2_     | Técnica       | Overflow              | Aritmético          | Medio       | Sí (Slither)                   | ANEXO A.1.2               |
+| _V3_     | Técnica       | Delegatecall          | Ejecución           | Crítico     | Parcial                        | ANEXO A.1.3               |
+| _V4_     | Control       | Acceso no restringido | Autorización        | Crítico     | Sí                             | ANEXO A.2.1               |
+| _V5_     | Control       | tx.origin             | Autenticación       | Alto        | Sí                             | ANEXO A.2.2               |
+| _V6_     | Económica     | Front-running         | MEV                 | Alto        | No                             | ANEXO A.3.1               |
+| _V7_     | Económica     | Oráculos              | Dependencia externa | Crítico     | No                             | ANEXO A.3.2               |
+| _V8_     | Lógica        | Error de balance      | Lógica              | Variable    | No                             | ANEXO A.4.1               |# ANEXO B. Entorno virtual Python
 
-o   Bloqueo o bypass de lógica de negocio
-
-o   Posible explotación combinada con otras vulnerabilidades (por ejemplo, _front-running_ o _reentrancy_
-
-·      Mitigación:
-
-o   Implementación de máquinas de estados explícitas y completas
-
-o   Uso de modificadores para validar estado (inState(State.Open))
-
-o   Restricción de transiciones de estado válidas
-
-o   Aplicación de patrones [_state machines_](https://fravoll.github.io/solidity-patterns/state_machine.html)
-
-## A.5. Resumen de vulnerabilidades
-
-|   |   |   |   |   |   |   |
-|---|---|---|---|---|---|---|
-|**_ID_**|**Categoría**|**Vulnerabilidad**|**Tipo**|**Impacto**|**Detectable automáticamente**|**Ejemplo sección**|
-|_V1_|Técnica|Reentrancy|Ejecución|Crítico|Sí (Slither/Mythril)|A.1.1|
-|_V2_|Técnica|Overflow|Aritmético|Medio|Sí (Slither)|A.1.2|
-|_V3_|Técnica|Delegatecall|Ejecución|Crítico|Parcial|A.1.3|
-|_V4_|Control|Acceso no restringido|Autorización|Crítico|Sí|A.2.1|
-|_V5_|Control|tx.origin|Autenticación|Alto|Sí|A.2.2|
-|_V6_|Económica|Front-running|MEV|Alto|No|A.3.1|
-|_V7_|Económica|Oráculos|Dependencia externa|Crítico|No|A.3.2|
-|_V8_|Lógica|Error de balance|Lógica|Variable|No|A.4.1|# ANEXO B. Entorno virtual Python
 El desarrollo de una librería Python destinada a integrar múltiples herramientas de análisis de seguridad plantea, desde el inicio, un problema de gestión de dependencias que no debe subestimarse. Las herramientas que se integran en la solución propuesta, como Slither, Mythril o Echidna, tienen requisitos de versión específicos y en ocasiones incompatibles entre sí cuando se instalan en el entorno global del sistema. Esta situación, conocida en el ecosistema Python como dependency hell, puede provocar conflictos silenciosos difíciles de depurar y comprometer la reproducibilidad del entorno de desarrollo.
+
 Un entorno virtual (virtual environment) es un directorio aislado que contiene una instalación independiente del intérprete Python junto con sus propios paquetes y dependencias, sin interferir con el sistema global ni con otros proyectos. Esta separación proporciona varias ventajas fundamentales en el contexto del presente trabajo:
-En primer lugar, garantiza el aislamiento de dependencias, de forma que cada proyecto mantiene sus propias versiones de bibliotecas sin afectar al resto del sistema. Esto resulta especialmente relevante cuando diferentes herramientas de análisis requieren versiones distintas de una misma dependencia transitiva.
-En segundo lugar, favorece la reproducibilidad del entorno de desarrollo. Todos los integrantes del equipo pueden trabajar exactamente con las mismas versiones de todas las dependencias, eliminando la variabilidad asociada a instalaciones manuales y garantizando que los resultados obtenidos durante el desarrollo son consistentes independientemente del sistema operativo o configuración personal de cada desarrollador.
-En tercer lugar, facilita el ciclo de vida del proyecto al delimitar claramente qué paquetes pertenecen al proyecto y cuáles son del sistema, simplificando tanto la distribución de la librería como su posterior publicación en registros públicos como PyPI.
+
+En primer lugar, garantiza el **aislamiento de dependencias**, de forma que cada proyecto mantiene sus propias versiones de bibliotecas sin afectar al resto del sistema. Esto resulta especialmente relevante cuando diferentes herramientas de análisis requieren versiones distintas de una misma dependencia transitiva.
+
+En segundo lugar, favorece la **reproducibilidad del entorno de desarrollo**. Todos los integrantes del equipo pueden trabajar exactamente con las mismas versiones de todas las dependencias, eliminando la variabilidad asociada a instalaciones manuales y garantizando que los resultados obtenidos durante el desarrollo son consistentes independientemente del sistema operativo o configuración personal de cada desarrollador.
+
+En tercer lugar, facilita el **ciclo de vida** del proyecto al delimitar claramente qué paquetes pertenecen al proyecto y cuáles son del sistema, simplificando tanto la distribución de la librería como su posterior publicación en registros públicos como PyPI.
 
 ## ANEXO B.1. Tipos de entornos virtuales
+
 En el ecosistema Python existen varias alternativas para la gestión de entornos virtuales, con distintos niveles de abstracción y funcionalidad.
-El módulo estándar venv, incluido en la biblioteca estándar desde Python 3.3, permite crear entornos virtuales básicos mediante el comando python -m venv .venv. Sin embargo, este enfoque no incluye gestión de dependencias ni ficheros de bloqueo (lockfiles), por lo que debe complementarse con herramientas adicionales como pip y pip-tools.
-virtualenv es una alternativa anterior al módulo estándar, con mayor compatibilidad con versiones antiguas de Python y algunas funcionalidades adicionales, aunque en la práctica ha quedado desplazada por las herramientas modernas.
-conda ofrece un modelo más completo que combina gestión de entornos con gestión de paquetes, incluyendo dependencias no Python. Es habitual en entornos científicos y de análisis de datos, pero introduce una complejidad y un tamaño innecesarios para un proyecto centrado en el ecosistema Python puro.
-Herramientas como poetry o pipenv representan un nivel superior de abstracción, combinando la gestión de entornos virtuales con la resolución de dependencias, la generación de ficheros de bloqueo y el ciclo de publicación de paquetes. Su adopción en proyectos profesionales se ha generalizado en los últimos años.
-Finalmente, uv constituye la herramienta de última generación en este espacio, combinando todas las funcionalidades anteriores en una solución de rendimiento muy superior, como se detalla en la sección siguiente.
+
+El módulo estándar `venv`, incluido en la biblioteca estándar desde Python 3.3, permite crear entornos virtuales básicos mediante el comando `python -m venv .venv`. Sin embargo, este enfoque no incluye gestión de dependencias ni ficheros de bloqueo (*lockfiles*), por lo que debe complementarse con herramientas adicionales como `pip` y `pip-tools`.
+
+`virtualenv` es una alternativa anterior al módulo estándar, con mayor compatibilidad con versiones antiguas de Python y algunas funcionalidades adicionales, aunque en la práctica ha quedado desplazada por las herramientas modernas.
+
+`conda` ofrece un modelo más completo que combina gestión de entornos con gestión de paquetes, incluyendo dependencias no Python. Es habitual en entornos científicos y de análisis de datos, pero introduce una complejidad y un tamaño innecesarios para un proyecto centrado en el ecosistema Python puro.
+
+Herramientas como `poetry` o `pipenv` representan un nivel superior de abstracción, combinando la gestión de entornos virtuales con la resolución de dependencias, la generación de ficheros de bloqueo y el ciclo de publicación de paquetes. Su adopción en proyectos profesionales se ha generalizado en los últimos años.
+
+Finalmente, `uv` constituye la herramienta de última generación en este espacio, combinando todas las funcionalidades anteriores en una solución de rendimiento muy superior, como se detalla en la sección siguiente.
 
 ## ANEXO B.2. Herramienta a usar: uv
-uv es un gestor de paquetes y proyectos Python de alto rendimiento desarrollado por Astral, la empresa creadora del formateador Ruff. Implementado en Rust, se presenta como una herramienta unificada capaz de sustituir a pip, pip-tools, pipx, poetry, pyenv, twine y virtualenv mediante una interfaz de línea de comandos coherente. Su desarrollo se orienta tanto a la velocidad de ejecución como a la corrección en la resolución de dependencias y a la facilidad de adopción en proyectos de diferente escala y complejidad.
+
+`uv` es un gestor de paquetes y proyectos Python de alto rendimiento desarrollado por Astral, la empresa creadora del formateador Ruff. Implementado en Rust, se presenta como una herramienta unificada capaz de sustituir a `pip`, `pip-tools`, `pipx`, `poetry`, `pyenv`, `twine` y `virtualenv` mediante una interfaz de línea de comandos coherente. Su desarrollo se orienta tanto a la velocidad de ejecución como a la corrección en la resolución de dependencias y a la facilidad de adopción en proyectos de diferente escala y complejidad.
 
 ### ANEXO B.2.1. Ventajas de uv
-La principal ventaja diferencial de uv respecto a las alternativas existentes es su rendimiento. Según los propios benchmarks publicados en su documentación oficial, uv es entre 10 y 100 veces más rápido que pip en operaciones de instalación de paquetes con caché caliente. Esta diferencia resulta perceptible en la práctica, especialmente durante las fases de incorporación de nuevos integrantes al equipo o en entornos de integración continua donde el entorno debe reconstruirse frecuentemente.
-Más allá del rendimiento, uv ofrece un conjunto de ventajas relevantes para el desarrollo de la librería propuesta en este trabajo. Gestiona automáticamente los entornos virtuales asociados a cada proyecto, sin necesidad de crearlos ni activarlos manualmente. Genera y mantiene un fichero de bloqueo universal (uv.lock) que garantiza instalaciones reproducibles en cualquier plataforma. Permite gestionar múltiples versiones del intérprete Python e instalar la versión adecuada de forma automática si no está disponible en el sistema. Además, su diseño es compatible con los estándares del ecosistema Python (pyproject.toml, PEP 517, PEP 621), lo que facilita la integración con otras herramientas y la publicación en registros de paquetes.
+
+La principal ventaja diferencial de `uv` respecto a las alternativas existentes es su rendimiento. Según los propios *benchmarks* publicados en su documentación oficial, `uv` es entre 10 y 100 veces más rápido que `pip` en operaciones de instalación de paquetes con caché caliente. Esta diferencia resulta perceptible en la práctica, especialmente durante las fases de incorporación de nuevos integrantes al equipo o en entornos de integración continua donde el entorno debe reconstruirse frecuentemente.
+
+Más allá del rendimiento, `uv` ofrece un conjunto de ventajas relevantes para el desarrollo de la librería propuesta en este trabajo. Gestiona automáticamente los entornos virtuales asociados a cada proyecto, sin necesidad de crearlos ni activarlos manualmente. Genera y mantiene un fichero de bloqueo universal (`uv.lock`) que garantiza instalaciones reproducibles en cualquier plataforma. Permite gestionar múltiples versiones del intérprete Python e instalar la versión adecuada de forma automática si no está disponible en el sistema. Además, su diseño es compatible con los estándares del ecosistema Python (`pyproject.toml`, PEP 517, PEP 621), lo que facilita la integración con otras herramientas y la publicación en registros de paquetes.
 
 ### ANEXO B.2.2. Qué proporciona uv en el contexto de este proyecto
+
 Para el desarrollo de la librería propuesta, uv proporciona un conjunto de funcionalidades que cubren todo el ciclo de vida del proyecto, desde la inicialización hasta la publicación.
-Gestión de dependencias y sincronización del entorno. Una vez definidas las dependencias del proyecto en el fichero pyproject.toml, cualquier integrante del equipo puede reproducir exactamente el mismo entorno ejecutando un único comando:
+
+**Gestión de dependencias y sincronización del entorno.** Una vez definidas las dependencias del proyecto en el fichero `pyproject.toml`, cualquier integrante del equipo puede reproducir exactamente el mismo entorno ejecutando un único comando:
+```bash
 uv sync
-Este comando resuelve las dependencias declaradas, instala las versiones exactas registradas en el fichero de bloqueo uv.lock y configura el entorno virtual del proyecto de forma automática. La simplicidad de este flujo elimina los problemas habituales de divergencia entre entornos de desarrollo individuales, garantizando que todos los miembros del equipo trabajan con las mismas versiones de Slither, Mythril, Echidna y el resto de dependencias de la librería.
+```
 
-Inicialización de proyectos. uv proporciona soporte integrado para la creación de nuevos proyectos mediante el comando uv init. Para el caso específico de una librería Python destinada a ser importada por otros proyectos o publicada en PyPI, se utiliza la opción --lib:
+Este comando resuelve las dependencias declaradas, instala las versiones exactas registradas en el fichero de bloqueo `uv.lock` y configura el entorno virtual del proyecto de forma automática. La simplicidad de este flujo elimina los problemas habituales de divergencia entre entornos de desarrollo individuales, garantizando que todos los miembros del equipo trabajan con las mismas versiones de Slither, Mythril, Echidna y el resto de dependencias de la librería.
+
+**Inicialización de proyectos.** `uv` proporciona soporte integrado para la creación de nuevos proyectos mediante el comando `uv init`. Para el caso específico de una librería Python destinada a ser importada por otros proyectos o publicada en PyPI, se utiliza la opción `--lib`:
+```bash
 uv init --lib evmaudit
-Este comando genera automáticamente la estructura de directorios recomendada para una librería Python, incluyendo el fichero pyproject.toml con los metadatos del proyecto, el directorio src/ con el paquete principal y los ficheros de configuración necesarios para la construcción y distribución. El uso de la disposición src/ (src layout) es la práctica recomendada actualmente para proyectos publicables, ya que evita problemas habituales relacionados con la importación del paquete desde el directorio raíz durante el desarrollo.
+```
 
-Construcción de distribuciones. uv integra soporte nativo para la generación de distribuciones instalables mediante el comando uv build, que produce tanto el archivo fuente (sdist) como la rueda binaria (wheel) del paquete:
+Este comando genera automáticamente la estructura de directorios recomendada para una librería Python, incluyendo el fichero `pyproject.toml` con los metadatos del proyecto, el directorio `src/` con el paquete principal y los ficheros de configuración necesarios para la construcción y distribución. El uso de la disposición `src/` (*src layout*) es la práctica recomendada actualmente para proyectos publicables, ya que evita problemas habituales relacionados con la importación del paquete desde el directorio raíz durante el desarrollo.
+
+**Construcción de distribuciones.** `uv` integra soporte nativo para la generación de distribuciones instalables mediante el comando `uv build`, que produce tanto el archivo fuente (*sdist*) como la rueda binaria (*wheel*) del paquete:
+
+```bash
 uv build
-El resultado son los artefactos estándar de distribución Python ubicados en el directorio dist/, listos para ser publicados o distribuidos directamente.
-Publicación de paquetes. El ciclo se completa con el soporte para publicación en registros de paquetes, incluyendo PyPI, mediante el comando uv publish:
+```
+
+El resultado son los artefactos estándar de distribución Python ubicados en el directorio `dist/`, listos para ser publicados o distribuidos directamente.
+
+**Publicación de paquetes.** El ciclo se completa con el soporte para publicación en registros de paquetes, incluyendo PyPI, mediante el comando `uv publish`:
+```bash
 uv publish
-Este comando gestiona la autenticación y la subida de los artefactos generados, cubriendo el flujo completo que anteriormente requería herramientas adicionales como twine.
-En conjunto, uv unifica en una sola herramienta todo el ciclo de vida del proyecto: inicialización, gestión de dependencias, sincronización del entorno, construcción de distribuciones y publicación. Esta integración reduce la fricción en el desarrollo colaborativo y facilita la adopción de prácticas profesionales de gestión de proyectos Python desde las primeras fases del trabajo.
- 
+```
+
+Este comando gestiona la autenticación y la subida de los artefactos generados, cubriendo el flujo completo que anteriormente requería herramientas adicionales como `twine`.
+
+En conjunto, `uv` unifica en una sola herramienta todo el ciclo de vida del proyecto: inicialización, gestión de dependencias, sincronización del entorno, construcción de distribuciones y publicación. Esta integración reduce la fricción en el desarrollo colaborativo y facilita la adopción de prácticas profesionales de gestión de proyectos Python desde las primeras fases del trabajo.
 # ANEXO C.	DISTRIBUCIÓN Y PUBLICACIÓN EN EL REGISTRO DE PAQUETES PYPI
-El ciclo de desarrollo de la librería propuesta culmina con su fase de distribución, permitiendo que las herramientas de análisis de seguridad implementadas sean accesibles e integrables por la comunidad de desarrollo y auditoría de smart contracts. Para asegurar una distribución estandarizada y eficiente dentro del ecosistema Python, se ha seleccionado el índice oficial de paquetes PyPI (Python Package Index). La gestión de este proceso se unifica bajo la herramienta uv, garantizando la consistencia desde la compilación de los artefactos hasta su publicación definitiva.
-5.2.4. Configuración de Metadatos del Proyecto (pyproject.toml)
-El paso previo indispensable para la distribución consiste en la definición inequívoca de los metadatos y la especificación del sistema de construcción (build system) en el archivo de configuración pyproject.toml, ubicado en la raíz del paquete. Este procedimiento se rige bajo los estándares modernos de empaquetado de Python (PEP 517 y PEP 621).
-Para este proyecto, se ha adoptado hatchling como build backend, debido a su ligereza, velocidad y compatibilidad nativa con las especificaciones del ecosistema actual. A continuación, se presenta la estructura de configuración requerida para delimitar las propiedades de la librería evmaudit:
+
+El ciclo de desarrollo de la librería propuesta culmina con su fase de distribución, permitiendo que las herramientas de análisis de seguridad implementadas sean accesibles e integrables por la comunidad de desarrollo y auditoría de *smart contracts*. Para asegurar una distribución estandarizada y eficiente dentro del ecosistema Python, se ha seleccionado el índice oficial de paquetes PyPI (*Python Package Index*). La gestión de este proceso se unifica bajo la herramienta `uv`, garantizando la consistencia desde la compilación de los artefactos hasta su publicación definitiva.
+## ANEXO C.1. Configuración de Metadatos del Proyecto (pyproject.toml)
+
+El paso previo indispensable para la distribución consiste en la definición inequívoca de los metadatos y la especificación del sistema de construcción (*build system*) en el archivo de configuración `pyproject.toml`, ubicado en la raíz del paquete. Este procedimiento se rige bajo los estándares modernos de empaquetado de Python (PEP 517 y PEP 621).
+
+Para este proyecto, se ha adoptado `hatchling` como *build backend*, debido a su ligereza, velocidad y compatibilidad nativa con las especificaciones del ecosistema actual. A continuación, se presenta la estructura de configuración requerida para delimitar las propiedades de la librería `evmaudit`:
+
+```toml
 [project]
 name = "evmaudit"
 version = "0.1.0"
@@ -1492,114 +2361,208 @@ evmaudit = "evmaudit.main:main"
 [build-system]
 requires = ["uv_build>=0.11.15,<0.12.0"]
 build-backend = "uv_build"
-Los clasificadores (classifiers) incluidos permiten categorizar la librería dentro del índice público, facilitando su indexación en función de la licencia de código abierto seleccionada, la compatibilidad del sistema operativo y las versiones soportadas del intérprete Python.
-5.2.5. Proceso de Compilación del Paquete
-Una vez validados los metadatos, se procede a la generación de los archivos de distribución. Este proceso transforma el código fuente estructurado en el directorio src/ en artefactos instalables e independientes del entorno de desarrollo.
+```
+
+Los clasificadores (*classifiers*) incluidos permiten categorizar la librería dentro del índice público, facilitando su indexación en función de la licencia de código abierto seleccionada, la compatibilidad del sistema operativo y las versiones soportadas del intérprete Python.
+
+## ANEXO C.2. Proceso de Compilación del Paquete
+Una vez validados los metadatos, se procede a la generación de los archivos de distribución. Este proceso transforma el código fuente estructurado en el directorio `src/` en artefactos instalables e independientes del entorno de desarrollo.
+
 La ejecución del comando unificado de compilación abstrae la complejidad de las herramientas tradicionales:
+
+```bash
 uv build
-Este comando genera de forma nativa dos tipos de distribuciones estándar dentro del directorio dist/:
-•	Distribución de código fuente (sdist o .tar.gz): Un archivo comprimido que contiene el código fuente original y los archivos de configuración, actuando como respaldo para plataformas o configuraciones no previstas.
-•	Distribución binaria compilada (wheel o .whl): El formato de empaquetado moderno que permite una instalación directa y optimizada en el sistema destino, evitando la necesidad de compilar el código en la máquina del usuario final.
-En contextos de desarrollo complejos donde el paquete forma parte de un repositorio principal o arquitectura de workspace (como el entorno de trabajo TFM-UNIR), uv permite gestionar la compilación de manera localizada. Para forzar la construcción exclusiva del subproyecto desde su propio directorio y evitar colisiones en la raíz global, se aplica la opción de empaquetado específico:
-uv build --package evmaudit
-5.2.6. Seguridad y Autenticación en la Publicación
-La publicación de código en repositorios públicos exige mecanismos estrictos de control de acceso para prevenir vectores de ataque basados en la cadena de suministro (supply chain attacks). Por razones de seguridad, se desestima el uso de contraseñas de usuario tradicionales en favor de la autenticación basada en Tokens de API.
-El proceso de despliegue requiere la obtención de un token con prefijo pypi- generado desde el panel de control de PyPI. En la primera interacción, el alcance del token se configura de manera global; no obstante, una vez realizada la primera subida con éxito, la buena práctica metodológica dicta restringir los permisos del token de manera exclusiva al ámbito del paquete evmaudit, minimizando así la superficie de exposición en caso de compromiso de la credencial. 
-5.2.7. Ejecución del Despliegue
-Con los artefactos ubicados en el directorio dist/ y las credenciales expedidas, se procede a la transferencia segura hacia los servidores de PyPI. El comando uv publish automatiza la verificación de integridad mediante hashes criptográficos y realiza la subida en un único paso:
+```
+
+Este comando genera de forma nativa dos tipos de distribuciones estándar dentro del directorio `dist/`:
+
+- **Distribución de código fuente (*sdist* o** `.tar.gz`**):** Un archivo comprimido que contiene el código fuente original y los archivos de configuración, actuando como respaldo para plataformas o configuraciones no previstas.
+- **Distribución binaria compilada (*wheel* o** `.whl`**):** El formato de empaquetado moderno que permite una instalación directa y optimizada en el sistema destino, evitando la necesidad de compilar el código en la máquina del usuario final.
+
+En contextos de desarrollo complejos donde el paquete forma parte de un repositorio principal o arquitectura de *workspace* (como el entorno de trabajo `TFM-UNIR`), `uv` permite gestionar la compilación de manera localizada. Para forzar la construcción exclusiva del subproyecto desde su propio directorio y evitar colisiones en la raíz global, se aplica la opción de empaquetado específico:
+
+```bash
+    uv build --package evmaudit
+```
+
+## ANEXO C.3. Seguridad y Autenticación en la Publicación
+
+La publicación de código en repositorios públicos exige mecanismos estrictos de control de acceso para prevenir vectores de ataque basados en la cadena de suministro (*supply chain attacks*). Por razones de seguridad, se desestima el uso de contraseñas de usuario tradicionales en favor de la autenticación basada en **Tokens de API.**
+
+El proceso de despliegue requiere la obtención de un *token* con prefijo `pypi-` generado desde el panel de control de PyPI. En la primera interacción, el alcance del *token* se configura de manera global; no obstante, una vez realizada la primera subida con éxito, la buena práctica metodológica dicta restringir los permisos del token de manera exclusiva al ámbito del paquete `evmaudit`, minimizando así la superficie de exposición en caso de compromiso de la credencial.
+
+## ANEXO C.4. Ejecución del Despliegue
+
+Con los artefactos ubicados en el directorio `dist/` y las credenciales expedidas, se procede a la transferencia segura hacia los servidores de PyPI. El comando `uv publish` automatiza la verificación de integridad mediante *hashes* criptográficos y realiza la subida en un único paso:
+
+```bash
 uv publish
-Durante el flujo interactivo en la línea de comandos, el sistema requiere la introducción del identificador genérico __token__ en el campo de usuario, seguido de la clave alfanumérica del token de API en el campo de contraseña. Con el objetivo de optimizar este flujo en entornos de Integración Continua (CI/CD) o evitar la inserción manual recurrente, es posible exportar temporalmente la credencial en el entorno de la terminal actual:
+```
+
+Durante el flujo interactivo en la línea de comandos, el sistema requiere la introducción del identificador genérico `__token__` en el campo de usuario, seguido de la clave alfanumérica del token de API en el campo de contraseña. Con el objetivo de optimizar este flujo en entornos de Integración Continua (CI/CD) o evitar la inserción manual recurrente, es posible exportar temporalmente la credencial en el entorno de la terminal actual:
+
+
+```bash
 export UV_PUBLISH_TOKEN="pypi-tu-token-aqui"
 uv publish
+```
+
 Tras la finalización exitosa del proceso, el paquete queda registrado globalmente, permitiendo su incorporación inmediata en otros proyectos mediante los gestores tradicionales del ecosistema:
+```bash
 pip install evmaudit
+```
+
 O bien, aprovechando los beneficios de rendimiento de la herramienta unificada del proyecto:
+```bash
 uv add evmaudit
-5.2.8. Ciclo de Mantenimiento y Actualización de Versiones
+```
+
+## ANEXO C.5. Ciclo de Mantenimiento y Actualización de Versiones
+
 La evolución de la librería para la corrección de vulnerabilidades o la integración de nuevas capacidades de análisis requiere una política estricta de control de versiones. El flujo metodológico establecido para la liberación de actualizaciones iterativas consta de tres fases secuenciales:
-•	Incremento del número de versión: Modificación manual del campo version en el archivo pyproject.toml siguiendo el estándar de Versionado Semántico (ej. de 0.1.0 a 0.1.1).
-•	Saneamiento del directorio de distribución: Eliminación de los artefactos obsoletos del directorio dist/ para mitigar el riesgo de duplicidad o subidas erróneas de versiones previas.
-•	Reconstrucción y despliegue: Ejecución consecutiva de los procesos de empaquetado y transferencia:
+- **Incremento del número de versión:** Modificación manual del campo `version` en el archivo `pyproject.toml` siguiendo el estándar de Versionado Semántico (ej. de `0.1.0` a `0.1.1`).
+- **Saneamiento del directorio de distribución:** Eliminación de los artefactos obsoletos del directorio `dist/` para mitigar el riesgo de duplicidad o subidas erróneas de versiones previas.
+- **Reconstrucción y despliegue:** Ejecución consecutiva de los procesos de empaquetado y transferencia:
+
+```bash
 uv build
 uv publish
+```
+
 Esta sistemática asegura que cada iteración de la herramienta de auditoría de la EVM mantenga la trazabilidad, la coherencia histórica y la disponibilidad pública necesarias para un entorno de producción académica y profesional.
 
  
-# Z3 - Anexo D Docker
-ANEXO D.	CONTENEDORIZACIÓN E INFRAESTRUCTURA DE DESPLIEGUE (DOCKER)
-En el ámbito del desarrollo de software moderno y la ciberseguridad, la reproducibilidad del entorno de ejecución constituye un pilar crítico. Tradicionalmente, el despliegue de aplicaciones que integran múltiples herramientas de análisis (como compiladores de Solidity y motores de ejecución simbólica) se enfrentaba al problema de "funciona en mi máquina", derivado de las discrepancias en las versiones de las dependencias, librerías del sistema operativo y configuraciones locales. Para mitigar este riesgo, el presente proyecto adopta una arquitectura basada en contenedores de aplicación a través del ecosistema de Docker y Docker Compose.
-5.2.11. Fundamentos de Contenedorización: Docker y Docker Compose
-Docker es una plataforma de código abierto basada en la tecnología de contenedorización, la cual permite empaquetar una aplicación y todas sus dependencias (binarios, librerías, archivos de configuración) en una unidad estandarizada denominada contenedor. A diferencia de la virtualización tradicional, Docker opera mediante la virtualización a nivel de sistema operativo, compartiendo el núcleo (kernel) del sistema anfitrión pero ejecutando los procesos en espacios de usuario completamente aislados a través de namespaces y cgroups. Desde la perspectiva de la seguridad, este aislamiento garantiza que los procesos del pipeline de auditoría de EVMAudit se ejecuten de forma confinada, mitigando el impacto en la infraestructura anfitriona ante la eventual ejecución de código arbitrario o inesperado durante el análisis de contratos inteligentes.
-Por su parte, Docker Compose es la herramienta diseñada para definir y orquestar aplicaciones Docker multi-contenedor. Mediante el uso de un archivo de configuración declarativo en formato YAML (docker-compose.yml), permite definir con precisión los servicios que componen el sistema, sus dependencias de arranque, la exposición de puertos hacia el exterior, la creación de redes aisladas y la asignación de volúmenes persistentes. En el contexto de EVMAudit, actúa como el motor de despliegue unificado, permitiendo al administrador inicializar toda la infraestructura del TFM (servidor FastAPI, interfaz web y almacenamiento de informes) de manera centralizada.
+# Anexo D Docker
 
-5.2.12. Estrategia de Construcción de la Imagen (Dockerfile)
-La construcción de la imagen se define en un único Dockerfile optimizado. Debido a que el pipeline de análisis requiere interactuar con el sistema operativo para invocar compiladores y binarios de seguridad, se ha seleccionado Ubuntu 22.04 como imagen base, proporcionando un entorno estable y con soporte extendido para dependencias nativas de Linux en arquitectura amd64.
+## ANEXO D.1.	CONTENEDORIZACIÓN E INFRAESTRUCTURA DE DESPLIEGUE (DOCKER)
+
+En el ámbito del desarrollo de software moderno y la ciberseguridad, la reproducibilidad del entorno de ejecución constituye un pilar crítico. Tradicionalmente, el despliegue de aplicaciones que integran múltiples herramientas de análisis (como compiladores de Solidity y motores de ejecución simbólica) se enfrentaba al problema de "funciona en mi máquina", derivado de las discrepancias en las versiones de las dependencias, librerías del sistema operativo y configuraciones locales. Para mitigar este riesgo, el presente proyecto adopta una arquitectura basada en contenedores de aplicación a través del ecosistema de **Docker** y **Docker Compose**.
+
+## ANEXO D.2.	Fundamentos de Contenedorización: Docker y Docker Compose
+
+Docker es una plataforma de código abierto basada en la tecnología de contenedorización, la cual permite empaquetar una aplicación y todas sus dependencias (binarios, librerías, archivos de configuración) en una unidad estandarizada denominada **contenedor**. A diferencia de la virtualización tradicional, Docker opera mediante la virtualización a nivel de sistema operativo, compartiendo el núcleo (kernel) del sistema anfitrión pero ejecutando los procesos en espacios de usuario completamente aislados a través de namespaces y cgroups. Desde la perspectiva de la seguridad, este aislamiento garantiza que los procesos del pipeline de auditoría de EVMAudit se ejecuten de forma confinada, mitigando el impacto en la infraestructura anfitriona ante la eventual ejecución de código arbitrario o inesperado durante el análisis de contratos inteligentes.
+
+Por su parte, **Docker Compose** es la herramienta diseñada para definir y orquestar aplicaciones Docker multi-contenedor. Mediante el uso de un archivo de configuración declarativo en formato YAML (docker-compose.yml), permite definir con precisión los servicios que componen el sistema, sus dependencias de arranque, la exposición de puertos hacia el exterior, la creación de redes aisladas y la asignación de volúmenes persistentes. En el contexto de EVMAudit, actúa como el motor de despliegue unificado, permitiendo al administrador inicializar toda la infraestructura del TFM (servidor FastAPI, interfaz web y almacenamiento de informes) de manera centralizada.
+
+## ANEXO D.3.	Estrategia de Construcción de la Imagen (Dockerfile)
+La construcción de la imagen se define en un único Dockerfile optimizado. Debido a que el pipeline de análisis requiere interactuar con el sistema operativo para invocar compiladores y binarios de seguridad, se ha seleccionado **Ubuntu 22.04** como imagen base, proporcionando un entorno estable y con soporte extendido para dependencias nativas de Linux en arquitectura amd64.
+
 El proceso de aprovisionamiento de la imagen se divide en las siguientes fases críticas:
-1.	Entorno y Variables de Sistema: Se configuran las variables de entorno PYTHONDONTWRITEBYTECODE=1 y PYTHONUNBUFFERED=1 para optimizar la ejecución de Python dentro del contenedor, evitando la escritura de residuos binarios y forzando el volcado de logs en tiempo real. Asimismo, se establece DEBIAN_FRONTEND=noninteractive para suprimir diálogos interactivos durante la instalación de paquetes.
-2.	Aprovisionamiento de Compiladores (Solidity): Se añade el repositorio PPA oficial de Ethereum (ppa:ethereum/ethereum) para incorporar el compilador nativo de Solidity (solc). Posteriormente, se instala la utilidad solc-select mediante el gestor de paquetes de Python para automatizar la descarga y conmutación de versiones.
-3.	Integración del Fuzzer Echidna: Dado que Echidna se distribuye de manera óptima como un binario estático para Linux, el contenedor automatiza su descarga directa (versión v2.3.2) desde los repositorios oficiales de Crytic, procediendo a su extracción e instalación en /usr/local/bin/ para garantizar su disponibilidad inmediata en el PATH del sistema.
-4.	Optimización de Dependencias con ‘uv’ (Multi-stage Build): Con el objetivo de minimizar los tiempos de construcción y asegurar una gestión eficiente de los paquetes de Python, se emplea un mecanismo de construcción en etapas múltiples (Multi-stage build), importando los binarios optimizados del gestor uv directamente desde su imagen oficial en el registro de GitHub (ghcr.io/astral-sh/uv:latest).
-5.	Instalación del Paquete Local: Tras establecer el directorio de trabajo en /app y copiar el código fuente , se ejecuta el comando uv sync --frozen --no-cache. Esto resuelve de forma determinista el grafo de dependencias del archivo uv.lock, registrando el paquete local editable evmaudit e instalando el servidor ASGI Uvicorn sin almacenar datos residuales en la caché de la imagen.
-5.2.13. Orquestación de Servicios (Docker Compose)
-La coordinación del contenedor web y sus dependencias con el sistema anfitrión se gestiona de forma declarativa mediante un archivo docker-compose.yml. La especificación del servicio, denominado evmaudit-web, se fundamenta en tres pilares de ingeniería:
-•	Persistencia de Datos mediante Volúmenes: Con el fin de dotar al sistema de un estado persistente (pese a la naturaleza efímera de los contenedores), se realiza un mapeo directo de directorios del host hacia el contenedor:
-•	./jsons/_uploads:/app/jsons/_uploads: Almacena de forma persistente los contratos Solidity cargados por los usuarios, los wrappers intermedios generados para Echidna y los informes de auditoría finales en formato JSON y Markdown.
-•	./contracts:/app/contracts: Habilita un volumen opcional para la auditoría directa de Smart Contracts locales sin necesidad de interactuar con la interfaz web.
-•	Aislamiento de Red y Mapeo de Puertos: Se expone el puerto 8080 del contenedor hacia el puerto 8080 del sistema anfitrión. Esto permite redirigir el tráfico HTTP de la interfaz construida en HTML5/Vanilla JS hacia el backend desarrollado en FastAPI de forma transparente.
-•	Tolerancia a Fallos: Se implementa la política de reinicio restart: unless-stopped. Esta directiva asegura la alta disponibilidad del servicio ante excepciones imprevistas en el motor de ejecución simbólica (Mythril) o caídas del propio demonio de Docker, garantizando que el servicio web vuelva a levantarse de manera automática salvo interrupción explícita del administrador.
+1. **Entorno y Variables de Sistema**: Se configuran las variables de entorno `PYTHONDONTWRITEBYTECODE=1` y `PYTHONUNBUFFERED=1` para optimizar la ejecución de Python dentro del contenedor, evitando la escritura de residuos binarios y forzando el volcado de logs en tiempo real. Asimismo, se establece `DEBIAN_FRONTEND=noninteractive` para suprimir diálogos interactivos durante la instalación de paquetes.
+2. **Aprovisionamiento de Compiladores (Solidity):** Se añade el repositorio PPA oficial de Ethereum (ppa:ethereum/ethereum) para incorporar el compilador nativo de Solidity (solc). Posteriormente, se instala la utilidad `solc-select` mediante el gestor de paquetes de Python para automatizar la descarga y conmutación de versiones.
+3. **Integración del Fuzzer Echidna:** Dado que Echidna se distribuye de manera óptima como un binario estático para Linux, el contenedor automatiza su descarga directa (versión v2.3.2) desde los repositorios oficiales de *Crytic*, procediendo a su extracción e instalación en `/usr/local/bin/` para garantizar su disponibilidad inmediata en el PATH del sistema.
+4. **Optimización de Dependencias con `uv` (Multi-stage Build):** Con el objetivo de minimizar los tiempos de construcción y asegurar una gestión eficiente de los paquetes de Python, se emplea un mecanismo de construcción en etapas múltiples (Multi-stage build), importando los binarios optimizados del gestor uv directamente desde su imagen oficial en el registro de GitHub (ghcr.io/astral-sh/uv:latest).
+5. **Instalación del Paquete Local:** Tras establecer el directorio de trabajo en /app y copiar el código fuente , se ejecuta el comando `uv sync --frozen --no-cache`. Esto resuelve de forma determinista el grafo de dependencias del archivo uv.lock, registrando el paquete local editable evmaudit e instalando el servidor ASGI Uvicorn sin almacenar datos residuales en la caché de la imagen.
 
-5.2.14. Flujo de Despliegue y Ciclo de Vida del Contenedor
+## ANEXO D.4.	Orquestación de Servicios (Docker Compose)
+
+La coordinación del contenedor web y sus dependencias con el sistema anfitrión se gestiona de forma declarativa mediante un archivo docker-compose.yml. La especificación del servicio, denominado evmaudit-web, se fundamenta en tres pilares de ingeniería:
+
+- **Persistencia de Datos mediante Volúmenes**: Con el fin de dotar al sistema de un estado persistente (pese a la naturaleza efímera de los contenedores), se realiza un mapeo directo de directorios del host hacia el contenedor:
+- **`./jsons/_uploads:/app/jsons/_uploads`**: Almacena de forma persistente los contratos Solidity cargados por los usuarios, los wrappers intermedios generados para Echidna y los informes de auditoría finales en formato JSON y Markdown.
+- **`./contracts:/app/contracts`**: Habilita un volumen opcional para la auditoría directa de Smart Contracts locales sin necesidad de interactuar con la interfaz web.
+- **Aislamiento de Red y Mapeo de Puertos**: Se expone el puerto 8080 del contenedor hacia el puerto 8080 del sistema anfitrión. Esto permite redirigir el tráfico HTTP de la interfaz construida en HTML5/Vanilla JS hacia el backend desarrollado en FastAPI de forma transparente.
+- **Tolerancia a Fallos**: Se implementa la política de reinicio restart: unless-stopped. Esta directiva asegura la alta disponibilidad del servicio ante excepciones imprevistas en el motor de ejecución simbólica (Mythril) o caídas del propio demonio de Docker, garantizando que el servicio web vuelva a levantarse de manera automática salvo interrupción explícita del administrador.
+
+## ANEXO D.5.	Flujo de Despliegue y Ciclo de Vida del Contenedor
 Para la puesta en marcha de la infraestructura local en entornos de desarrollo o evaluación, el ciclo de vida del contenedor se administra mediante el estándar de comandos de Docker Compose:
-6.	Fase de Construcción (Build): Compilación de la imagen e instalación del entorno virtual determinista:
+1. **Fase de Construcción (Build):** Compilación de la imagen e instalación del entorno virtual determinista:
+```bash
 docker compose build
-7.	Fase de Inicialización (Up): Despliegue e instanciación del servicio en segundo plano (detached mode):
+```
+
+2. **Fase de Inicialización (Up):** Despliegue e instanciación del servicio en segundo plano (detached mode):
+```bash
 docker compose up -d
-8.	Fase de Auditoría de Ejecución (Logs): Inspección de la salida estándar del contenedor para la monitorización de los análisis en curso:
+```
+
+3.	**Fase de Auditoría de Ejecución (Logs):** Inspección de la salida estándar del contenedor para la monitorización de los análisis en curso:
+
+```bash
 docker compose logs -f evmaudit-web
-9.	Fase de Parada (Down): Interrupción y eliminación de los contenedores activos salvaguardando la integridad de los datos de las auditorías gracias a los volúmenes enlazados:
+```
+
+4.	**Fase de Parada (Down):** Interrupción y eliminación de los contenedores activos salvaguardando la integridad de los datos de las auditorías gracias a los volúmenes enlazados:
 docker compose down
 
 # ANEXO F.	ENTORNO DE INTEGRACIÓN CONTINUA (CI/CD) Y PUBLICACIÓN AUTOMATIZADA
-Para garantizar la integridad del software durante el ciclo de vida del desarrollo y agilizar el flujo de despliegue, se ha diseñado e implementado un pipeline de Integración Continua (CI) basado en GitHub Actions. Esta estrategia de ingeniería de software permite automatizar la compilación, verificación y empaquetado de la aplicación en cada iteración, mitigando los riesgos asociados a la integración manual de código y asegurando la disponibilidad inmediata de artefactos listos para producción.
-5.2.9. Arquitectura del Workflow y Disparadores (Triggers)
+
+Para garantizar la integridad del software durante el ciclo de vida del desarrollo y agilizar el flujo de despliegue, se ha diseñado e implementado un pipeline de Integración Continua (CI) basado en **GitHub Actions**. Esta estrategia de ingeniería de software permite automatizar la compilación, verificación y empaquetado de la aplicación en cada iteración, mitigando los riesgos asociados a la integración manual de código y asegurando la disponibilidad inmediata de artefactos listos para producción.
+
+## ANEXO F.1.	Arquitectura del Workflow y Disparadores (Triggers)
+
 El flujo de trabajo automatizado se define de manera declarativa mediante la sintaxis YAML de GitHub Actions. Con el propósito de optimizar los recursos de cómputo y mantener un control estricto sobre la estabilidad de la rama principal, se han configurado dos disparadores específicos:
-•	Eventos de Empuje (Push): El pipeline se ejecuta de forma automática ante cualquier consolidación directa de código en la rama main, asegurando que cada incremento de software sea evaluado y empaquetado de inmediato.
-•	Solicitudes de Extracción (Pull Requests): La automatización actúa como una barrera de calidad (quality gate) ante cualquier intento de fusión hacia la rama main. Esto permite validar que las modificaciones propuestas por los desarrolladores no rompan el proceso de construcción del contenedor antes de que el código sea integrado definitivamente.
-El entorno de ejecución seleccionado para los trabajos (jobs) es ubuntu-latest, lo que proporciona un entorno virtual limpio, aislado y actualizado de manera nativa por la infraestructura de GitHub.
-5.2.10. Desglose Técnico de las Etapas del Pipeline
+
+- **Eventos de Empuje (*Push*):** El pipeline se ejecuta de forma automática ante cualquier consolidación directa de código en la rama `main`, asegurando que cada incremento de software sea evaluado y empaquetado de inmediato.
+
+- **Solicitudes de Extracción (*Pull Requests*):** La automatización actúa como una barrera de calidad (*quality gate*) ante cualquier intento de fusión hacia la rama `main`. Esto permite validar que las modificaciones propuestas por los desarrolladores no rompan el proceso de construcción del contenedor antes de que el código sea integrado definitivamente.
+
+El entorno de ejecución seleccionado para los trabajos (*jobs*) es `ubuntu-latest`, lo que proporciona un entorno virtual limpio, aislado y actualizado de manera nativa por la infraestructura de GitHub.
+
+## ANEXO F.2.	Desglose Técnico de las Etapas del Pipeline
 El ciclo de vida del pipeline se divide en dos trabajos secuenciales y dependientes, los cuales ejecutan tareas críticas de aprovisionamiento, autenticación y despliegue:
  
 
-5.2.10.1. Trabajo de Construcción y Publicación (create-docker-image)
-Es el núcleo técnico de la automatización y consta de los siguientes pasos detallados:
-1.	Clonación del Repositorio y Gestión de Submódulos: Se utiliza la acción oficial actions/checkout@v2. Debido a la arquitectura desacoplada del proyecto, es indispensable configurar el parámetro submodules: 'recursive'. Esta directiva instruye al agente para que descargue e integre de manera automática el repositorio y código de evmaudit dentro de la estructura de directorios del pipeline.
-2.	Autenticación en el Registro de Contenedores (GHCR): Mediante la acción docker/login-action@v2, el pipeline establece una conexión segura con el registro oficial de GitHub (ghcr.io). El proceso se autentica de forma dinámica utilizando el actor del ciclo de vida (${{ github.actor }}) y un token de acceso seguro almacenado de forma cifrada en los secretos del repositorio bajo la clave ${{ secrets.IMAGES_TFM_UNIR }}.
-3.	Normalización del Espacio de Nombres y Doble Etiquetado (Multi-tagging): Las especificaciones de Docker y el estándar de la Open Container Initiative (OCI) prohíben estrictamente el uso de caracteres en mayúscula para los nombres de las imágenes de contenedores. Para solucionar esto, el pipeline ejecuta un script en Bash que convierte dinámicamente el nombre del repositorio a minúsculas utilizando el comando tr '[:upper:]' '[:lower:]'. Posteriormente, se implementa una estrategia de doble etiquetado para optimizar la trazabilidad y la inmutabilidad:
-•	Etiqueta por SHA (IMAGE_SHA): Vincula de forma unívoca el contenedor con el hash del commit específico de Git que originó la compilación (${{ github.sha }}). Esto permite realizar auditorías retrospectivas y despliegues deterministas en caso de fallos.
-•	Etiqueta de Última Versión (IMAGE_LATEST): Sobrescribe el puntero :latest con la versión más reciente del software que haya superado la fase de construcción con éxito.
-4.	Construcción y Push Multiplataforma: Se invoca de manera directa el comando docker build, forzando la compilación bajo la arquitectura destino --platform linux/amd64 utilizando el Dockerfile del proyecto como plano de construcción. Una vez generadas las imágenes locales con sus respectivas etiquetas, se ejecutan las instrucciones de empuje (push) hacia el registro seguro de GitHub, quedando el artefacto disponible para su consumo.
+### ANEXO F.2.1.	Trabajo de Construcción y Publicación (`create-docker-image`)
 
-5.2.10.2. Trabajo de Despliegue (deploy) y Limitaciones del Entorno
-Para garantizar una separación formal de conceptos en la arquitectura de la integración, el pipeline implementa un segundo trabajo secuencial denominado deploy. Utilizando la directiva needs: create-docker-image, se establece una restricción de dependencia estricta: esta etapa no puede inicializarse si el empaquetado y la publicación previa de la imagen en el registro han fallado.
-En la fase actual del proyecto, esta etapa automatizada no ha sido implementada de forma activa y opera estrictamente como un punto de anclaje (placeholder) arquitectónico. La justificación de esta decisión de diseño radica en las limitaciones técnicas del entorno de alojamiento seleccionado para las pruebas de concepto. La infraestructura de EVMAudit se despliega externamente en la plataforma PaaS Railway utilizando su modalidad de suscripción gratuita. Este nivel de servicio impone restricciones en las interfaces de programación (APIs) y en el uso de webhooks, impidiendo la ejecución de despliegues totalmente automatizados (Automated CD Triggers) desencadenados de forma directa mediante agentes de terceros como GitHub Actions.
-Por consiguiente, el flujo de trabajo en este punto se limita a verificar la integridad de la secuencia de comandos en consola, quedando el aprovisionamiento de la infraestructura supeditado a los mecanismos nativos de la plataforma de destino. En el siguiente apartado (X.5. Despliegue de la Infraestructura), se expondrá de manera más amplia la configuración, el aprovisionamiento y las características operativas de dicho entorno en Railway.
-# ANEXO G.	DESPLIEGUE DE LA INFRAESTRUCTURA EN LA NUBE (RAILWAY) 
-Para validar la operatividad de EVMAudit en un entorno accesible y simular un escenario de producción real, se ha procedido al despliegue de la arquitectura contenedorizada en la plataforma de Plataforma como Servicio (PaaS) Railway. A continuación, se detallan las especificaciones del entorno, las restricciones técnicas de hardware identificadas y las optimizaciones de ingeniería aplicadas en el código fuente para garantizar la estabilidad del sistema.
-5.2.15. Aprovisionamiento y Configuración del Entorno Cloud
+Es el núcleo técnico de la automatización y consta de los siguientes pasos detallados:
+
+1.  **Clonación del Repositorio y Gestión de Submódulos:** Se utiliza la acción oficial `actions/checkout@v2`. Debido a la arquitectura desacoplada del proyecto, es indispensable configurar el parámetro `submodules: 'recursive'`. Esta directiva instruye al agente para que descargue e integre de manera automática el repositorio y código de `evmaudit` dentro de la estructura de directorios del pipeline.
+
+2.  **Autenticación en el Registro de Contenedores (GHCR):** Mediante la acción `docker/login-action@v2`, el pipeline establece una conexión segura con el registro oficial de GitHub (`ghcr.io`). El proceso se autentica de forma dinámica utilizando el actor del ciclo de vida (`${{ github.actor }}`) y un token de acceso seguro almacenado de forma cifrada en los secretos del repositorio bajo la clave `${{ secrets.IMAGES_TFM_UNIR }}`.
+
+3.  **Normalización del Espacio de Nombres y Doble Etiquetado (*Multi-tagging*):** Las especificaciones de Docker y el estándar de la Open Container Initiative (OCI) prohíben estrictamente el uso de caracteres en mayúscula para los nombres de las imágenes de contenedores. Para solucionar esto, el pipeline ejecuta un script en Bash que convierte dinámicamente el nombre del repositorio a minúsculas utilizando el comando `tr '[:upper:]' '[:lower:]'`. Posteriormente, se implementa una estrategia de doble etiquetado para optimizar la trazabilidad y la inmutabilidad:
+	- **Etiqueta por SHA (**`IMAGE_SHA`**):** Vincula de forma unívoca el contenedor con el hash del *commit* específico de Git que originó la compilación (`${{ github.sha }}`). Esto permite realizar auditorías retrospectivas y despliegues deterministas en caso de fallos.
+    - **Etiqueta de Última Versión (**`IMAGE_LATEST`**):** Sobrescribe el puntero `:latest` con la versión más reciente del software que haya superado la fase de construcción con éxito.
+
+4.  **Construcción y *Push* Multiplataforma:** Se invoca de manera directa el comando `docker build`, forzando la compilación bajo la arquitectura destino `--platform linux/amd64` utilizando el `Dockerfile` del proyecto como plano de construcción. Una vez generadas las imágenes locales con sus respectivas etiquetas, se ejecutan las instrucciones de empuje (*push*) hacia el registro seguro de GitHub, quedando el artefacto disponible para su consumo.
+
+
+### ANEXO F.2.2.	Trabajo de Despliegue (deploy) y Limitaciones del Entorno
+
+Para garantizar una separación formal de conceptos en la arquitectura de la integración, el pipeline implementa un segundo trabajo secuencial denominado `deploy`. Utilizando la directiva `needs: create-docker-image`, se establece una restricción de dependencia estricta: esta etapa no puede inicializarse si el empaquetado y la publicación previa de la imagen en el registro han fallado.
+
+En la fase actual del proyecto, **esta etapa automatizada no ha sido implementada de forma activa y opera estrictamente como un punto de anclaje (*placeholder*) arquitectónico**. La justificación de esta decisión de diseño radica en las limitaciones técnicas del entorno de alojamiento seleccionado para las pruebas de concepto. La infraestructura de EVMAudit se despliega externamente en la plataforma PaaS **Railway** utilizando su modalidad de suscripción gratuita. Este nivel de servicio impone restricciones en las interfaces de programación (APIs) y en el uso de *webhooks*, impidiendo la ejecución de despliegues totalmente automatizados (*Automated CD Triggers*) desencadenados de forma directa mediante agentes de terceros como GitHub Actions.
+
+Por consiguiente, el flujo de trabajo en este punto se limita a verificar la integridad de la secuencia de comandos en consola, quedando el aprovisionamiento de la infraestructura supeditado a los mecanismos nativos de la plataforma de destino. En el **siguiente apartado (X.5. Despliegue de la Infraestructura)**, se expondrá de manera más amplia la configuración, el aprovisionamiento y las características operativas de dicho entorno en Railway.# ANEXO G.	DESPLIEGUE DE LA INFRAESTRUCTURA EN LA NUBE (RAILWAY) 
+
+Para validar la operatividad de EVMAudit en un entorno accesible y simular un escenario de producción real, se ha procedido al despliegue de la arquitectura contenedorizada en la plataforma de Plataforma como Servicio (PaaS) **Railway**. A continuación, se detallan las especificaciones del entorno, las restricciones técnicas de hardware identificadas y las optimizaciones de ingeniería aplicadas en el código fuente para garantizar la estabilidad del sistema.
+
+## ANEXO G.1.  Aprovisionamiento y Configuración del Entorno Cloud
+
 El proceso de despliegue en la infraestructura de la nube se ha estructurado bajo las siguientes directrices operativas:
-•	Selección del Nivel de Servicio: La instancia se ha instanciado haciendo uso del nivel gratuito (Free Tier) de la plataforma, el cual provee un crédito base de $5 USD o un límite temporal de 30 días de cómputo.
-•	Aislamiento Regional: Con el objetivo de minimizar la latencia de red en las peticiones HTTP y optimizar la transferencia de datos, se ha seleccionado la región europea con nodo central en Ámsterdam (EU).
-•	Mapeo de Infraestructura y Orquestación: El aprovisionamiento se realiza directamente vinculando el contenedor web a la imagen Docker compilada y almacenada en el registro de GitHub (ghcr.io), exponiendo de manera transparente la API del backend desarrollada en FastAPI.
-•	Enrutamiento y Capa de Enlace (SSL): La plataforma genera de manera dinámica un nombre de dominio completamente cualificado (FQDN) provisto de seguridad criptográfica TLS/SSL (HTTPS) para el acceso público a la interfaz de usuario: https://evmaudit-production.up.railway.app/.
-5.2.16. Limitaciones de Hardware y el Problema del Desbordamiento de Memoria (OOM)
+
+- **Selección del Nivel de Servicio:** La instancia se ha instanciado haciendo uso del nivel gratuito (*Free Tier*) de la plataforma, el cual provee un crédito base de \$5 USD o un límite temporal de 30 días de cómputo.
+
+- **Aislamiento Regional:** Con el objetivo de minimizar la latencia de red en las peticiones HTTP y optimizar la transferencia de datos, se ha seleccionado la región europea con nodo central en **Ámsterdam (EU)**.
+
+- **Mapeo de Infraestructura y Orquestación:** El aprovisionamiento se realiza directamente vinculando el contenedor web a la imagen Docker compilada y almacenada en el registro de GitHub (ghcr.io), exponiendo de manera transparente la API del *backend* desarrollada en FastAPI.
+
+- **Enrutamiento y Capa de Enlace (SSL):** La plataforma genera de manera dinámica un nombre de dominio completamente cualificado (FQDN) provisto de seguridad criptográfica TLS/SSL (HTTPS) para el acceso público a la interfaz de usuario: <https://evmaudit-production.up.railway.app/>.
+
+## ANEXO G.2.  Limitaciones de Hardware y el Problema del Desbordamiento de Memoria (OOM)
+
 La modalidad gratuita de la plataforma PaaS impone restricciones estrictas sobre los recursos de hardware asignados a cada contenedor, parametrizados de la siguiente forma:
-•	Capacidad de Cómputo (CPU): 2 vCPU virtuales compartidas.
-•	Memoria Volátil (RAM): 1 GB con un límite estricto de cuota (Plan Limit).
-Bajo un escenario de despliegue convencional en servidores dedicados o infraestructura local, el pipeline de análisis de EVMAudit se ejecuta sin restricciones debido a la disponibilidad de memoria elástica. Sin embargo, en el entorno de la nube restringido, el motor de fuzzing basado en propiedades Echidna presenta un problema crítico de arquitectura.
-Echidna, al estar desarrollado en Haskell, requiere de forma nativa una reserva inicial y un espacio de intercambio que supera con creces el gigabyte de memoria RAM para gestionar el mapa de cobertura del binario y la generación de casos de prueba. Al alcanzar el umbral crítico de 1 GB asignado por Railway, el demonio del sistema operativo anfitrión (Kernel Out-of-Memory Killer) destruía de manera abrupta el contenedor para salvaguardar la integridad del nodo, provocando la caída del servicio web y reportando un error de tipo OOM.
-5.2.17. Optimización del Sistema en Tiempo de Ejecución (RTS) de Haskell
-Para mitigar el desbordamiento de memoria sin alterar las capacidades analíticas esenciales de la herramienta, se realizó una intervención a nivel de código en el módulo de control del pipeline (run_echidna). La solución consistió en inyectar directivas específicas orientadas a reconfigurar los parámetros del Runtime System (RTS) del compilador de Glasgow Haskell (GHC) empaquetados dentro del binario de Echidna.
-La estructura de invocación del proceso fue modificada e implementada en Python mediante el siguiente diseño de argumentos:
+
+- **Capacidad de Cómputo (CPU):** 2 vCPU virtuales compartidas.
+- **Memoria Volátil (RAM):** 1 GB con un límite estricto de cuota (*Plan Limit*).
+
+Bajo un escenario de despliegue convencional en servidores dedicados o infraestructura local, el pipeline de análisis de EVMAudit se ejecuta sin restricciones debido a la disponibilidad de memoria elástica. Sin embargo, en el entorno de la nube restringido, el motor de *fuzzing* basado en propiedades **Echidna** presenta un problema crítico de arquitectura.
+
+Echidna, al estar desarrollado en Haskell, requiere de forma nativa una reserva inicial y un espacio de intercambio que supera con creces el gigabyte de memoria RAM para gestionar el mapa de cobertura del binario y la generación de casos de prueba. Al alcanzar el umbral crítico de 1 GB asignado por Railway, el demonio del sistema operativo anfitrión (*Kernel Out-of-Memory Killer*) destruía de manera abrupta el contenedor para salvaguardar la integridad del nodo, provocando la caída del servicio web y reportando un error de tipo *OOM*.
+
+## ANEXO G.3.  Optimización del Sistema en Tiempo de Ejecución (RTS) de Haskell
+Para mitigar el desbordamiento de memoria sin alterar las capacidades
+analíticas esenciales de la herramienta, se realizó una intervención a
+nivel de código en el módulo de control del *pipeline* (run_echidna). La
+solución consistió en inyectar directivas específicas orientadas a
+reconfigurar los parámetros del **Runtime System (RTS)** del compilador
+de Glasgow Haskell (GHC) empaquetados dentro del binario de Echidna.
+
+La estructura de invocación del proceso fue modificada e implementada en
+Python mediante el siguiente diseño de argumentos:
+
+```python
 command = [
     "echidna",
     contract_path,
@@ -1623,13 +2586,15 @@ command = [
     # Cierre de las opciones RTS
     "-RTS"       
 ]
+```
 A continuación se expone la justificación técnica detrás de los modificadores inyectados:
-•	Restricción de Ensayos (--test-limit 100): Al parametrizar el límite de pruebas en 100 iteraciones, se acota la profundidad del grafo de ejecución generado por el fuzzer. Esto reduce el consumo de memoria acumulativo a lo largo del tiempo de computación.
-•	Techo Infranqueable de Memoria (-M950m): Esta directiva establece que el asignador de memoria de Haskell tiene prohibido estrictamente reclamar más de 950 megabytes del espacio de usuario. Al situar este límite ligeramente por debajo del gigabyte real de Railway, se evita que el sistema operativo de la nube elimine el proceso por exceder la cuota física.
-•	Recolección de Basura Agresiva (-c): Activa un algoritmo de recolección de residuos más severo en el recolector de basura de Haskell (Garbage Collector). En lugar de acumular objetos intermedios en la memoria RAM, el sistema libera los recursos obsoletos inmediatamente después de cada evaluación de propiedad.
-•	Concurrencia Confinada (-N1): Limita la ejecución del entorno de ejecución a un único hilo de procesamiento, evitando la duplicación de estructuras de datos en memoria asociadas al paralelismo de hilos nativos.
-Es importante destacar que la optimización descrita no se integró de forma estática en la construcción del archivo Dockerfile (lo que habría alterado el comportamiento de la imagen base de manera permanente), sino que se aplicó directamente sobre el código fuente desplegado en el contenedor en ejecución (runtime). Bajo condiciones de despliegue convencionales en infraestructuras con escalabilidad elástica o recursos dedicados de hardware, esta intervención técnica resultaría completamente innecesaria, ya que la aplicación contaría con la memoria suficiente para procesar el pipeline por defecto. Por consiguiente, esta modificación responde de manera estricta a un mecanismo de mitigación ad hoc, implementado exclusivamente para sortear las limitaciones físicas del entorno gratuito y evitar la interrupción forzada del servicio web por falta de memoria.
-Conclusión del Despliegue: La implementación de estas salvaguardas de bajo nivel ha permitido que la aplicación web de EVMAudit opere de manera completamente estable y fluida en la nube. Pese a las severas restricciones del entorno gratuito de Railway, el sistema es capaz de completar con éxito el pipeline completo de auditoría en siete pasos sin registrar caídas en el servicio ni excepciones por falta de recursos.
 
- 
+- **Restricción de Ensayos (\--test-limit 100):** Al parametrizar el límite de pruebas en 100 iteraciones, se acota la profundidad del grafo de ejecución generado por el fuzzer. Esto reduce el consumo de memoria acumulativo a lo largo del tiempo de computación.
+- **Techo Infranqueable de Memoria (-M950m):** Esta directiva establece que el asignador de memoria de Haskell tiene prohibido estrictamente reclamar más de 950 megabytes del espacio de usuario. Al situar este límite ligeramente por debajo del gigabyte real de Railway, se evita que el sistema operativo de la nube elimine el proceso por exceder la cuota física.
+- **Recolección de Basura Agresiva (-c):** Activa un algoritmo de recolección de residuos más severo en el recolector de basura de Haskell (*Garbage Collector*). En lugar de acumular objetos intermedios en la memoria RAM, el sistema libera los recursos obsoletos inmediatamente después de cada evaluación de propiedad.
+- **Concurrencia Confinada (-N1):** Limita la ejecución del entorno de ejecución a un único hilo de procesamiento, evitando la duplicación de estructuras de datos en memoria asociadas al paralelismo de hilos nativos.
 
+Es importante destacar que la optimización descrita no se integró d forma estática en la construcción del archivo Dockerfile (lo que habrí alterado el comportamiento de la imagen base de manera permanente), sin que se aplicó directamente sobre el código fuente desplegado en el
+contenedor en ejecución (*runtime*). Bajo condiciones de despliegue convencionales en infraestructuras con escalabilidad elástica o recurso dedicados de hardware, esta intervención técnica resultaría completamente innecesaria, ya que la aplicación contaría con la memoria suficiente para procesar el *pipeline* por defecto. Por consiguiente, esta modificación responde de manera estricta a un mecanismo de mitigación ad hoc, implementado exclusivamente para sortear las limitaciones físicas del entorno gratuito y evitar la interrupción forzada del servicio web por falta de memoria.
+
+**Conclusión del Despliegue:** La implementación de estas salvaguardas de bajo nivel ha permitido que la aplicación web de **EVMAudit** opere de manera completamente estable y fluida en la nube. Pese a las severas restricciones del entorno gratuito de Railway, el sistema es capaz de completar con éxito el pipeline completo de auditoría en siete pasos sin registrar caídas en el servicio ni excepciones por falta de recursos.

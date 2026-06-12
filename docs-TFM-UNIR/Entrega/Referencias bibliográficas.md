@@ -45,9 +45,9 @@
 
 [23]     “ConsenSysDiligence/mythril: Mythril is a symbolic-execution-based securty analysis tool for EVM bytecode. It detects security vulnerabilities in smart contracts built for Ethereum and other EVM-compatible blockchains.” Accessed: Apr. 14, 2026. [Online]. Available: https://github.com/ConsenSysDiligence/mythril
 
-[24]     B. Mueller, “File 1 of 1 HITB SECCONF Amsterd4m and ConsenSys Dilig3nce bring you XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Smashing Ethereum Smart Contracts for Fun and Real Profit XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX,” 2018.
+[24]     B. Mueller, “File 1 of 1 HITB SECCONF Amsterd4m and ConsenSys Dilig3nce bring you Smashing Ethereum Smart Contracts for Fun and Real Profit” 2018.
 
-[25]     “🛡️ Smart Contract Security Wars: The Ultimate Slither vs Mythril Battle Guide That Saves Your Protocol From Million-Dollar Hacks | by PMartin | CoinsBench.” Accessed: Apr. 14, 2026. [Online]. Available: https://coinsbench.com/%EF%B8%8F-smart-contract-security-wars-the-ultimate-slither-vs-mythril-battle-guide-that-saves-your-837d67c49121
+[25]     “Smart Contract Security Wars: The Ultimate Slither vs Mythril Battle Guide That Saves Your Protocol From Million-Dollar Hacks | by PMartin | CoinsBench.” Accessed: Apr. 14, 2026. [Online]. Available: https://coinsbench.com/%EF%B8%8F-smart-contract-security-wars-the-ultimate-slither-vs-mythril-battle-guide-that-saves-your-837d67c49121
 
 [26]     T. Durieux, J. F. Ferreira, R. Abreu, and P. Cruz, “Empirical Review of Automated Analysis Tools on 47,587 Ethereum Smart Contracts,” _Proceedings - International Conference on Software Engineering_, pp. 530–541, Feb. 2020, doi: 10.1145/3377811.3380364.
 

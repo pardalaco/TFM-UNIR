@@ -31,6 +31,11 @@ Adicionalmente, tras cada una de las entregas parciales previstas en la planific
 
 ## Keywords: 
 smart contracts, Ethereum, cybersecurity, vulnerability analysis, blockchain
+
+
+\newpage
+
+
 # 1. Introducción
 
 La tecnología blockchain ha evolucionado significativamente desde la aparición de Bitcoin en 2008 como sistema de dinero electrónico descentralizado. Con la llegada de plataformas como Ethereum, blockchain dejó de utilizarse únicamente para la transferencia de activos digitales y pasó a convertirse en una infraestructura capaz de ejecutar aplicaciones descentralizadas mediante contratos inteligentes. Estos contratos permiten automatizar lógica de negocio y gestionar activos sin necesidad de intermediarios, lo que ha impulsado el crecimiento de sectores como las finanzas descentralizadas (DeFi), los sistemas de tokenización y los protocolos de interoperabilidad blockchain.
@@ -92,7 +97,12 @@ Posteriormente, el capítulo de objetivos concretos y metodología de trabajo de
 
 El capítulo de desarrollo específico de la contribución constituye el núcleo principal del trabajo. En él se describe el diseño e implementación de la librería desarrollada, incluyendo la arquitectura del sistema, los módulos principales, la integración de herramientas externas, el proceso de normalización y correlación de resultados y los mecanismos de evaluación empleados.
 
-Finalmente, el capítulo de conclusiones y trabajo futuro recoge las principales aportaciones del trabajo, las limitaciones identificadas durante el desarrollo y posibles líneas de mejora o evolución futura de la herramienta propuesta.# 2. Estado del arte
+Finalmente, el capítulo de conclusiones y trabajo futuro recoge las principales aportaciones del trabajo, las limitaciones identificadas durante el desarrollo y posibles líneas de mejora o evolución futura de la herramienta propuesta.
+
+\newpage
+
+
+# 2. Estado del arte
 El presente capítulo recoge los fundamentos técnicos y el contexto necesario para comprender el problema abordado en este Trabajo Fin de Máster. En primer lugar, se introducen los conceptos básicos de blockchain y contratos inteligentes, con especial atención a Ethereum y al modelo de ejecución de la Ethereum Virtual Machine. Posteriormente, se analizan los principales retos de seguridad asociados a los contratos inteligentes, las vulnerabilidades más frecuentes, los ataques reales más representativos y las herramientas actuales de análisis. Finalmente, se identifican las limitaciones del estado del arte que justifican el desarrollo de una librería en Python orientada a la integración y correlación de resultados de seguridad.
 
 ## 2.1. Fundamentos blockchain y contratos inteligentes
@@ -520,6 +530,11 @@ Por otro lado, gran parte de las vulnerabilidades analizadas dependen principalm
 
 En conjunto, estas limitaciones justifican la necesidad de desarrollar soluciones que permitan integrar múltiples herramientas de análisis, normalizar resultados y facilitar una interpretación más estructurada de los hallazgos de seguridad en contratos inteligentes.
 
+
+
+\newpage
+
+
 # 3. Objetivos concretos y metodología de trabajo
 ## 3.1. Objetivo general
 
@@ -557,6 +572,11 @@ Posteriormente, se definió la arquitectura de la librería, estableciendo los m
 A continuación, se llevó a cabo la implementación de la solución utilizando Python como lenguaje principal. La librería desarrollada integró herramientas externas de análisis y permitió automatizar el procesamiento, normalización y correlación de los resultados obtenidos.
 
 Finalmente, se realizó una evaluación experimental utilizando contratos inteligentes vulnerables y casos reales obtenidos de repositorios públicos. Los resultados obtenidos permitieron analizar el comportamiento de la solución propuesta y valorar su utilidad como apoyo al análisis de seguridad de contratos inteligentes compatibles con la Ethereum Virtual Machine (EVM).
+
+
+\newpage
+
+
 # 4. Desarrollo de la solución propuesta
 
 Una vez estudiadas las principales vulnerabilidades presentes en los contratos inteligentes y analizadas las herramientas existentes para su detección, en este capítulo se presenta la solución desarrollada para dar respuesta a los objetivos planteados en el presente Trabajo Fin de Máster.
@@ -572,6 +592,11 @@ A lo largo de este capítulo se describen los requisitos que guiaron el desarrol
 !TODO: referencia cruzada a la Sección 3.2 (objetivos específicos).
 
 !TODO: referencia cruzada a la Sección 3.3 (metodología).
+
+
+\newpage
+
+
 # 4.1.Requisitos
 ## 4.1. Identificación de requisitos
 
@@ -630,6 +655,859 @@ Debido a la naturaleza del trabajo, se definieron además una serie de requisito
 !TODO: referencia cruzada a las herramientas descritas en la Sección 2.X.
 
 !TODO: referencia cruzada a las vulnerabilidades descritas en la Sección 2.X.
+
+
+
+\newpage
+
+
+# 4.2.Arquitectura
+## 4.2. Arquitectura general de EVMAudit
+
+Con el objetivo de satisfacer los requisitos definidos anteriormente, se diseñó una arquitectura modular que permitiese separar las distintas fases del proceso de análisis y facilitar la incorporación de nuevas funcionalidades en futuras versiones.
+
+La arquitectura implementada divide el sistema en varios módulos especializados encargados de:
+
+* ejecutar las herramientas externas
+* procesar y normalizar los resultados obtenidos
+* correlacionar vulnerabilidades equivalentes
+* generar propiedades para Echidna
+* ejecutar pruebas de fuzzing
+* construir el informe final.
+
+Esta separación de responsabilidades permite reducir el acoplamiento entre componentes y facilita la mantenibilidad del sistema.
+
+### 4.2.1. Pipeline de análisis
+
+El flujo general seguido por EVMAudit comienza con la recepción del contrato inteligente que se desea analizar. Posteriormente, la herramienta ejecuta Slither y Mythril para obtener resultados procedentes de análisis estático y ejecución simbólica.
+
+Una vez finalizada esta fase, los resultados generados son normalizados y transformados a una estructura común. Posteriormente, se aplica el mecanismo de correlación implementado por EVMAudit con el objetivo de unificar vulnerabilidades equivalentes y aumentar la confianza de los hallazgos obtenidos.
+
+A partir de los resultados correlacionados, se generan automáticamente propiedades para Echidna, construyendo un wrapper específico que permite realizar una fase adicional de validación mediante fuzzing.
+
+Finalmente, la herramienta genera un informe consolidado que agrupa toda la información obtenida durante el proceso.
+
+!TODO: insertar diagrama del pipeline completo.
+
+!TODO: insertar referencia a la Figura X.
+
+### 4.2.2. Estructura modular
+
+La implementación de EVMAudit se organiza en varios módulos independientes, cada uno de ellos responsable de una fase concreta del análisis.
+
+Los principales componentes que forman la solución son:
+
+* Runner.
+* Normalizer.
+* Correlator.
+* SWC Catalog.
+* Echidna Adapter.
+* Reporter.
+* Exceptions.
+
+Esta organización permite modificar o ampliar cada componente de forma independiente, favoreciendo la reutilización y evolución futura de la herramienta.
+
+!TODO: insertar diagrama UML de paquetes.
+
+!TODO: revisar nombres definitivos de los módulos.
+
+### 4.2.3. Separación entre lógica de análisis e interfaces
+
+Uno de los principios de diseño adoptados durante el desarrollo fue desacoplar completamente la lógica de análisis de las interfaces de usuario.
+
+Por este motivo, EVMAudit fue implementada como una librería independiente, permitiendo que la funcionalidad principal pueda ser reutilizada desde distintos entornos sin necesidad de modificar el código interno.
+
+Esta decisión permitió desarrollar posteriormente una aplicación web que utiliza la librería como motor de análisis, demostrando la reutilización de la solución propuesta.
+
+Los detalles relacionados con la aplicación web desarrollada y los mecanismos de distribución utilizados se describen en los anexos del documento.
+
+!TODO: referencia cruzada al apartado 4.9.
+
+!TODO: referencia cruzada al Anexo A.
+
+!TODO: referencia cruzada al Anexo B.
+
+!TODO: referencia cruzada al Anexo C.
+
+
+\newpage
+
+
+# 4.3.Runner
+## 4.3. Módulo Runner
+
+El módulo Runner constituye la capa encargada de la interacción con las herramientas externas utilizadas durante el proceso de análisis. Su principal responsabilidad consiste en gestionar la ejecución de Slither, Mythril y Echidna, así como preparar el entorno necesario para garantizar la correcta realización del análisis.
+
+La existencia de un módulo específico para esta tarea permite desacoplar la lógica propia de EVMAudit de las particularidades de cada herramienta, facilitando la incorporación de nuevas soluciones de análisis en futuras versiones.
+
+!TODO: insertar referencia a la Figura X (diagrama de arquitectura).
+
+### 4.3.1. Responsabilidades del módulo
+
+Las principales responsabilidades implementadas por el módulo Runner son las siguientes:
+
+* detección automática del nombre del contrato
+* configuración de la versión del compilador Solidity
+* ejecución de Slither
+* ejecución de Mythril
+* ejecución de Echidna
+* almacenamiento de resultados intermedios
+* gestión de errores producidos durante la ejecución.
+
+Gracias a esta aproximación, el resto de módulos del sistema pueden trabajar de forma independiente sin necesidad de conocer los detalles específicos de cada herramienta externa.
+
+### 4.3.2. Detección automática del nombre del contrato
+
+Durante las primeras fases de desarrollo se observó que el nombre del fichero Solidity no siempre coincide con el nombre del contrato definido en su interior.
+
+Por este motivo se implementó un mecanismo de detección automática que analiza el código fuente y extrae el nombre real del contrato utilizando expresiones regulares.
+
+Esta decisión permite evitar errores durante las fases posteriores del análisis y elimina la necesidad de que el usuario proporcione manualmente dicha información.
+
+Además, este mecanismo resulta especialmente útil cuando la librería es utilizada desde otras aplicaciones externas, ya que reduce la cantidad de parámetros que deben proporcionarse.
+
+!TODO: insertar fragmento de código de `detect_contract_name()`.
+
+### 4.3.3. Configuración automática del compilador
+
+Las herramientas de análisis empleadas dependen de la versión del compilador Solidity utilizada por el contrato.
+
+Con el objetivo de garantizar la reproducibilidad del análisis y evitar incompatibilidades entre versiones, EVMAudit analiza automáticamente la directiva `pragma solidity` presente en el contrato y configura la versión correspondiente mediante la utilidad `solc-select`.
+
+Este mecanismo permite adaptar dinámicamente el entorno de ejecución y facilita el análisis de contratos desarrollados con diferentes versiones del lenguaje.
+
+!TODO: insertar referencia cruzada a la Sección 2.X (Solidity y compilador).
+
+!TODO: insertar fragmento de código de `_set_solc_version()`.
+
+### 4.3.4. Ejecución de Slither
+
+Slither constituye la primera herramienta utilizada durante el proceso de análisis debido a su rapidez y a la gran cantidad de detectores disponibles.
+
+La función encargada de su ejecución verifica previamente que la herramienta se encuentre instalada y posteriormente lanza el análisis sobre el contrato proporcionado.
+
+Una vez finalizada la ejecución, la salida obtenida se almacena en formato JSON para garantizar la trazabilidad de los resultados.
+
+Durante la implementación fue necesario contemplar ciertos comportamientos específicos de Slither. En particular, la herramienta devuelve el código de salida 255 cuando detecta vulnerabilidades, aunque dicho comportamiento no representa un error real.
+
+Por este motivo, EVMAudit incorpora una lógica específica para interpretar correctamente este caso y continuar con el proceso de análisis.
+
+!TODO: insertar fragmento de código de `run_slither()`.
+
+!TODO: referencia cruzada a la Sección 2.X (Slither).
+
+### 4.3.5. Ejecución de Mythril
+
+La segunda fase del análisis se realiza mediante Mythril, herramienta basada en ejecución simbólica.
+
+A diferencia de Slither, Mythril presenta tiempos de ejecución superiores y requiere parámetros adicionales relacionados con la profundidad máxima de exploración y el tiempo máximo permitido para completar el análisis.
+
+Durante el desarrollo se incorporaron mecanismos para:
+
+* limitar el tiempo máximo de ejecución
+* controlar posibles errores durante el análisis
+* procesar las salidas generadas por la herramienta
+* preservar los resultados originales.
+
+Estas medidas permiten evitar que un contrato especialmente complejo bloquee el proceso completo de análisis.
+
+!TODO: insertar fragmento de código de `run_mythril()`.
+
+!TODO: referencia cruzada a la Sección 2.X (Mythril).
+
+### 4.3.6. Ejecución de Echidna
+
+Una vez generadas las propiedades correspondientes, EVMAudit ejecuta Echidna para realizar una fase adicional de validación mediante fuzzing.
+
+La integración de Echidna presentó una complejidad superior a la observada en Slither y Mythril debido a ciertas particularidades de la herramienta y a las diferencias existentes entre versiones.
+
+Durante el desarrollo fue necesario incorporar mecanismos específicos para:
+
+* reconstruir nombres de propiedades
+* interpretar adecuadamente las salidas generadas
+* distinguir entre pruebas superadas y vulnerabilidades explotables
+* gestionar posibles inconsistencias en los resultados.
+
+Estas adaptaciones permitieron integrar Echidna dentro del flujo general de EVMAudit sin alterar el resto de componentes de la arquitectura.
+
+!TODO: insertar fragmento de código de `run_echidna()`.
+
+!TODO: referencia cruzada a la Sección 2.X (Echidna).
+
+### 4.3.7. Persistencia de resultados intermedios
+
+Con el fin de favorecer la trazabilidad y la reproducibilidad del análisis, EVMAudit almacena las salidas originales generadas por las distintas herramientas utilizadas.
+
+Esta decisión permite:
+
+* inspeccionar manualmente los resultados obtenidos
+* reproducir análisis posteriores
+* depurar posibles errores
+* conservar evidencias originales.
+
+La preservación de las salidas originales resulta especialmente relevante en el contexto de auditorías de seguridad, donde la trazabilidad de los hallazgos constituye un aspecto fundamental.
+
+
+
+\newpage
+
+
+# 4.4.Normalizer
+## 4.4. Módulo de normalización
+
+Uno de los principales problemas identificados durante el estudio de las herramientas existentes fue la heterogeneidad de los formatos utilizados para representar las vulnerabilidades detectadas.
+
+Slither y Mythril generan estructuras JSON completamente diferentes, tanto en la forma de representar la severidad como en la descripción de los hallazgos o la identificación de las localizaciones afectadas.
+
+Esta situación dificulta la comparación directa de resultados y hace necesaria una fase previa de transformación antes de poder aplicar mecanismos de correlación.
+
+Para resolver este problema se desarrolló un módulo de normalización encargado de transformar las salidas heterogéneas en una estructura común.
+
+### 4.4.1. Objetivos del proceso de normalización
+
+El proceso de normalización persigue varios objetivos:
+
+* unificar la representación de vulnerabilidades;
+* facilitar la correlación entre herramientas;
+* preservar las evidencias originales;
+* simplificar la generación posterior de informes;
+* desacoplar el resto de módulos de las particularidades de cada herramienta.
+
+Gracias a ello, los componentes posteriores pueden operar sobre una estructura homogénea independientemente del origen de los resultados.
+
+### 4.4.2. Estructura común de los hallazgos
+
+Cada vulnerabilidad normalizada se representa mediante un conjunto común de atributos.
+
+Entre los campos principales se encuentran:
+
+* título;
+* descripción;
+* severidad;
+* categoría;
+* contrato afectado;
+* función afectada;
+* localización;
+* identificador SWC;
+* herramienta de origen;
+* evidencia original.
+
+La inclusión de la salida original permite mantener la trazabilidad del análisis y facilita la revisión manual de los resultados.
+
+!TODO: insertar diagrama UML del objeto Finding.
+
+!TODO: revisar nombres exactos de los atributos.
+
+### 4.4.3. Normalización de resultados de Slither
+
+La función de normalización correspondiente a Slither transforma la estructura JSON generada por la herramienta y extrae la información relevante necesaria para construir los hallazgos comunes utilizados por EVMAudit.
+
+Durante esta fase se realiza además la asociación de los detectores propios de Slither con los identificadores SWC correspondientes.
+
+Este proceso permite traducir la terminología específica de Slither a una representación independiente de la herramienta utilizada.
+
+!TODO: insertar fragmento de código de `normalize_slither_output()`.
+
+### 4.4.4. Normalización de resultados de Mythril
+
+De forma análoga, la salida generada por Mythril es procesada para obtener una representación equivalente a la utilizada por Slither.
+
+La transformación permite unificar:
+
+* niveles de severidad;
+* nombres de vulnerabilidades;
+* identificadores SWC;
+* información contextual del hallazgo.
+
+Gracias a ello, ambas herramientas pueden ser tratadas posteriormente de forma transparente por el módulo de correlación.
+
+!TODO: insertar fragmento de código de `normalize_mythril_output()`.
+
+### 4.4.5. Clasificación de vulnerabilidades
+
+Además de unificar la representación de los hallazgos, el módulo de normalización clasifica las vulnerabilidades detectadas siguiendo las categorías definidas durante el estudio del estado del arte.
+
+Entre las categorías utilizadas se encuentran:
+
+* vulnerabilidades de control de acceso;
+* vulnerabilidades económicas;
+* vulnerabilidades relacionadas con la lógica de negocio;
+* vulnerabilidades asociadas a la ejecución del contrato.
+
+Esta clasificación permite mantener la coherencia entre la parte teórica del trabajo y la implementación desarrollada.
+
+!TODO: referencia cruzada a la Sección 2.X (clasificación de vulnerabilidades).
+
+### 4.4.6. Preservación de evidencias
+
+Uno de los principios adoptados durante el diseño de EVMAudit fue evitar la pérdida de información durante las fases intermedias del análisis.
+
+Por este motivo, cada hallazgo normalizado conserva una referencia a la salida original generada por la herramienta correspondiente.
+
+Esta decisión facilita:
+
+* la revisión manual por parte del auditor;
+* la trazabilidad del proceso;
+* la depuración de errores;
+* la reproducibilidad de los resultados.
+
+La conservación de evidencias resulta especialmente importante en entornos de auditoría y análisis forense, donde es necesario justificar el origen de cada vulnerabilidad identificada.
+
+!TODO: insertar diagrama del proceso de normalización.
+
+!TODO: insertar referencia a la Figura X.
+
+
+\newpage
+
+
+# 4.5.Correlator
+## 4.5. Módulo de correlación
+
+Una vez normalizados los resultados obtenidos por las herramientas de análisis, EVMAudit aplica un proceso de correlación cuyo objetivo consiste en identificar vulnerabilidades equivalentes detectadas por distintas herramientas y agruparlas en un único hallazgo.
+
+Este módulo constituye el núcleo de la contribución desarrollada en el presente Trabajo Fin de Máster, ya que permite reducir la redundancia de información y proporcionar una visión más estructurada de las vulnerabilidades detectadas.
+
+La necesidad de incorporar esta fase surge de una de las principales limitaciones observadas durante el estudio del estado del arte. Aunque herramientas como Slither y Mythril son capaces de detectar un gran número de vulnerabilidades, cada una de ellas presenta los resultados utilizando nomenclaturas y estructuras diferentes, generando además múltiples duplicidades que dificultan la revisión manual por parte del auditor.
+
+Por este motivo, EVMAudit incorpora un mecanismo propio de correlación encargado de consolidar la información procedente de ambas herramientas.
+
+### 4.5.1. Objetivos del proceso de correlación
+
+Los objetivos perseguidos por este módulo son los siguientes:
+
+* reducir la redundancia de información
+* agrupar vulnerabilidades equivalentes
+* incrementar la confianza en los hallazgos detectados
+* facilitar la interpretación de resultados
+* proporcionar una representación unificada de las vulnerabilidades.
+
+La correlación no pretende eliminar completamente los falsos positivos generados por las herramientas utilizadas, sino proporcionar una capa adicional de análisis que facilite el trabajo posterior del auditor.
+
+### 4.5.2. Estrategia de correlación
+
+El proceso implementado en EVMAudit se basa en una estrategia de correlación mediante reglas.
+
+Dos vulnerabilidades se consideran equivalentes cuando cumplen simultáneamente las siguientes condiciones:
+
+* afectan al mismo contrato
+* afectan a la misma función
+* poseen el mismo identificador SWC.
+
+De este modo, la clave utilizada para la correlación puede expresarse de la siguiente forma:
+
+```text
+Contrato + Función + SWC
+```
+
+Esta aproximación permite agrupar vulnerabilidades que, aunque procedan de herramientas diferentes, representan realmente el mismo problema de seguridad.
+
+La elección del identificador SWC como criterio común permite disponer de una referencia independiente de la nomenclatura utilizada por cada herramienta.
+
+!TODO: insertar referencia cruzada a la Sección 2.X (SWC Registry).
+
+!TODO: insertar pseudocódigo del algoritmo de correlación.
+
+### 4.5.3. Hallazgos confirmados y hallazgos detectados
+
+Una vez realizado el proceso de agrupación, EVMAudit distingue entre dos tipos de vulnerabilidades.
+
+#### Hallazgos confirmados
+
+Se consideran confirmados aquellos hallazgos que han sido detectados por más de una herramienta.
+
+La coincidencia entre distintas técnicas de análisis aumenta la confianza asociada a la vulnerabilidad y proporciona una mayor evidencia de su existencia.
+
+#### Hallazgos detectados
+
+Corresponden a vulnerabilidades identificadas por una única herramienta.
+
+Aunque presentan un menor nivel de confianza, siguen siendo incluidas en el informe final con el objetivo de evitar la pérdida de información potencialmente relevante.
+
+Esta clasificación permite priorizar posteriormente la revisión manual realizada por el auditor.
+
+### 4.5.4. Nivel de confianza
+
+Con el objetivo de proporcionar información adicional sobre la fiabilidad de cada hallazgo, EVMAudit asigna un nivel de confianza basado en las herramientas que han detectado la vulnerabilidad.
+
+La confianza asociada no representa una medida probabilística, sino un indicador orientativo derivado del número de herramientas que coinciden en el mismo hallazgo.
+
+Este mecanismo permite distinguir aquellas vulnerabilidades respaldadas por varias herramientas de aquellas detectadas únicamente por una de ellas.
+
+No obstante, la interpretación final continúa dependiendo del criterio del auditor, ya que la correlación implementada no sustituye la validación manual.
+
+!TODO: revisar nomenclatura definitiva utilizada por el código (`confidence_score`).
+
+### 4.5.5. Gestión de severidades
+
+Cuando una vulnerabilidad es detectada por varias herramientas, puede ocurrir que cada una de ellas asigne niveles de severidad diferentes.
+
+Para resolver esta situación, EVMAudit conserva la severidad más alta reportada por las herramientas implicadas.
+
+Este enfoque se adopta siguiendo un criterio conservador, priorizando la revisión de aquellas vulnerabilidades que potencialmente puedan tener un mayor impacto.
+
+### 4.5.6. Preservación de evidencias
+
+Durante el proceso de correlación se mantiene la información procedente de todas las herramientas que han participado en la detección.
+
+De esta forma, cada hallazgo correlacionado conserva:
+
+* las herramientas que lo han identificado
+* las evidencias originales asociadas
+* las localizaciones afectadas
+* la información contextual proporcionada por cada herramienta.
+
+Esta decisión garantiza la trazabilidad del análisis y facilita la revisión manual posterior.
+
+### 4.5.7. Beneficios del proceso de correlación
+
+La incorporación de esta fase proporciona diversas ventajas:
+
+* reducción de duplicidades
+* mejora de la legibilidad del informe final
+* aumento de la confianza en determinados hallazgos
+* simplificación del proceso de auditoría
+* independencia respecto a las herramientas utilizadas.
+
+La correlación constituye, por tanto, uno de los principales elementos diferenciadores de EVMAudit frente al uso individual de las herramientas integradas.
+
+!TODO: insertar diagrama del proceso de correlación.
+
+!TODO: insertar ejemplo real antes y después de la correlación.
+
+!TODO: insertar referencia a la Figura X.
+
+
+
+
+\newpage
+
+
+# 4.6.SWC Catalog
+## 4.6. Catálogo de vulnerabilidades SWC
+
+Con el objetivo de desacoplar la fase de detección de vulnerabilidades de las fases posteriores de validación y generación de pruebas, se implementó un catálogo de vulnerabilidades basado en la clasificación Smart Contract Weakness Classification (SWC).
+
+Este catálogo constituye una capa intermedia que permite asociar los hallazgos detectados con información adicional independiente de las herramientas utilizadas.
+
+Gracias a ello, EVMAudit puede reutilizar la información obtenida durante el proceso de correlación y emplearla posteriormente para la generación automática de propiedades orientadas a Echidna.
+
+### 4.6.1. Objetivos del catálogo
+
+El catálogo desarrollado persigue los siguientes objetivos:
+
+* unificar la representación de vulnerabilidades
+* desacoplar la lógica de generación de pruebas
+* facilitar la incorporación de nuevas plantillas
+* centralizar información sobre las debilidades conocidas
+* favorecer la mantenibilidad del sistema.
+
+Esta aproximación permite que las fases posteriores del análisis no dependan directamente de las particularidades de Slither o Mythril.
+
+### 4.6.2. Estructura del catálogo
+
+Cada entrada del catálogo contiene información asociada a una vulnerabilidad concreta.
+
+Entre los datos almacenados se encuentran:
+
+* identificador SWC
+* nombre de la vulnerabilidad
+* descripción
+* severidad
+* plantilla asociada
+* limitaciones conocidas
+* posibilidad de validación automática.
+
+La información almacenada permite enriquecer los hallazgos correlacionados y proporcionar información adicional durante las fases posteriores del análisis.
+
+!TODO: insertar tabla con varios ejemplos del catálogo.
+
+### 4.6.3. Asociación entre detectores y SWC
+
+Una de las principales dificultades observadas durante el desarrollo fue la ausencia de una correspondencia directa entre los detectores utilizados por cada herramienta.
+
+Para resolver este problema se definieron tablas de asociación que permiten traducir los detectores específicos a identificadores SWC.
+
+Gracias a esta estrategia es posible utilizar un lenguaje común durante todo el proceso de análisis y evitar dependencias directas respecto a la nomenclatura propia de cada herramienta.
+
+Esta decisión resulta especialmente relevante para el módulo de correlación descrito anteriormente.
+
+!TODO: insertar referencia cruzada a la Sección 4.4.
+
+### 4.6.4. Reutilización del catálogo
+
+Además de servir como mecanismo de clasificación, el catálogo es utilizado posteriormente durante la generación de propiedades para Echidna.
+
+A partir del identificador SWC asociado a cada vulnerabilidad, EVMAudit recupera automáticamente la plantilla correspondiente y genera las estructuras necesarias para la fase de fuzzing.
+
+Esta aproximación permite separar claramente:
+
+* detección
+* correlación
+* generación de pruebas.
+
+La independencia entre estas fases facilita futuras ampliaciones y simplifica el mantenimiento del sistema.
+
+### 4.6.5. Extensibilidad del catálogo
+
+La utilización de un catálogo independiente permite incorporar nuevas vulnerabilidades sin necesidad de modificar el resto de módulos implementados.
+
+De esta forma, la incorporación de nuevas entradas únicamente requiere:
+
+1. definir el identificador SWC correspondiente
+2. añadir la información descriptiva asociada
+3. incorporar la plantilla de generación deseada.
+
+Este diseño favorece la evolución futura de la herramienta y permite adaptar EVMAudit a nuevas versiones del ecosistema Ethereum.
+
+!TODO: insertar diagrama de relación entre SWC Catalog y Echidna Adapter.
+
+!TODO: insertar referencia a la Figura X.
+
+
+\newpage
+
+
+# 4.7.Echidna adaptar
+## 4.7. Adaptador para Echidna y generación automática de propiedades
+
+Una vez finalizado el proceso de correlación, EVMAudit incorpora una fase adicional orientada a la validación dinámica de determinadas vulnerabilidades mediante fuzzing.
+
+Para ello, se desarrolló un adaptador específico encargado de transformar los hallazgos correlacionados en propiedades compatibles con Echidna, permitiendo complementar los resultados obtenidos mediante análisis estático y ejecución simbólica.
+
+La incorporación de esta fase responde a uno de los objetivos específicos planteados en el trabajo, consistente en combinar distintas técnicas de análisis con el fin de obtener una visión más completa del estado de seguridad del contrato analizado.
+
+!TODO: referencia cruzada a la Sección 3.2 (objetivos específicos).
+
+### 4.7.1. Objetivos del adaptador
+
+El módulo desarrollado persigue los siguientes objetivos:
+
+* reutilizar la información obtenida durante la fase de correlación
+* generar automáticamente propiedades para Echidna
+* reducir la intervención manual del auditor
+* proporcionar una fase adicional de validación
+* mantener desacopladas las distintas fases del análisis.
+
+La existencia de este componente permite integrar el fuzzing dentro del pipeline general de EVMAudit sin introducir dependencias directas entre las herramientas utilizadas.
+
+### 4.7.2. Generación de wrappers
+
+Echidna requiere que las propiedades de seguridad estén implementadas como funciones Solidity dentro de un contrato específico.
+
+Con el objetivo de automatizar este proceso, EVMAudit genera dinámicamente un contrato wrapper que hereda del contrato original e incorpora las propiedades correspondientes a las vulnerabilidades detectadas.
+
+El proceso seguido puede resumirse en las siguientes etapas:
+
+1. Recepción de los hallazgos correlacionados.
+2. Consulta del catálogo SWC.
+3. Obtención de las plantillas asociadas.
+4. Sustitución de parámetros.
+5. Generación del wrapper final.
+6. Ejecución de Echidna.
+
+Gracias a esta aproximación, la generación de pruebas se realiza de forma completamente automática.
+
+!TODO: insertar diagrama del proceso de generación de wrappers.
+
+!TODO: insertar referencia a la Figura X.
+
+### 4.7.3. Plantillas de propiedades
+
+Cada vulnerabilidad soportada dispone de una plantilla específica que describe la propiedad que deberá ser evaluada por Echidna.
+
+Estas plantillas permiten traducir información abstracta procedente del análisis estático a estructuras ejecutables compatibles con el motor de fuzzing.
+
+La utilización de plantillas aporta varias ventajas:
+
+* reutilización de código
+* independencia respecto a las herramientas de detección
+* facilidad de mantenimiento
+* incorporación sencilla de nuevas vulnerabilidades.
+
+!TODO: insertar ejemplo de una plantilla real.
+
+### 4.7.4. Vulnerabilidades testables y no testables
+
+Durante el desarrollo se observó que no todas las vulnerabilidades pueden verificarse automáticamente mediante fuzzing.
+
+Por este motivo, el adaptador distingue entre:
+
+#### Vulnerabilidades testables
+
+Son aquellas que pueden expresarse mediante propiedades directamente evaluables por Echidna.
+
+Algunos ejemplos incluyen:
+
+* determinadas restricciones de acceso
+* invariantes económicas
+* comprobaciones relacionadas con balances
+* validaciones de lógica de negocio.
+
+#### Vulnerabilidades no testables
+
+Corresponden a aquellas situaciones cuya explotación requiere condiciones externas o escenarios complejos difíciles de reproducir automáticamente.
+
+Entre ellas destacan:
+
+* ataques de reentrancia
+* determinados problemas de interacción entre contratos
+* escenarios dependientes del contexto de despliegue.
+
+En estos casos, EVMAudit conserva la información asociada a la vulnerabilidad y genera advertencias específicas, pero no intenta forzar una validación automática que pudiera producir resultados incorrectos.
+
+Esta decisión se adoptó con el objetivo de evitar conclusiones erróneas y mantener un comportamiento conservador.
+
+### 4.7.5. Integración con Echidna
+
+Una vez generado el wrapper correspondiente, el módulo Runner ejecuta Echidna y recupera los resultados obtenidos durante el proceso de fuzzing.
+
+La salida generada por la herramienta se procesa posteriormente para incorporarla al informe final.
+
+De esta manera, EVMAudit consigue integrar tres técnicas de análisis diferentes:
+
+* análisis estático
+* ejecución simbólica
+* fuzzing.
+
+La combinación de estas aproximaciones permite aprovechar las fortalezas de cada una de ellas y compensar parcialmente sus limitaciones individuales.
+
+!TODO: referencia cruzada a la Sección 2.X (análisis estático).
+
+!TODO: referencia cruzada a la Sección 2.X (ejecución simbólica).
+
+!TODO: referencia cruzada a la Sección 2.X (fuzzing).
+
+### 4.7.6. Beneficios de la generación automática
+
+La generación automática de propiedades aporta diversas ventajas:
+
+* reducción del trabajo manual
+* mayor reutilización de resultados
+* integración transparente con Echidna
+* facilidad para incorporar nuevas vulnerabilidades
+* mejora del flujo general de análisis.
+
+No obstante, la validación automática obtenida no sustituye la revisión manual realizada por el auditor, sino que constituye una capa adicional de apoyo.
+
+
+
+\newpage
+
+
+# 4.8.Gestion de errores
+## 4.8. Gestión de errores y robustez de la solución
+
+Debido a la dependencia de herramientas externas y a la complejidad del proceso de análisis, durante el diseño de EVMAudit se prestó especial atención a la gestión de errores y a la robustez del sistema.
+
+La existencia de múltiples componentes externos hace necesario disponer de mecanismos que permitan detectar y manejar situaciones anómalas sin comprometer el funcionamiento global de la herramienta.
+
+### 4.8.1. Necesidad de una gestión centralizada
+
+Durante el proceso de análisis pueden producirse diferentes tipos de errores:
+
+* ausencia de herramientas instaladas
+* incompatibilidades entre versiones
+* contratos inválidos
+* timeouts durante el análisis
+* errores internos de las herramientas utilizadas
+* problemas durante la generación de wrappers.
+
+La gestión individual de cada una de estas situaciones complicaría considerablemente el mantenimiento del sistema.
+
+Por este motivo se implementó una jerarquía de excepciones propia que centraliza el tratamiento de los errores.
+
+### 4.8.2. Jerarquía de excepciones
+
+La arquitectura implementada incorpora una clase base común a partir de la cual se derivan los distintos tipos de error utilizados por EVMAudit.
+
+Esta aproximación permite distinguir claramente entre:
+
+* errores de configuración
+* errores de análisis
+* errores producidos por herramientas externas.
+
+La utilización de excepciones específicas simplifica la depuración y mejora la legibilidad del código.
+
+!TODO: insertar diagrama UML de excepciones.
+
+### 4.8.3. Detección de dependencias externas
+
+Antes de ejecutar las herramientas integradas, EVMAudit verifica que las dependencias necesarias se encuentren correctamente instaladas.
+
+Este mecanismo permite detectar problemas de configuración de forma temprana y proporcionar mensajes de error más descriptivos.
+
+La validación previa evita que el proceso de análisis falle de forma inesperada en fases posteriores.
+
+### 4.8.4. Gestión de timeouts
+
+Algunas herramientas, especialmente aquellas basadas en ejecución simbólica, pueden presentar tiempos de análisis elevados dependiendo de la complejidad del contrato.
+
+Con el objetivo de evitar bloqueos indefinidos, EVMAudit incorpora límites temporales para determinadas operaciones.
+
+La utilización de timeouts permite:
+
+* mejorar la estabilidad del sistema
+* evitar consumos excesivos de recursos
+* garantizar la finalización del análisis.
+
+### 4.8.5. Preservación de resultados ante errores
+
+Cuando se produce un fallo durante alguna fase del análisis, EVMAudit intenta conservar la información obtenida hasta ese momento.
+
+Esta estrategia permite:
+
+* facilitar la depuración
+* conservar evidencias parciales
+* evitar la pérdida completa del trabajo realizado.
+
+La preservación de resultados resulta especialmente relevante en entornos de auditoría, donde incluso los análisis incompletos pueden aportar información útil.
+
+### 4.8.6. Robustez frente a comportamientos específicos de las herramientas
+
+Durante el desarrollo se detectaron determinados comportamientos particulares en las herramientas integradas.
+
+Entre ellos destacan:
+
+* códigos de retorno no convencionales
+* formatos de salida inconsistentes
+* diferencias entre versiones
+* mensajes mezclados con datos estructurados.
+
+Para hacer frente a estas situaciones se implementaron mecanismos específicos de adaptación y validación.
+
+Estas medidas permitieron integrar las herramientas seleccionadas sin modificar su funcionamiento interno.
+
+### 4.8.7. Beneficios de la estrategia adoptada
+
+La incorporación de mecanismos de gestión de errores proporciona diversas ventajas:
+
+* mayor estabilidad
+* mejora de la experiencia de usuario
+* facilidad de mantenimiento
+* simplificación de la depuración
+* incremento de la robustez general del sistema.
+
+La existencia de una capa de gestión de errores independiente contribuye además a mantener desacoplados los distintos módulos que forman la arquitectura de EVMAudit.
+
+!TODO: insertar referencia cruzada al módulo Runner.
+
+!TODO: insertar referencia cruzada al diagrama de arquitectura general.
+
+
+\newpage
+
+
+# 4.9.Integración y distribución
+## 4.9. Distribución e integración de la solución
+
+Uno de los objetivos perseguidos durante el desarrollo de EVMAudit fue diseñar una solución desacoplada de cualquier interfaz concreta y suficientemente flexible para poder ser reutilizada en distintos contextos.
+
+Por este motivo, la lógica principal de análisis se implementó como una librería independiente, separando completamente las funcionalidades relacionadas con la detección y procesamiento de vulnerabilidades de los mecanismos de interacción con el usuario.
+
+Esta decisión permitió demostrar la reutilización de la solución desarrollada mediante su integración en otros componentes software sin necesidad de modificar el núcleo de la herramienta.
+
+### 4.9.1. Distribución de la librería
+
+La implementación de EVMAudit como una librería independiente permite desacoplar el motor de análisis de cualquier entorno concreto de ejecución.
+
+Este enfoque proporciona diversas ventajas:
+
+* reutilización de la herramienta desde otros proyectos
+* separación entre lógica de negocio e interfaces de usuario
+* facilidad de mantenimiento
+* posibilidad de incorporar nuevas interfaces en el futuro.
+
+La distribución de la librería permite que el proceso de análisis pueda ejecutarse desde aplicaciones externas sin necesidad de duplicar funcionalidades.
+
+!TODO: referencia cruzada al Anexo A (publicación en PyPI).
+
+### 4.9.2. Aplicación web como caso de uso
+
+Con el objetivo de validar la reutilización de la arquitectura desarrollada, se implementó una aplicación web que utiliza EVMAudit como motor de análisis.
+
+La aplicación no implementa mecanismos propios de detección de vulnerabilidades, sino que delega completamente las tareas de análisis en la librería desarrollada.
+
+Esta aproximación permite mantener una única implementación del proceso de análisis y garantiza la consistencia de los resultados obtenidos.
+
+La aplicación actúa, por tanto, como una capa de presentación encargada de:
+
+* recibir contratos inteligentes proporcionados por el usuario
+* invocar las funciones de EVMAudit
+* mostrar el progreso del análisis
+* presentar los resultados obtenidos.
+
+De esta forma, la aplicación web constituye una demostración práctica de la reutilización de la solución desarrollada.
+
+### 4.9.3. Flujo de funcionamiento de la aplicación
+
+La aplicación desarrollada permite dos mecanismos de entrada:
+
+* carga de contratos Solidity mediante fichero
+* introducción directa del código fuente a través de la interfaz web.
+
+Una vez recibido el contrato, la aplicación inicia el proceso de análisis y ejecuta internamente el pipeline implementado por EVMAudit.
+
+Las distintas fases del proceso se ejecutan de forma secuencial:
+
+1. ejecución de Slither
+2. ejecución de Mythril
+3. normalización de resultados
+4. correlación de vulnerabilidades
+5. generación de propiedades
+6. ejecución de Echidna
+7. generación del informe final.
+
+Durante la ejecución, la aplicación informa al usuario del progreso alcanzado y permite recuperar el informe una vez finalizado el análisis.
+
+Este comportamiento demuestra que la arquitectura modular adoptada permite integrar EVMAudit en aplicaciones externas sin modificar la lógica interna del sistema.
+
+!TODO: insertar diagrama simplificado de la aplicación web.
+
+!TODO: insertar captura de pantalla de la interfaz.
+
+!TODO: referencia cruzada al Anexo B (aplicación web).
+
+### 4.9.4. Separación entre presentación y lógica de análisis
+
+La decisión de implementar EVMAudit como una librería independiente permite mantener separadas las responsabilidades del sistema.
+
+Mientras que la librería se encarga de:
+
+* ejecutar herramientas externas
+* procesar resultados
+* correlacionar vulnerabilidades
+* generar informes
+
+la aplicación web únicamente proporciona los mecanismos de interacción con el usuario.
+
+Esta separación favorece:
+
+* la mantenibilidad del sistema
+* la reutilización de la solución
+* la incorporación de nuevas interfaces
+* la evolución independiente de cada componente.
+
+En consecuencia, la aplicación web debe entenderse como una demostración de la capacidad de integración de EVMAudit y no como la contribución principal del trabajo.
+
+### 4.9.5. Consideraciones sobre infraestructura
+
+Los aspectos relacionados con la publicación de la librería, el despliegue de la aplicación y la infraestructura utilizada no constituyen el núcleo de la contribución desarrollada en este Trabajo Fin de Máster.
+
+Por este motivo, dichos elementos se incluyen en los anexos del documento.
+
+!TODO: referencia cruzada al Anexo A (PyPI).
+
+!TODO: referencia cruzada al Anexo B (Aplicación web).
+
+!TODO: referencia cruzada al Anexo C (Docker).
+
+!TODO: referencia cruzada al Anexo D (Despliegue).
+
+
+
+\newpage
+
 
 # 4.10. Flujo completo
 ## 4.10. Flujo completo del análisis
@@ -728,6 +1606,11 @@ La secuencia completa permite combinar distintas técnicas de análisis dentro d
 !TODO: insertar referencia a la Figura X.
 
 !TODO: insertar referencia cruzada a las secciones 4.3 a 4.9.
+
+
+\newpage
+
+
 # 4.11.Evaluación experimental
 ## 4.11. Flujo completo del análisis
 
@@ -1008,813 +1891,15 @@ No obstante, algunas vulnerabilidades no pudieron validarse automáticamente deb
 El análisis realizado demuestra que EVMAudit puede aplicarse también sobre contratos reales y no únicamente sobre ejemplos académicos diseñados específicamente para contener vulnerabilidades.
 
 !TODO: indicar limitaciones observadas durante el análisis.
-# 4.2.Arquitectura
-## 4.2. Arquitectura general de EVMAudit
 
-Con el objetivo de satisfacer los requisitos definidos anteriormente, se diseñó una arquitectura modular que permitiese separar las distintas fases del proceso de análisis y facilitar la incorporación de nuevas funcionalidades en futuras versiones.
 
-La arquitectura implementada divide el sistema en varios módulos especializados encargados de:
+\newpage
 
-* ejecutar las herramientas externas
-* procesar y normalizar los resultados obtenidos
-* correlacionar vulnerabilidades equivalentes
-* generar propiedades para Echidna
-* ejecutar pruebas de fuzzing
-* construir el informe final.
 
-Esta separación de responsabilidades permite reducir el acoplamiento entre componentes y facilita la mantenibilidad del sistema.
 
-### 4.2.1. Pipeline de análisis
 
-El flujo general seguido por EVMAudit comienza con la recepción del contrato inteligente que se desea analizar. Posteriormente, la herramienta ejecuta Slither y Mythril para obtener resultados procedentes de análisis estático y ejecución simbólica.
+\newpage
 
-Una vez finalizada esta fase, los resultados generados son normalizados y transformados a una estructura común. Posteriormente, se aplica el mecanismo de correlación implementado por EVMAudit con el objetivo de unificar vulnerabilidades equivalentes y aumentar la confianza de los hallazgos obtenidos.
-
-A partir de los resultados correlacionados, se generan automáticamente propiedades para Echidna, construyendo un wrapper específico que permite realizar una fase adicional de validación mediante fuzzing.
-
-Finalmente, la herramienta genera un informe consolidado que agrupa toda la información obtenida durante el proceso.
-
-!TODO: insertar diagrama del pipeline completo.
-
-!TODO: insertar referencia a la Figura X.
-
-### 4.2.2. Estructura modular
-
-La implementación de EVMAudit se organiza en varios módulos independientes, cada uno de ellos responsable de una fase concreta del análisis.
-
-Los principales componentes que forman la solución son:
-
-* Runner.
-* Normalizer.
-* Correlator.
-* SWC Catalog.
-* Echidna Adapter.
-* Reporter.
-* Exceptions.
-
-Esta organización permite modificar o ampliar cada componente de forma independiente, favoreciendo la reutilización y evolución futura de la herramienta.
-
-!TODO: insertar diagrama UML de paquetes.
-
-!TODO: revisar nombres definitivos de los módulos.
-
-### 4.2.3. Separación entre lógica de análisis e interfaces
-
-Uno de los principios de diseño adoptados durante el desarrollo fue desacoplar completamente la lógica de análisis de las interfaces de usuario.
-
-Por este motivo, EVMAudit fue implementada como una librería independiente, permitiendo que la funcionalidad principal pueda ser reutilizada desde distintos entornos sin necesidad de modificar el código interno.
-
-Esta decisión permitió desarrollar posteriormente una aplicación web que utiliza la librería como motor de análisis, demostrando la reutilización de la solución propuesta.
-
-Los detalles relacionados con la aplicación web desarrollada y los mecanismos de distribución utilizados se describen en los anexos del documento.
-
-!TODO: referencia cruzada al apartado 4.9.
-
-!TODO: referencia cruzada al Anexo A.
-
-!TODO: referencia cruzada al Anexo B.
-
-!TODO: referencia cruzada al Anexo C.
-# 4.3.Runner
-## 4.3. Módulo Runner
-
-El módulo Runner constituye la capa encargada de la interacción con las herramientas externas utilizadas durante el proceso de análisis. Su principal responsabilidad consiste en gestionar la ejecución de Slither, Mythril y Echidna, así como preparar el entorno necesario para garantizar la correcta realización del análisis.
-
-La existencia de un módulo específico para esta tarea permite desacoplar la lógica propia de EVMAudit de las particularidades de cada herramienta, facilitando la incorporación de nuevas soluciones de análisis en futuras versiones.
-
-!TODO: insertar referencia a la Figura X (diagrama de arquitectura).
-
-### 4.3.1. Responsabilidades del módulo
-
-Las principales responsabilidades implementadas por el módulo Runner son las siguientes:
-
-* detección automática del nombre del contrato
-* configuración de la versión del compilador Solidity
-* ejecución de Slither
-* ejecución de Mythril
-* ejecución de Echidna
-* almacenamiento de resultados intermedios
-* gestión de errores producidos durante la ejecución.
-
-Gracias a esta aproximación, el resto de módulos del sistema pueden trabajar de forma independiente sin necesidad de conocer los detalles específicos de cada herramienta externa.
-
-### 4.3.2. Detección automática del nombre del contrato
-
-Durante las primeras fases de desarrollo se observó que el nombre del fichero Solidity no siempre coincide con el nombre del contrato definido en su interior.
-
-Por este motivo se implementó un mecanismo de detección automática que analiza el código fuente y extrae el nombre real del contrato utilizando expresiones regulares.
-
-Esta decisión permite evitar errores durante las fases posteriores del análisis y elimina la necesidad de que el usuario proporcione manualmente dicha información.
-
-Además, este mecanismo resulta especialmente útil cuando la librería es utilizada desde otras aplicaciones externas, ya que reduce la cantidad de parámetros que deben proporcionarse.
-
-!TODO: insertar fragmento de código de `detect_contract_name()`.
-
-### 4.3.3. Configuración automática del compilador
-
-Las herramientas de análisis empleadas dependen de la versión del compilador Solidity utilizada por el contrato.
-
-Con el objetivo de garantizar la reproducibilidad del análisis y evitar incompatibilidades entre versiones, EVMAudit analiza automáticamente la directiva `pragma solidity` presente en el contrato y configura la versión correspondiente mediante la utilidad `solc-select`.
-
-Este mecanismo permite adaptar dinámicamente el entorno de ejecución y facilita el análisis de contratos desarrollados con diferentes versiones del lenguaje.
-
-!TODO: insertar referencia cruzada a la Sección 2.X (Solidity y compilador).
-
-!TODO: insertar fragmento de código de `_set_solc_version()`.
-
-### 4.3.4. Ejecución de Slither
-
-Slither constituye la primera herramienta utilizada durante el proceso de análisis debido a su rapidez y a la gran cantidad de detectores disponibles.
-
-La función encargada de su ejecución verifica previamente que la herramienta se encuentre instalada y posteriormente lanza el análisis sobre el contrato proporcionado.
-
-Una vez finalizada la ejecución, la salida obtenida se almacena en formato JSON para garantizar la trazabilidad de los resultados.
-
-Durante la implementación fue necesario contemplar ciertos comportamientos específicos de Slither. En particular, la herramienta devuelve el código de salida 255 cuando detecta vulnerabilidades, aunque dicho comportamiento no representa un error real.
-
-Por este motivo, EVMAudit incorpora una lógica específica para interpretar correctamente este caso y continuar con el proceso de análisis.
-
-!TODO: insertar fragmento de código de `run_slither()`.
-
-!TODO: referencia cruzada a la Sección 2.X (Slither).
-
-### 4.3.5. Ejecución de Mythril
-
-La segunda fase del análisis se realiza mediante Mythril, herramienta basada en ejecución simbólica.
-
-A diferencia de Slither, Mythril presenta tiempos de ejecución superiores y requiere parámetros adicionales relacionados con la profundidad máxima de exploración y el tiempo máximo permitido para completar el análisis.
-
-Durante el desarrollo se incorporaron mecanismos para:
-
-* limitar el tiempo máximo de ejecución
-* controlar posibles errores durante el análisis
-* procesar las salidas generadas por la herramienta
-* preservar los resultados originales.
-
-Estas medidas permiten evitar que un contrato especialmente complejo bloquee el proceso completo de análisis.
-
-!TODO: insertar fragmento de código de `run_mythril()`.
-
-!TODO: referencia cruzada a la Sección 2.X (Mythril).
-
-### 4.3.6. Ejecución de Echidna
-
-Una vez generadas las propiedades correspondientes, EVMAudit ejecuta Echidna para realizar una fase adicional de validación mediante fuzzing.
-
-La integración de Echidna presentó una complejidad superior a la observada en Slither y Mythril debido a ciertas particularidades de la herramienta y a las diferencias existentes entre versiones.
-
-Durante el desarrollo fue necesario incorporar mecanismos específicos para:
-
-* reconstruir nombres de propiedades
-* interpretar adecuadamente las salidas generadas
-* distinguir entre pruebas superadas y vulnerabilidades explotables
-* gestionar posibles inconsistencias en los resultados.
-
-Estas adaptaciones permitieron integrar Echidna dentro del flujo general de EVMAudit sin alterar el resto de componentes de la arquitectura.
-
-!TODO: insertar fragmento de código de `run_echidna()`.
-
-!TODO: referencia cruzada a la Sección 2.X (Echidna).
-
-### 4.3.7. Persistencia de resultados intermedios
-
-Con el fin de favorecer la trazabilidad y la reproducibilidad del análisis, EVMAudit almacena las salidas originales generadas por las distintas herramientas utilizadas.
-
-Esta decisión permite:
-
-* inspeccionar manualmente los resultados obtenidos
-* reproducir análisis posteriores
-* depurar posibles errores
-* conservar evidencias originales.
-
-La preservación de las salidas originales resulta especialmente relevante en el contexto de auditorías de seguridad, donde la trazabilidad de los hallazgos constituye un aspecto fundamental.
-
-# 4.4.Normalizer
-## 4.4. Módulo de normalización
-
-Uno de los principales problemas identificados durante el estudio de las herramientas existentes fue la heterogeneidad de los formatos utilizados para representar las vulnerabilidades detectadas.
-
-Slither y Mythril generan estructuras JSON completamente diferentes, tanto en la forma de representar la severidad como en la descripción de los hallazgos o la identificación de las localizaciones afectadas.
-
-Esta situación dificulta la comparación directa de resultados y hace necesaria una fase previa de transformación antes de poder aplicar mecanismos de correlación.
-
-Para resolver este problema se desarrolló un módulo de normalización encargado de transformar las salidas heterogéneas en una estructura común.
-
-### 4.4.1. Objetivos del proceso de normalización
-
-El proceso de normalización persigue varios objetivos:
-
-* unificar la representación de vulnerabilidades;
-* facilitar la correlación entre herramientas;
-* preservar las evidencias originales;
-* simplificar la generación posterior de informes;
-* desacoplar el resto de módulos de las particularidades de cada herramienta.
-
-Gracias a ello, los componentes posteriores pueden operar sobre una estructura homogénea independientemente del origen de los resultados.
-
-### 4.4.2. Estructura común de los hallazgos
-
-Cada vulnerabilidad normalizada se representa mediante un conjunto común de atributos.
-
-Entre los campos principales se encuentran:
-
-* título;
-* descripción;
-* severidad;
-* categoría;
-* contrato afectado;
-* función afectada;
-* localización;
-* identificador SWC;
-* herramienta de origen;
-* evidencia original.
-
-La inclusión de la salida original permite mantener la trazabilidad del análisis y facilita la revisión manual de los resultados.
-
-!TODO: insertar diagrama UML del objeto Finding.
-
-!TODO: revisar nombres exactos de los atributos.
-
-### 4.4.3. Normalización de resultados de Slither
-
-La función de normalización correspondiente a Slither transforma la estructura JSON generada por la herramienta y extrae la información relevante necesaria para construir los hallazgos comunes utilizados por EVMAudit.
-
-Durante esta fase se realiza además la asociación de los detectores propios de Slither con los identificadores SWC correspondientes.
-
-Este proceso permite traducir la terminología específica de Slither a una representación independiente de la herramienta utilizada.
-
-!TODO: insertar fragmento de código de `normalize_slither_output()`.
-
-### 4.4.4. Normalización de resultados de Mythril
-
-De forma análoga, la salida generada por Mythril es procesada para obtener una representación equivalente a la utilizada por Slither.
-
-La transformación permite unificar:
-
-* niveles de severidad;
-* nombres de vulnerabilidades;
-* identificadores SWC;
-* información contextual del hallazgo.
-
-Gracias a ello, ambas herramientas pueden ser tratadas posteriormente de forma transparente por el módulo de correlación.
-
-!TODO: insertar fragmento de código de `normalize_mythril_output()`.
-
-### 4.4.5. Clasificación de vulnerabilidades
-
-Además de unificar la representación de los hallazgos, el módulo de normalización clasifica las vulnerabilidades detectadas siguiendo las categorías definidas durante el estudio del estado del arte.
-
-Entre las categorías utilizadas se encuentran:
-
-* vulnerabilidades de control de acceso;
-* vulnerabilidades económicas;
-* vulnerabilidades relacionadas con la lógica de negocio;
-* vulnerabilidades asociadas a la ejecución del contrato.
-
-Esta clasificación permite mantener la coherencia entre la parte teórica del trabajo y la implementación desarrollada.
-
-!TODO: referencia cruzada a la Sección 2.X (clasificación de vulnerabilidades).
-
-### 4.4.6. Preservación de evidencias
-
-Uno de los principios adoptados durante el diseño de EVMAudit fue evitar la pérdida de información durante las fases intermedias del análisis.
-
-Por este motivo, cada hallazgo normalizado conserva una referencia a la salida original generada por la herramienta correspondiente.
-
-Esta decisión facilita:
-
-* la revisión manual por parte del auditor;
-* la trazabilidad del proceso;
-* la depuración de errores;
-* la reproducibilidad de los resultados.
-
-La conservación de evidencias resulta especialmente importante en entornos de auditoría y análisis forense, donde es necesario justificar el origen de cada vulnerabilidad identificada.
-
-!TODO: insertar diagrama del proceso de normalización.
-
-!TODO: insertar referencia a la Figura X.
-# 4.5.Correlator
-## 4.5. Módulo de correlación
-
-Una vez normalizados los resultados obtenidos por las herramientas de análisis, EVMAudit aplica un proceso de correlación cuyo objetivo consiste en identificar vulnerabilidades equivalentes detectadas por distintas herramientas y agruparlas en un único hallazgo.
-
-Este módulo constituye el núcleo de la contribución desarrollada en el presente Trabajo Fin de Máster, ya que permite reducir la redundancia de información y proporcionar una visión más estructurada de las vulnerabilidades detectadas.
-
-La necesidad de incorporar esta fase surge de una de las principales limitaciones observadas durante el estudio del estado del arte. Aunque herramientas como Slither y Mythril son capaces de detectar un gran número de vulnerabilidades, cada una de ellas presenta los resultados utilizando nomenclaturas y estructuras diferentes, generando además múltiples duplicidades que dificultan la revisión manual por parte del auditor.
-
-Por este motivo, EVMAudit incorpora un mecanismo propio de correlación encargado de consolidar la información procedente de ambas herramientas.
-
-### 4.5.1. Objetivos del proceso de correlación
-
-Los objetivos perseguidos por este módulo son los siguientes:
-
-* reducir la redundancia de información
-* agrupar vulnerabilidades equivalentes
-* incrementar la confianza en los hallazgos detectados
-* facilitar la interpretación de resultados
-* proporcionar una representación unificada de las vulnerabilidades.
-
-La correlación no pretende eliminar completamente los falsos positivos generados por las herramientas utilizadas, sino proporcionar una capa adicional de análisis que facilite el trabajo posterior del auditor.
-
-### 4.5.2. Estrategia de correlación
-
-El proceso implementado en EVMAudit se basa en una estrategia de correlación mediante reglas.
-
-Dos vulnerabilidades se consideran equivalentes cuando cumplen simultáneamente las siguientes condiciones:
-
-* afectan al mismo contrato
-* afectan a la misma función
-* poseen el mismo identificador SWC.
-
-De este modo, la clave utilizada para la correlación puede expresarse de la siguiente forma:
-
-```text
-Contrato + Función + SWC
-```
-
-Esta aproximación permite agrupar vulnerabilidades que, aunque procedan de herramientas diferentes, representan realmente el mismo problema de seguridad.
-
-La elección del identificador SWC como criterio común permite disponer de una referencia independiente de la nomenclatura utilizada por cada herramienta.
-
-!TODO: insertar referencia cruzada a la Sección 2.X (SWC Registry).
-
-!TODO: insertar pseudocódigo del algoritmo de correlación.
-
-### 4.5.3. Hallazgos confirmados y hallazgos detectados
-
-Una vez realizado el proceso de agrupación, EVMAudit distingue entre dos tipos de vulnerabilidades.
-
-#### Hallazgos confirmados
-
-Se consideran confirmados aquellos hallazgos que han sido detectados por más de una herramienta.
-
-La coincidencia entre distintas técnicas de análisis aumenta la confianza asociada a la vulnerabilidad y proporciona una mayor evidencia de su existencia.
-
-#### Hallazgos detectados
-
-Corresponden a vulnerabilidades identificadas por una única herramienta.
-
-Aunque presentan un menor nivel de confianza, siguen siendo incluidas en el informe final con el objetivo de evitar la pérdida de información potencialmente relevante.
-
-Esta clasificación permite priorizar posteriormente la revisión manual realizada por el auditor.
-
-### 4.5.4. Nivel de confianza
-
-Con el objetivo de proporcionar información adicional sobre la fiabilidad de cada hallazgo, EVMAudit asigna un nivel de confianza basado en las herramientas que han detectado la vulnerabilidad.
-
-La confianza asociada no representa una medida probabilística, sino un indicador orientativo derivado del número de herramientas que coinciden en el mismo hallazgo.
-
-Este mecanismo permite distinguir aquellas vulnerabilidades respaldadas por varias herramientas de aquellas detectadas únicamente por una de ellas.
-
-No obstante, la interpretación final continúa dependiendo del criterio del auditor, ya que la correlación implementada no sustituye la validación manual.
-
-!TODO: revisar nomenclatura definitiva utilizada por el código (`confidence_score`).
-
-### 4.5.5. Gestión de severidades
-
-Cuando una vulnerabilidad es detectada por varias herramientas, puede ocurrir que cada una de ellas asigne niveles de severidad diferentes.
-
-Para resolver esta situación, EVMAudit conserva la severidad más alta reportada por las herramientas implicadas.
-
-Este enfoque se adopta siguiendo un criterio conservador, priorizando la revisión de aquellas vulnerabilidades que potencialmente puedan tener un mayor impacto.
-
-### 4.5.6. Preservación de evidencias
-
-Durante el proceso de correlación se mantiene la información procedente de todas las herramientas que han participado en la detección.
-
-De esta forma, cada hallazgo correlacionado conserva:
-
-* las herramientas que lo han identificado
-* las evidencias originales asociadas
-* las localizaciones afectadas
-* la información contextual proporcionada por cada herramienta.
-
-Esta decisión garantiza la trazabilidad del análisis y facilita la revisión manual posterior.
-
-### 4.5.7. Beneficios del proceso de correlación
-
-La incorporación de esta fase proporciona diversas ventajas:
-
-* reducción de duplicidades
-* mejora de la legibilidad del informe final
-* aumento de la confianza en determinados hallazgos
-* simplificación del proceso de auditoría
-* independencia respecto a las herramientas utilizadas.
-
-La correlación constituye, por tanto, uno de los principales elementos diferenciadores de EVMAudit frente al uso individual de las herramientas integradas.
-
-!TODO: insertar diagrama del proceso de correlación.
-
-!TODO: insertar ejemplo real antes y después de la correlación.
-
-!TODO: insertar referencia a la Figura X.
-
-
-# 4.6.SWC Catalog
-## 4.6. Catálogo de vulnerabilidades SWC
-
-Con el objetivo de desacoplar la fase de detección de vulnerabilidades de las fases posteriores de validación y generación de pruebas, se implementó un catálogo de vulnerabilidades basado en la clasificación Smart Contract Weakness Classification (SWC).
-
-Este catálogo constituye una capa intermedia que permite asociar los hallazgos detectados con información adicional independiente de las herramientas utilizadas.
-
-Gracias a ello, EVMAudit puede reutilizar la información obtenida durante el proceso de correlación y emplearla posteriormente para la generación automática de propiedades orientadas a Echidna.
-
-### 4.6.1. Objetivos del catálogo
-
-El catálogo desarrollado persigue los siguientes objetivos:
-
-* unificar la representación de vulnerabilidades
-* desacoplar la lógica de generación de pruebas
-* facilitar la incorporación de nuevas plantillas
-* centralizar información sobre las debilidades conocidas
-* favorecer la mantenibilidad del sistema.
-
-Esta aproximación permite que las fases posteriores del análisis no dependan directamente de las particularidades de Slither o Mythril.
-
-### 4.6.2. Estructura del catálogo
-
-Cada entrada del catálogo contiene información asociada a una vulnerabilidad concreta.
-
-Entre los datos almacenados se encuentran:
-
-* identificador SWC
-* nombre de la vulnerabilidad
-* descripción
-* severidad
-* plantilla asociada
-* limitaciones conocidas
-* posibilidad de validación automática.
-
-La información almacenada permite enriquecer los hallazgos correlacionados y proporcionar información adicional durante las fases posteriores del análisis.
-
-!TODO: insertar tabla con varios ejemplos del catálogo.
-
-### 4.6.3. Asociación entre detectores y SWC
-
-Una de las principales dificultades observadas durante el desarrollo fue la ausencia de una correspondencia directa entre los detectores utilizados por cada herramienta.
-
-Para resolver este problema se definieron tablas de asociación que permiten traducir los detectores específicos a identificadores SWC.
-
-Gracias a esta estrategia es posible utilizar un lenguaje común durante todo el proceso de análisis y evitar dependencias directas respecto a la nomenclatura propia de cada herramienta.
-
-Esta decisión resulta especialmente relevante para el módulo de correlación descrito anteriormente.
-
-!TODO: insertar referencia cruzada a la Sección 4.4.
-
-### 4.6.4. Reutilización del catálogo
-
-Además de servir como mecanismo de clasificación, el catálogo es utilizado posteriormente durante la generación de propiedades para Echidna.
-
-A partir del identificador SWC asociado a cada vulnerabilidad, EVMAudit recupera automáticamente la plantilla correspondiente y genera las estructuras necesarias para la fase de fuzzing.
-
-Esta aproximación permite separar claramente:
-
-* detección
-* correlación
-* generación de pruebas.
-
-La independencia entre estas fases facilita futuras ampliaciones y simplifica el mantenimiento del sistema.
-
-### 4.6.5. Extensibilidad del catálogo
-
-La utilización de un catálogo independiente permite incorporar nuevas vulnerabilidades sin necesidad de modificar el resto de módulos implementados.
-
-De esta forma, la incorporación de nuevas entradas únicamente requiere:
-
-1. definir el identificador SWC correspondiente
-2. añadir la información descriptiva asociada
-3. incorporar la plantilla de generación deseada.
-
-Este diseño favorece la evolución futura de la herramienta y permite adaptar EVMAudit a nuevas versiones del ecosistema Ethereum.
-
-!TODO: insertar diagrama de relación entre SWC Catalog y Echidna Adapter.
-
-!TODO: insertar referencia a la Figura X.
-# 4.7.Echidna adaptar
-## 4.7. Adaptador para Echidna y generación automática de propiedades
-
-Una vez finalizado el proceso de correlación, EVMAudit incorpora una fase adicional orientada a la validación dinámica de determinadas vulnerabilidades mediante fuzzing.
-
-Para ello, se desarrolló un adaptador específico encargado de transformar los hallazgos correlacionados en propiedades compatibles con Echidna, permitiendo complementar los resultados obtenidos mediante análisis estático y ejecución simbólica.
-
-La incorporación de esta fase responde a uno de los objetivos específicos planteados en el trabajo, consistente en combinar distintas técnicas de análisis con el fin de obtener una visión más completa del estado de seguridad del contrato analizado.
-
-!TODO: referencia cruzada a la Sección 3.2 (objetivos específicos).
-
-### 4.7.1. Objetivos del adaptador
-
-El módulo desarrollado persigue los siguientes objetivos:
-
-* reutilizar la información obtenida durante la fase de correlación
-* generar automáticamente propiedades para Echidna
-* reducir la intervención manual del auditor
-* proporcionar una fase adicional de validación
-* mantener desacopladas las distintas fases del análisis.
-
-La existencia de este componente permite integrar el fuzzing dentro del pipeline general de EVMAudit sin introducir dependencias directas entre las herramientas utilizadas.
-
-### 4.7.2. Generación de wrappers
-
-Echidna requiere que las propiedades de seguridad estén implementadas como funciones Solidity dentro de un contrato específico.
-
-Con el objetivo de automatizar este proceso, EVMAudit genera dinámicamente un contrato wrapper que hereda del contrato original e incorpora las propiedades correspondientes a las vulnerabilidades detectadas.
-
-El proceso seguido puede resumirse en las siguientes etapas:
-
-1. Recepción de los hallazgos correlacionados.
-2. Consulta del catálogo SWC.
-3. Obtención de las plantillas asociadas.
-4. Sustitución de parámetros.
-5. Generación del wrapper final.
-6. Ejecución de Echidna.
-
-Gracias a esta aproximación, la generación de pruebas se realiza de forma completamente automática.
-
-!TODO: insertar diagrama del proceso de generación de wrappers.
-
-!TODO: insertar referencia a la Figura X.
-
-### 4.7.3. Plantillas de propiedades
-
-Cada vulnerabilidad soportada dispone de una plantilla específica que describe la propiedad que deberá ser evaluada por Echidna.
-
-Estas plantillas permiten traducir información abstracta procedente del análisis estático a estructuras ejecutables compatibles con el motor de fuzzing.
-
-La utilización de plantillas aporta varias ventajas:
-
-* reutilización de código
-* independencia respecto a las herramientas de detección
-* facilidad de mantenimiento
-* incorporación sencilla de nuevas vulnerabilidades.
-
-!TODO: insertar ejemplo de una plantilla real.
-
-### 4.7.4. Vulnerabilidades testables y no testables
-
-Durante el desarrollo se observó que no todas las vulnerabilidades pueden verificarse automáticamente mediante fuzzing.
-
-Por este motivo, el adaptador distingue entre:
-
-#### Vulnerabilidades testables
-
-Son aquellas que pueden expresarse mediante propiedades directamente evaluables por Echidna.
-
-Algunos ejemplos incluyen:
-
-* determinadas restricciones de acceso
-* invariantes económicas
-* comprobaciones relacionadas con balances
-* validaciones de lógica de negocio.
-
-#### Vulnerabilidades no testables
-
-Corresponden a aquellas situaciones cuya explotación requiere condiciones externas o escenarios complejos difíciles de reproducir automáticamente.
-
-Entre ellas destacan:
-
-* ataques de reentrancia
-* determinados problemas de interacción entre contratos
-* escenarios dependientes del contexto de despliegue.
-
-En estos casos, EVMAudit conserva la información asociada a la vulnerabilidad y genera advertencias específicas, pero no intenta forzar una validación automática que pudiera producir resultados incorrectos.
-
-Esta decisión se adoptó con el objetivo de evitar conclusiones erróneas y mantener un comportamiento conservador.
-
-### 4.7.5. Integración con Echidna
-
-Una vez generado el wrapper correspondiente, el módulo Runner ejecuta Echidna y recupera los resultados obtenidos durante el proceso de fuzzing.
-
-La salida generada por la herramienta se procesa posteriormente para incorporarla al informe final.
-
-De esta manera, EVMAudit consigue integrar tres técnicas de análisis diferentes:
-
-* análisis estático
-* ejecución simbólica
-* fuzzing.
-
-La combinación de estas aproximaciones permite aprovechar las fortalezas de cada una de ellas y compensar parcialmente sus limitaciones individuales.
-
-!TODO: referencia cruzada a la Sección 2.X (análisis estático).
-
-!TODO: referencia cruzada a la Sección 2.X (ejecución simbólica).
-
-!TODO: referencia cruzada a la Sección 2.X (fuzzing).
-
-### 4.7.6. Beneficios de la generación automática
-
-La generación automática de propiedades aporta diversas ventajas:
-
-* reducción del trabajo manual
-* mayor reutilización de resultados
-* integración transparente con Echidna
-* facilidad para incorporar nuevas vulnerabilidades
-* mejora del flujo general de análisis.
-
-No obstante, la validación automática obtenida no sustituye la revisión manual realizada por el auditor, sino que constituye una capa adicional de apoyo.
-
-# 4.8.Gestion de errores
-## 4.8. Gestión de errores y robustez de la solución
-
-Debido a la dependencia de herramientas externas y a la complejidad del proceso de análisis, durante el diseño de EVMAudit se prestó especial atención a la gestión de errores y a la robustez del sistema.
-
-La existencia de múltiples componentes externos hace necesario disponer de mecanismos que permitan detectar y manejar situaciones anómalas sin comprometer el funcionamiento global de la herramienta.
-
-### 4.8.1. Necesidad de una gestión centralizada
-
-Durante el proceso de análisis pueden producirse diferentes tipos de errores:
-
-* ausencia de herramientas instaladas
-* incompatibilidades entre versiones
-* contratos inválidos
-* timeouts durante el análisis
-* errores internos de las herramientas utilizadas
-* problemas durante la generación de wrappers.
-
-La gestión individual de cada una de estas situaciones complicaría considerablemente el mantenimiento del sistema.
-
-Por este motivo se implementó una jerarquía de excepciones propia que centraliza el tratamiento de los errores.
-
-### 4.8.2. Jerarquía de excepciones
-
-La arquitectura implementada incorpora una clase base común a partir de la cual se derivan los distintos tipos de error utilizados por EVMAudit.
-
-Esta aproximación permite distinguir claramente entre:
-
-* errores de configuración
-* errores de análisis
-* errores producidos por herramientas externas.
-
-La utilización de excepciones específicas simplifica la depuración y mejora la legibilidad del código.
-
-!TODO: insertar diagrama UML de excepciones.
-
-### 4.8.3. Detección de dependencias externas
-
-Antes de ejecutar las herramientas integradas, EVMAudit verifica que las dependencias necesarias se encuentren correctamente instaladas.
-
-Este mecanismo permite detectar problemas de configuración de forma temprana y proporcionar mensajes de error más descriptivos.
-
-La validación previa evita que el proceso de análisis falle de forma inesperada en fases posteriores.
-
-### 4.8.4. Gestión de timeouts
-
-Algunas herramientas, especialmente aquellas basadas en ejecución simbólica, pueden presentar tiempos de análisis elevados dependiendo de la complejidad del contrato.
-
-Con el objetivo de evitar bloqueos indefinidos, EVMAudit incorpora límites temporales para determinadas operaciones.
-
-La utilización de timeouts permite:
-
-* mejorar la estabilidad del sistema
-* evitar consumos excesivos de recursos
-* garantizar la finalización del análisis.
-
-### 4.8.5. Preservación de resultados ante errores
-
-Cuando se produce un fallo durante alguna fase del análisis, EVMAudit intenta conservar la información obtenida hasta ese momento.
-
-Esta estrategia permite:
-
-* facilitar la depuración
-* conservar evidencias parciales
-* evitar la pérdida completa del trabajo realizado.
-
-La preservación de resultados resulta especialmente relevante en entornos de auditoría, donde incluso los análisis incompletos pueden aportar información útil.
-
-### 4.8.6. Robustez frente a comportamientos específicos de las herramientas
-
-Durante el desarrollo se detectaron determinados comportamientos particulares en las herramientas integradas.
-
-Entre ellos destacan:
-
-* códigos de retorno no convencionales
-* formatos de salida inconsistentes
-* diferencias entre versiones
-* mensajes mezclados con datos estructurados.
-
-Para hacer frente a estas situaciones se implementaron mecanismos específicos de adaptación y validación.
-
-Estas medidas permitieron integrar las herramientas seleccionadas sin modificar su funcionamiento interno.
-
-### 4.8.7. Beneficios de la estrategia adoptada
-
-La incorporación de mecanismos de gestión de errores proporciona diversas ventajas:
-
-* mayor estabilidad
-* mejora de la experiencia de usuario
-* facilidad de mantenimiento
-* simplificación de la depuración
-* incremento de la robustez general del sistema.
-
-La existencia de una capa de gestión de errores independiente contribuye además a mantener desacoplados los distintos módulos que forman la arquitectura de EVMAudit.
-
-!TODO: insertar referencia cruzada al módulo Runner.
-
-!TODO: insertar referencia cruzada al diagrama de arquitectura general.
-# 4.9.Integración y distribución
-## 4.9. Distribución e integración de la solución
-
-Uno de los objetivos perseguidos durante el desarrollo de EVMAudit fue diseñar una solución desacoplada de cualquier interfaz concreta y suficientemente flexible para poder ser reutilizada en distintos contextos.
-
-Por este motivo, la lógica principal de análisis se implementó como una librería independiente, separando completamente las funcionalidades relacionadas con la detección y procesamiento de vulnerabilidades de los mecanismos de interacción con el usuario.
-
-Esta decisión permitió demostrar la reutilización de la solución desarrollada mediante su integración en otros componentes software sin necesidad de modificar el núcleo de la herramienta.
-
-### 4.9.1. Distribución de la librería
-
-La implementación de EVMAudit como una librería independiente permite desacoplar el motor de análisis de cualquier entorno concreto de ejecución.
-
-Este enfoque proporciona diversas ventajas:
-
-* reutilización de la herramienta desde otros proyectos
-* separación entre lógica de negocio e interfaces de usuario
-* facilidad de mantenimiento
-* posibilidad de incorporar nuevas interfaces en el futuro.
-
-La distribución de la librería permite que el proceso de análisis pueda ejecutarse desde aplicaciones externas sin necesidad de duplicar funcionalidades.
-
-!TODO: referencia cruzada al Anexo A (publicación en PyPI).
-
-### 4.9.2. Aplicación web como caso de uso
-
-Con el objetivo de validar la reutilización de la arquitectura desarrollada, se implementó una aplicación web que utiliza EVMAudit como motor de análisis.
-
-La aplicación no implementa mecanismos propios de detección de vulnerabilidades, sino que delega completamente las tareas de análisis en la librería desarrollada.
-
-Esta aproximación permite mantener una única implementación del proceso de análisis y garantiza la consistencia de los resultados obtenidos.
-
-La aplicación actúa, por tanto, como una capa de presentación encargada de:
-
-* recibir contratos inteligentes proporcionados por el usuario
-* invocar las funciones de EVMAudit
-* mostrar el progreso del análisis
-* presentar los resultados obtenidos.
-
-De esta forma, la aplicación web constituye una demostración práctica de la reutilización de la solución desarrollada.
-
-### 4.9.3. Flujo de funcionamiento de la aplicación
-
-La aplicación desarrollada permite dos mecanismos de entrada:
-
-* carga de contratos Solidity mediante fichero
-* introducción directa del código fuente a través de la interfaz web.
-
-Una vez recibido el contrato, la aplicación inicia el proceso de análisis y ejecuta internamente el pipeline implementado por EVMAudit.
-
-Las distintas fases del proceso se ejecutan de forma secuencial:
-
-1. ejecución de Slither
-2. ejecución de Mythril
-3. normalización de resultados
-4. correlación de vulnerabilidades
-5. generación de propiedades
-6. ejecución de Echidna
-7. generación del informe final.
-
-Durante la ejecución, la aplicación informa al usuario del progreso alcanzado y permite recuperar el informe una vez finalizado el análisis.
-
-Este comportamiento demuestra que la arquitectura modular adoptada permite integrar EVMAudit en aplicaciones externas sin modificar la lógica interna del sistema.
-
-!TODO: insertar diagrama simplificado de la aplicación web.
-
-!TODO: insertar captura de pantalla de la interfaz.
-
-!TODO: referencia cruzada al Anexo B (aplicación web).
-
-### 4.9.4. Separación entre presentación y lógica de análisis
-
-La decisión de implementar EVMAudit como una librería independiente permite mantener separadas las responsabilidades del sistema.
-
-Mientras que la librería se encarga de:
-
-* ejecutar herramientas externas
-* procesar resultados
-* correlacionar vulnerabilidades
-* generar informes
-
-la aplicación web únicamente proporciona los mecanismos de interacción con el usuario.
-
-Esta separación favorece:
-
-* la mantenibilidad del sistema
-* la reutilización de la solución
-* la incorporación de nuevas interfaces
-* la evolución independiente de cada componente.
-
-En consecuencia, la aplicación web debe entenderse como una demostración de la capacidad de integración de EVMAudit y no como la contribución principal del trabajo.
-
-### 4.9.5. Consideraciones sobre infraestructura
-
-Los aspectos relacionados con la publicación de la librería, el despliegue de la aplicación y la infraestructura utilizada no constituyen el núcleo de la contribución desarrollada en este Trabajo Fin de Máster.
-
-Por este motivo, dichos elementos se incluyen en los anexos del documento.
-
-!TODO: referencia cruzada al Anexo A (PyPI).
-
-!TODO: referencia cruzada al Anexo B (Aplicación web).
-
-!TODO: referencia cruzada al Anexo C (Docker).
-
-!TODO: referencia cruzada al Anexo D (Despliegue).
 
 # 5. Conclusiones y trabajo futuro
 
@@ -1842,6 +1927,11 @@ Por este motivo, dichos elementos se incluyen en los anexos del documento.
 + Semgrep
 + Manticore
 + dashboard web
+
+
+\newpage
+
+
 # Referencias bibliográficas
 [1]       S. Nakamoto, “Bitcoin: A Peer-to-Peer Electronic Cash System.” [Online]. Available: www.bitcoin.org
 
@@ -1931,7 +2021,12 @@ Por este motivo, dichos elementos se incluyen en los anexos del documento.
 
 [44]     “Deep Dive Exploit Analysis: Euler Finance.” Accessed: Apr. 15, 2026. [Online]. Available: https://www.cyfrin.io/blog/how-did-the-euler-finance-hack-happen-hack-analysis
 
-[45]     “Euler Finance Flash Loan Attack Explained.” Accessed: Apr. 15, 2026. [Online]. Available: https://www.chainalysis.com/blog/euler-finance-flash-loan-attack/# ANEXO A. Ejemplos de vulnerabilidades en contratos inteligentes
+[45]     “Euler Finance Flash Loan Attack Explained.” Accessed: Apr. 15, 2026. [Online]. Available: https://www.chainalysis.com/blog/euler-finance-flash-loan-attack/
+
+\newpage
+
+
+# ANEXO A. Ejemplos de vulnerabilidades en contratos inteligentes
 
 Este anexo presenta ejemplos simplificados de vulnerabilidades representativas en contratos inteligentes desarrollados en Solidity. El objetivo es ilustrar de forma práctica los principales tipos de debilidades descritas en la sección 4.4, facilitando su comprensión y su posterior detección mediante herramientas automáticas.
 
@@ -2257,7 +2352,12 @@ function bid() public payable {
 | _V5_     | Control       | tx.origin             | Autenticación       | Alto        | Sí                             | ANEXO A.2.2               |
 | _V6_     | Económica     | Front-running         | MEV                 | Alto        | No                             | ANEXO A.3.1               |
 | _V7_     | Económica     | Oráculos              | Dependencia externa | Crítico     | No                             | ANEXO A.3.2               |
-| _V8_     | Lógica        | Error de balance      | Lógica              | Variable    | No                             | ANEXO A.4.1               |# ANEXO B. Entorno virtual Python
+| _V8_     | Lógica        | Error de balance      | Lógica              | Variable    | No                             | ANEXO A.4.1               |
+
+\newpage
+
+
+# ANEXO B. Entorno virtual Python
 
 El desarrollo de una librería Python destinada a integrar múltiples herramientas de análisis de seguridad plantea, desde el inicio, un problema de gestión de dependencias que no debe subestimarse. Las herramientas que se integran en la solución propuesta, como Slither, Mythril o Echidna, tienen requisitos de versión específicos y en ocasiones incompatibles entre sí cuando se instalan en el entorno global del sistema. Esta situación, conocida en el ecosistema Python como dependency hell, puede provocar conflictos silenciosos difíciles de depurar y comprometer la reproducibilidad del entorno de desarrollo.
 
@@ -2327,6 +2427,11 @@ uv publish
 Este comando gestiona la autenticación y la subida de los artefactos generados, cubriendo el flujo completo que anteriormente requería herramientas adicionales como `twine`.
 
 En conjunto, `uv` unifica en una sola herramienta todo el ciclo de vida del proyecto: inicialización, gestión de dependencias, sincronización del entorno, construcción de distribuciones y publicación. Esta integración reduce la fricción en el desarrollo colaborativo y facilita la adopción de prácticas profesionales de gestión de proyectos Python desde las primeras fases del trabajo.
+
+
+\newpage
+
+
 # ANEXO C.	DISTRIBUCIÓN Y PUBLICACIÓN EN EL REGISTRO DE PAQUETES PYPI
 
 El ciclo de desarrollo de la librería propuesta culmina con su fase de distribución, permitiendo que las herramientas de análisis de seguridad implementadas sean accesibles e integrables por la comunidad de desarrollo y auditoría de *smart contracts*. Para asegurar una distribución estandarizada y eficiente dentro del ecosistema Python, se ha seleccionado el índice oficial de paquetes PyPI (*Python Package Index*). La gestión de este proceso se unifica bajo la herramienta `uv`, garantizando la consistencia desde la compilación de los artefactos hasta su publicación definitiva.
@@ -2432,6 +2537,16 @@ uv publish
 Esta sistemática asegura que cada iteración de la herramienta de auditoría de la EVM mantenga la trazabilidad, la coherencia histórica y la disponibilidad pública necesarias para un entorno de producción académica y profesional.
 
  
+
+
+\newpage
+
+
+
+
+\newpage
+
+
 # Anexo D Docker
 
 ## ANEXO D.1.	CONTENEDORIZACIÓN E INFRAESTRUCTURA DE DESPLIEGUE (DOCKER)
@@ -2485,6 +2600,11 @@ docker compose logs -f evmaudit-web
 4.	**Fase de Parada (Down):** Interrupción y eliminación de los contenedores activos salvaguardando la integridad de los datos de las auditorías gracias a los volúmenes enlazados:
 docker compose down
 
+
+
+\newpage
+
+
 # ANEXO F.	ENTORNO DE INTEGRACIÓN CONTINUA (CI/CD) Y PUBLICACIÓN AUTOMATIZADA
 
 Para garantizar la integridad del software durante el ciclo de vida del desarrollo y agilizar el flujo de despliegue, se ha diseñado e implementado un pipeline de Integración Continua (CI) basado en **GitHub Actions**. Esta estrategia de ingeniería de software permite automatizar la compilación, verificación y empaquetado de la aplicación en cada iteración, mitigando los riesgos asociados a la integración manual de código y asegurando la disponibilidad inmediata de artefactos listos para producción.
@@ -2524,7 +2644,12 @@ Para garantizar una separación formal de conceptos en la arquitectura de la int
 
 En la fase actual del proyecto, **esta etapa automatizada no ha sido implementada de forma activa y opera estrictamente como un punto de anclaje (*placeholder*) arquitectónico**. La justificación de esta decisión de diseño radica en las limitaciones técnicas del entorno de alojamiento seleccionado para las pruebas de concepto. La infraestructura de EVMAudit se despliega externamente en la plataforma PaaS **Railway** utilizando su modalidad de suscripción gratuita. Este nivel de servicio impone restricciones en las interfaces de programación (APIs) y en el uso de *webhooks*, impidiendo la ejecución de despliegues totalmente automatizados (*Automated CD Triggers*) desencadenados de forma directa mediante agentes de terceros como GitHub Actions.
 
-Por consiguiente, el flujo de trabajo en este punto se limita a verificar la integridad de la secuencia de comandos en consola, quedando el aprovisionamiento de la infraestructura supeditado a los mecanismos nativos de la plataforma de destino. En el **siguiente apartado (X.5. Despliegue de la Infraestructura)**, se expondrá de manera más amplia la configuración, el aprovisionamiento y las características operativas de dicho entorno en Railway.# ANEXO G.	DESPLIEGUE DE LA INFRAESTRUCTURA EN LA NUBE (RAILWAY) 
+Por consiguiente, el flujo de trabajo en este punto se limita a verificar la integridad de la secuencia de comandos en consola, quedando el aprovisionamiento de la infraestructura supeditado a los mecanismos nativos de la plataforma de destino. En el **siguiente apartado (X.5. Despliegue de la Infraestructura)**, se expondrá de manera más amplia la configuración, el aprovisionamiento y las características operativas de dicho entorno en Railway.
+
+\newpage
+
+
+# ANEXO G.	DESPLIEGUE DE LA INFRAESTRUCTURA EN LA NUBE (RAILWAY) 
 
 Para validar la operatividad de EVMAudit en un entorno accesible y simular un escenario de producción real, se ha procedido al despliegue de la arquitectura contenedorizada en la plataforma de Plataforma como Servicio (PaaS) **Railway**. A continuación, se detallan las especificaciones del entorno, las restricciones técnicas de hardware identificadas y las optimizaciones de ingeniería aplicadas en el código fuente para garantizar la estabilidad del sistema.
 
@@ -2598,3 +2723,8 @@ Es importante destacar que la optimización descrita no se integró d forma est�
 contenedor en ejecución (*runtime*). Bajo condiciones de despliegue convencionales en infraestructuras con escalabilidad elástica o recurso dedicados de hardware, esta intervención técnica resultaría completamente innecesaria, ya que la aplicación contaría con la memoria suficiente para procesar el *pipeline* por defecto. Por consiguiente, esta modificación responde de manera estricta a un mecanismo de mitigación ad hoc, implementado exclusivamente para sortear las limitaciones físicas del entorno gratuito y evitar la interrupción forzada del servicio web por falta de memoria.
 
 **Conclusión del Despliegue:** La implementación de estas salvaguardas de bajo nivel ha permitido que la aplicación web de **EVMAudit** opere de manera completamente estable y fluida en la nube. Pese a las severas restricciones del entorno gratuito de Railway, el sistema es capaz de completar con éxito el pipeline completo de auditoría en siete pasos sin registrar caídas en el servicio ni excepciones por falta de recursos.
+
+
+\newpage
+
+

@@ -1,12 +1,12 @@
-# ANEXO. Ejemplos de vulnerabilidades en contratos inteligentes
+# ANEXO A. Ejemplos de vulnerabilidades en contratos inteligentes
 
 Este anexo presenta ejemplos simplificados de vulnerabilidades representativas en contratos inteligentes desarrollados en Solidity. El objetivo es ilustrar de forma práctica los principales tipos de debilidades descritas en la sección 4.4, facilitando su comprensión y su posterior detección mediante herramientas automáticas.
 
 Cada ejemplo incluye: descripción, fragmento de código vulnerable, impacto y estrategia de mitigación.
 
-## ANEXO.1. Vulnerabilidades técnicas de ejecución
+## ANEXO A.1. Vulnerabilidades técnicas de ejecución
 
-### ANEXO.1.1. Reentrancy
+### ANEXO A.1.1. Reentrancy
 
 La vulnerabilidad de [**reentrancy**](https://www.cyfrin.io/blog/what-is-a-reentrancy-attack-solidity-smart-contracts) se produce cuando un contrato realiza una llamada externa antes de actualizar su estado interno, permitiendo que el contrato receptor reingrese en la función original en un estado inconsistente.
 
@@ -44,9 +44,9 @@ contract VulnerableBank {
 	- Actualizar el estado antes de llamadas externas
 
   
-### ANEXO.1.2. Integer Overflow / Underflow
+### ANEXO A.1.2. Integer Overflow / Underflow
 
-Errores aritméticos que provocan desbordamientos en operaciones enteras. Aunque mitigados en Solidity ≥0.8, siguen siendo relevantes en bloques unchecked.
+Errores aritméticos que provocan desbordamientos en operaciones enteras. Aunque mitigados en Solidity >= 0.8, siguen siendo relevantes en bloques unchecked.
 
 Código vulnerable
 ```js
@@ -66,7 +66,7 @@ function increment(uint256 x) public pure returns (uint256) {
 	- Evitar unchecked salvo casos justificados
 	- Uso de validaciones explícitas
 
-### ANEXO.1.3. Uso inseguro de delegatecall
+### ANEXO A.1.3. Uso inseguro de delegatecall
 
 La función delegatecall ejecuta código externo en el contexto de almacenamiento del contrato llamador.
 
@@ -92,7 +92,7 @@ contract Proxy {
 	- Control estricto de la dirección implementation
 	- Uso de patrones proxy auditados ([EIP-1967](https://eips.ethereum.org/EIPS/eip-1967), [UUPS](https://docs.openzeppelin.com/contracts-stylus/uups-proxy))
 
-### ANEXO.1.4. Denegación de servicio (DoS)
+### ANEXO A.1.4. Denegación de servicio (DoS)
 
 Bloqueo de ejecución debido a fallos en llamadas externas o estructuras no acotadas.
 
@@ -113,9 +113,9 @@ function payout(address[] memory recipients) public {
 	- Uso de [patrón _pull over push_](https://medium.com/@markojauregui/the-pull-over-push-model-in-solidity-a-secure-pattern-for-fund-withdrawals-10c2e6628626)
 	- Evitar bucles dependientes de input externo
 
-## ANEXO.2. Vulnerabilidades técnicas de control y privilegios
+## ANEXO A.2. Vulnerabilidades técnicas de control y privilegios
 
-### ANEXO.2.1. Falta de control de acceso
+### ANEXO A.2.1. Falta de control de acceso
 
 Funciones críticas accesibles por cualquier usuario.
 
@@ -139,7 +139,7 @@ contract Ownable {
 	- Uso de onlyOwner
 	- Librerías como [OpenZeppelin AccessControl](https://docs.openzeppelin.com/contracts/5.x/access-control)
 
-### ANEXO.2.2. Uso de tx.origin
+### ANEXO A.2.2. Uso de tx.origin
 
 Uso incorrecto de tx.origin para autenticación.
 
@@ -156,7 +156,7 @@ function withdraw() public {
 - **Impacto**: Ataques mediante contratos intermediarios.
 - **Mitigación**: Usar msg.sender para autenticación
 
-### ANEXO.2.3. Inicialización insegura (contratos upgradeables)
+### ANEXO A.2.3. Inicialización insegura (contratos upgradeables)
 
 En contratos upgradeables, la inicialización se realiza mediante funciones externas (initialize) en lugar de constructores. Si no están protegidas, cualquier usuario puede ejecutarlas y asumir el control del contrato.
 
@@ -173,11 +173,11 @@ function initialize(address _owner) public {
 	- Uso de [initializer (OpenZeppelin)](https://docs.openzeppelin.com/upgrades-plugins/writing-upgradeable)
 	- Bloqueo de inicialización tras ejecución
 
-## ANEXO.3. Vulnerabilidades económicas y del entorno
+## ANEXO A.3. Vulnerabilidades económicas y del entorno
 
-### ANEXO.3.1. Front-running / MEV
+### ANEXO A.3.1. Front-running / MEV
 
-Un atacante observa la mempool y ejecuta transacciones antes que la víctimANEXO.
+Un atacante observa la mempool y ejecuta transacciones antes que la víctimANEXO A.
 
 Código vulnerable
 ```js
@@ -195,12 +195,12 @@ function buy(uint price) public {
 	- Subastas ciegas
 	- Uso de _relayers_ privados
 
-### ANEXO.3.2. Dependencia de oráculos
+### ANEXO A.3.2. Dependencia de oráculos
 
 Uso de datos externos manipulables.
 
 Código vulnerable
-```
+```js
 function getPrice() public view returns (uint) {
 
     return externalOracle.price();
@@ -213,12 +213,12 @@ function getPrice() public view returns (uint) {
 	- Oráculos descentralizados (ej. [Chainlink](https://chain.link/))
 	- Promedios temporales ([TWAP](https://www.binance.com/es-MX/support/faq/detail/80655cc54d8a4b2bb8ea097001844fd1))
 
-### ANEXO.3.3. Uso de block.timestamp
+### ANEXO A.3.3. Uso de block.timestamp
 
 El uso de block.timestamp como fuente de aleatoriedad o para decisiones críticas es inseguro, ya que su valor puede ser parcialmente manipulado por mineros o validadores dentro de ciertos límites.
 
 Código vulnerable
-```
+```js
 function random() public view returns (uint) {
 
     return uint(keccak256(abi.encodePacked(block.timestamp)));
@@ -230,9 +230,9 @@ function random() public view returns (uint) {
 	- VRF ([Verifiable Random Functions](https://chain.link/education-hub/verifiable-random-function-vrf))
 	- Fuentes externas verificables
 
-## ANEXO.4. Errores lógicos de negocio
+## ANEXO A.4. Errores lógicos de negocio
 
-### ANEXO.4.1. Error en cálculo de balances
+### ANEXO A.4.1. Error en cálculo de balances
 
 Errores en operadores lógicos o condiciones de validación pueden provocar inconsistencias en la gestión de balances, especialmente en casos límite donde las condiciones no cubren todos los escenarios posibles.
 
@@ -250,7 +250,7 @@ function withdraw(uint amount) public {
 - Mitigación:
 	- Uso de > en lugar de >=.
 
-### ANEXO.4.2. Distribución incorrecta de recompensas
+### ANEXO A.4.2. Distribución incorrecta de recompensas
 
 La lógica de distribución puede introducir errores debido a divisiones enteras o falta de gestión de restos, provocando pérdida de precisión y fondos no asignados correctamente.
 
@@ -280,7 +280,7 @@ function distribute() public {
 	- Validación de invariantes económicas (la suma distribuida debe coincidir con el total)
 	- Testing específico de casos límite (número de usuarios, valores pequeños, etc.)
 
-### ANEXO.4.3. Estados inconsistentes
+### ANEXO A.4.3. Estados inconsistentes
 
 La falta de control adecuado sobre las transiciones de estado puede permitir la ejecución de funciones en condiciones no válidas, generando comportamientos inconsistentes en el contrato.
 
@@ -313,15 +313,15 @@ function bid() public payable {
 	- Restricción de transiciones de estado válidas
 	- Aplicación de patrones [_state machines_](https://fravoll.github.io/solidity-patterns/state_machine.html)
 
-## ANEXO.5. Resumen de vulnerabilidades
+## ANEXO A.5. Resumen de vulnerabilidades
 
 | **_ID_** | **Categoría** | **Vulnerabilidad**    | **Tipo**            | **Impacto** | **Detectable automáticamente** | **Ejemplo sección** |
 | -------- | ------------- | --------------------- | ------------------- | ----------- | ------------------------------ | ------------------- |
-| _V1_     | Técnica       | Reentrancy            | Ejecución           | Crítico     | Sí (Slither/Mythril)           | ANEXO.1.1               |
-| _V2_     | Técnica       | Overflow              | Aritmético          | Medio       | Sí (Slither)                   | ANEXO.1.2               |
-| _V3_     | Técnica       | Delegatecall          | Ejecución           | Crítico     | Parcial                        | ANEXO.1.3               |
-| _V4_     | Control       | Acceso no restringido | Autorización        | Crítico     | Sí                             | ANEXO.2.1               |
-| _V5_     | Control       | tx.origin             | Autenticación       | Alto        | Sí                             | ANEXO.2.2               |
-| _V6_     | Económica     | Front-running         | MEV                 | Alto        | No                             | ANEXO.3.1               |
-| _V7_     | Económica     | Oráculos              | Dependencia externa | Crítico     | No                             | ANEXO.3.2               |
-| _V8_     | Lógica        | Error de balance      | Lógica              | Variable    | No                             | ANEXO.4.1               |
+| _V1_     | Técnica       | Reentrancy            | Ejecución           | Crítico     | Sí (Slither/Mythril)           | ANEXO A.1.1               |
+| _V2_     | Técnica       | Overflow              | Aritmético          | Medio       | Sí (Slither)                   | ANEXO A.1.2               |
+| _V3_     | Técnica       | Delegatecall          | Ejecución           | Crítico     | Parcial                        | ANEXO A.1.3               |
+| _V4_     | Control       | Acceso no restringido | Autorización        | Crítico     | Sí                             | ANEXO A.2.1               |
+| _V5_     | Control       | tx.origin             | Autenticación       | Alto        | Sí                             | ANEXO A.2.2               |
+| _V6_     | Económica     | Front-running         | MEV                 | Alto        | No                             | ANEXO A.3.1               |
+| _V7_     | Económica     | Oráculos              | Dependencia externa | Crítico     | No                             | ANEXO A.3.2               |
+| _V8_     | Lógica        | Error de balance      | Lógica              | Variable    | No                             | ANEXO A.4.1               |

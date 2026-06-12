@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# Salir inmediatamente si algún comando falla
+set -e
+
+# ==============================================================================
+# 1. FILTRO: Solo ejecutar si el mensaje del commit empieza por "docs:"
+# ==============================================================================
+# Inspecciona los argumentos del proceso de Git que invocó este hook (PPID)
+if ! ps -o args= -p $PPID | grep -E -- "-m\s*['\"]?docs:" > /dev/null 2>&1; then
+    # Si no se detecta el prefijo "docs:" en el parámetro -m, se ignora el script
+    exit 0
+fi
+
+echo "=== Detectado prefijo 'docs:' en el commit. Iniciando tareas de compilación ==="
+
+# ==============================================================================
+# 2. COMPROBACIÓN DE DEPENDENCIAS: ¿Está Pandoc instalado?
+# ==============================================================================
+if ! command -v pandoc &> /dev/null; then
+    echo ""
+    echo "❌ ERROR: 'pandoc' no está instalado o no se encuentra en el PATH."
+    echo "⚠️  El script requiere Pandoc para compilar el PDF de tu TFM."
+    echo "💡 Por favor, instálalo antes de continuar o haz el commit usando el flag '--no-verify' si tienes prisa."
+    echo ""
+    exit 1
+fi
+
+# Definir la etiqueta de salto de página en LaTeX (vuelve a la página siguiente)
+SALTO_PAGINA=$'\n\n\\newpage\n\n'
+
+# ==============================================================================
+# 3. Concatenar la sección 4
+# ==============================================================================
+echo "1. Concatenando sección 4: Desarrollo específico de la contribución..."
+DESTINO_SEC4="docs-TFM-UNIR/Entrega/4. Desarrollo específico de la contribución.md"
+> "$DESTINO_SEC4"
+
+for f in docs-TFM-UNIR/Entrega/4.\ Desarrollo\ específico\ de\ la\ contribución/*; do
+    # Validar que sea un archivo por si la carpeta está vacía
+    [ -f "$f" ] || continue
+    cat "$f" >> "$DESTINO_SEC4"
+    echo "$SALTO_PAGINA" >> "$DESTINO_SEC4"
+done
+
+
+# ==============================================================================
+# 4. Concatenar todos los archivos Markdown en el documento final
+# ==============================================================================
+echo "2. Concatenando todos los archivos Markdown en el documento final..."
+DESTINO_FINAL="docs-TFM-UNIR/documento_final.md"
+> "$DESTINO_FINAL"
+
+for f in docs-TFM-UNIR/Entrega/*.md; do
+    [ -f "$f" ] || continue
+    
+    # EVITAR BUCLE: Excluir el propio archivo de destino si coincide en la ruta
+    if [[ "$f" == *"$DESTINO_FINAL"* ]]; then
+        continue
+    fi
+    
+    cat "$f" >> "$DESTINO_FINAL"
+    echo "$SALTO_PAGINA" >> "$DESTINO_FINAL"
+done
+
+
+# ==============================================================================
+# 5. Compilar a PDF con Pandoc
+# ==============================================================================
+echo "3. Compilando a PDF con Pandoc..."
+pandoc docs-TFM-UNIR/documento_final.md -o docs-TFM-UNIR/documento_final.pdf
+
+sleep 1 # Pequeña pausa para asegurar que el sistema de archivos se actualice antes de añadir al co
+
+# ==============================================================================
+# 6. Añadir automáticamente los archivos generados al commit actual
+# ==============================================================================
+echo "4. Añadiendo archivos generados al commit..."
+git add docs-TFM-UNIR/Entrega/4.\ Desarrollo\ específico\ de\ la\ contribución.md docs-TFM-UNIR/documento_final.md docs-TFM-UNIR/documento_final.pdf
+
+echo "=== Tareas completadas con éxito. Procediendo con el commit ==="

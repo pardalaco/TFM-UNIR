@@ -1,4 +1,4 @@
-# 0. Abstract + Coordinación
+
 
 ---
 title: "EVMAudit: Librería multiherramienta para la detección automatizada de vulnerabilidades en contratos inteligentes de Ethereum"
@@ -10,17 +10,18 @@ toc: true
 toc-depth: 3
 toc-title: "Índice de Contenidos"
 ---
-## Resumen
+# Resumen
 
 La seguridad de los contratos inteligentes se ha convertido en un aspecto crítico dentro del ecosistema blockchain debido al elevado impacto económico que pueden provocar las vulnerabilidades presentes en este tipo de software. Aunque existen herramientas especializadas para su análisis, como Slither, Mythril o Echidna, sus resultados suelen presentarse de forma heterogénea y con dificultades para correlacionar y priorizar los hallazgos obtenidos. En este Trabajo Fin de Máster se presenta EVMAudit, una librería desarrollada en Python orientada a la ejecución conjunta de múltiples herramientas de análisis de seguridad para contratos inteligentes compatibles con la Ethereum Virtual Machine (EVM). La solución propuesta incorpora mecanismos de normalización, correlación y priorización de resultados, permitiendo ofrecer una visión unificada y más estructurada de las vulnerabilidades detectadas. Además, la herramienta se distribuye mediante PyPI y dispone de una infraestructura de despliegue y automatización basada en Docker y CI/CD.
 
 Palabras clave: contratos inteligentes, Ethereum, ciberseguridad, análisis de vulnerabilidades, blockchain
 
-## Abstract
+# Abstract
 Smart contract security has become a critical concern within the blockchain ecosystem due to the significant economic impact caused by software vulnerabilities. Although several specialized analysis tools, such as Slither, Mythril, and Echidna, are available, their results are often heterogeneous and difficult to correlate and prioritize. This Master's Thesis presents EVMAudit, a Python library designed to orchestrate multiple security analysis tools for Ethereum Virtual Machine (EVM) compatible smart contracts. The proposed solution includes mechanisms for result normalization, correlation, and prioritization, providing a unified and more structured view of the detected vulnerabilities. Furthermore, the tool is distributed through PyPI and includes an automated deployment infrastructure based on Docker and CI/CD practices.
 
 Keywords: smart contracts, Ethereum, cybersecurity, vulnerability analysis, blockchain
 
+\newpage
 ## Mecanismos de coordinación empleados
 
 Con el objetivo de garantizar un seguimiento continuo del trabajo y mantener la coordinación entre los miembros del grupo, se estableció una reunión interna semanal en la que cada integrante exponía las tareas realizadas durante el periodo correspondiente y las posibles dificultades encontradas. Estas reuniones permitían, además, debatir las siguientes líneas de trabajo y planificar las tareas a desarrollar en las semanas posteriores.
@@ -28,9 +29,6 @@ Con el objetivo de garantizar un seguimiento continuo del trabajo y mantener la 
 Como herramientas de comunicación y colaboración se utilizaron principalmente WhatsApp para la comunicación diaria, Microsoft Teams para la realización de reuniones telemáticas, un repositorio compartido en GitHub para la gestión y sincronización del código fuente, y un documento compartido de Microsoft Word para la elaboración conjunta de la memoria.
 
 Adicionalmente, tras cada una de las entregas parciales previstas en la planificación del Trabajo Fin de Máster, se mantuvo una reunión de seguimiento con el director del trabajo. Estas sesiones permitieron revisar el progreso realizado, recibir retroalimentación sobre los resultados obtenidos y definir las acciones necesarias para las siguientes fases del proyecto.
-
-## Keywords: 
-smart contracts, Ethereum, cybersecurity, vulnerability analysis, blockchain
 
 
 \newpage

@@ -1,0 +1,45 @@
+%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#E8F2FF", "primaryBorderColor": "#7AA6D8", "primaryTextColor": "#1D3557", "lineColor": "#6B9DD1", "clusterBkg": "#F8FBFF", "clusterBorder": "#A9C7E8", "fontFamily": "Inter, Arial"}}}%%
+flowchart TD
+  classDef process fill:#E8F2FF,stroke:#6B9DD1,color:#1D3557,stroke-width:2px;
+  classDef decision fill:#DCEEFF,stroke:#5F91C8,color:#1D3557,stroke-width:2px;
+  classDef terminal fill:#CFE7FF,stroke:#6B9DD1,color:#1D3557,stroke-width:2px;
+  classDef skip fill:#F4F8FC,stroke:#A5BDD8,color:#35597F,stroke-width:1.5px;
+
+  start([Inicio]):::terminal
+  input["Recibir hallazgos correlacionados"]:::process
+  init["Inicializar vulnerabilidades y contadores"]:::process
+  select["Seleccionar hallazgo correlacionado"]:::process
+  swc["Extraer SWC"]:::process
+  fn["Extraer función afectada"]:::process
+  confirmed["Extraer herramientas confirmadoras"]:::process
+  detectors["Consultar detectores asociados al SWC"]:::process
+  exists{"¿Existen detectores<br/>en el catálogo?"}:::decision
+  templates["Recuperar plantillas Echidna"]:::process
+  testable{"¿Testable<br/>automáticamente?"}:::decision
+  propertyOk["Generar propiedad sin advertencia"]:::process
+  propertyWarning["Generar propiedad con advertencia"]:::process
+  limitation["Registrar limitación"]:::process
+  metadata["Añadir vulnerabilidad a metadatos"]:::process
+  skipped["Incrementar skipped_count"]:::skip
+  more{"¿Quedan </br>hallazgos?"}:::decision
+  hasProperties{"¿Se generó</br> alguna propiedad?"}:::decision
+  build["Construir contrato wrapper"]:::process
+  copy["Copiar contrato original"]:::process
+  saveWrapper["Guardar wrapper Solidity"]:::process
+  noWrapper["No generar wrapper"]:::skip
+  saveMetadata["Guardar metadatos del adaptador"]:::process
+  stop([Fin]):::terminal
+
+  start --> input --> init --> select
+  select --> swc --> fn --> confirmed --> detectors --> exists
+  exists -- Sí --> templates --> testable
+  testable -- Sí --> propertyOk --> metadata
+  testable -- No --> propertyWarning --> limitation --> metadata
+  exists -- No --> skipped
+  metadata --> more
+  skipped --> more
+  more -- Sí --> select
+  more -- No --> hasProperties
+  hasProperties -- Sí --> build --> copy --> saveWrapper --> saveMetadata
+  hasProperties -- No --> noWrapper --> saveMetadata
+  saveMetadata --> stop

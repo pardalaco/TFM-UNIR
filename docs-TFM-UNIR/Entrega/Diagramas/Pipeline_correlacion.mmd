@@ -1,0 +1,61 @@
+---
+config:
+  theme: base
+  themeVariables:
+    primaryColor: '#E8F2FF'
+    primaryBorderColor: '#7AA6D8'
+    primaryTextColor: '#1D3557'
+    lineColor: '#6B9DD1'
+    clusterBkg: '#F8FBFF'
+    clusterBorder: '#A9C7E8'
+    fontFamily: Inter, Arial
+  layout: dagre
+---
+flowchart TB
+    start(["Inicio"]) --> reports["Recibir reportes normalizados"]
+    reports --> slither["Extraer findings de <br> Slither"] & mythril["Extraer findings  de <br> Mythril"]
+    slither --> lines["Homogeneizar localización de líneas"]
+    mythril --> lines
+    lines --> key["Construir clave<br>contrato + <br> función + SWC"]
+    key --> group["Agrupar hallazgos por clave"]
+    group --> select["Seleccionar grupo"]
+    select --> tools["Obtener herramientas detectoras"]
+    tools --> multiple{"¿Detectado por más<br>de una herramienta?"}
+    multiple -- Sí --> confirmed["status = confirmed<br>confidence_score=3"]
+    multiple -- No --> detected["status = detected<br>confidence_score=2"]
+    confirmed --> severity["Calcular severidad máxima"]
+    detected --> severity
+    severity --> mergeLines["Unificar líneas <br>afectadas"]
+    mergeLines --> evidence["Fusionar evidencias<br> originales"]
+    evidence --> create["Crear <br>CorrelatedFinding"]
+    create --> more{"¿Quedan grupos?"}
+    more -- Sí --> select
+    more -- No --> output["Generar reporte <br>correlacionado"]
+    output --> save["Guardar JSON <br>correlacionado"]
+    save --> stop(["Fin"])
+
+     start:::terminal
+     reports:::process
+     slither:::process
+     mythril:::process
+     lines:::process
+     key:::process
+     group:::process
+     select:::process
+     tools:::process
+     multiple:::decision
+     confirmed:::process
+     detected:::process
+     severity:::process
+     mergeLines:::process
+     evidence:::process
+     create:::process
+     more:::decision
+     output:::process
+     save:::process
+     stop:::terminal
+    classDef process fill:#E8F2FF,stroke:#6B9DD1,color:#1D3557,stroke-width:2px
+    classDef decision fill:#DCEEFF,stroke:#5F91C8,color:#1D3557,stroke-width:2px
+    classDef terminal fill:#CFE7FF,stroke:#6B9DD1,color:#1D3557,stroke-width:2px
+    style confirmed font-size:12px
+    style detected font-size:12px

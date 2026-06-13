@@ -1,0 +1,180 @@
+\section{Anexo D Docker}\label{anexo-d-docker}
+
+\subsection{ANEXO D.1. CONTENEDORIZACIÓN E INFRAESTRUCTURA DE DESPLIEGUE
+(DOCKER)}\label{anexo-d.1.-contenedorizaciuxf3n-e-infraestructura-de-despliegue-docker}
+
+En el ámbito del desarrollo de software moderno y la ciberseguridad, la
+reproducibilidad del entorno de ejecución constituye un pilar crítico.
+Tradicionalmente, el despliegue de aplicaciones que integran múltiples
+herramientas de análisis (como compiladores de Solidity y motores de
+ejecución simbólica) se enfrentaba al problema de ``funciona en mi
+máquina'', derivado de las discrepancias en las versiones de las
+dependencias, librerías del sistema operativo y configuraciones locales.
+Para mitigar este riesgo, el presente proyecto adopta una arquitectura
+basada en contenedores de aplicación a través del ecosistema de
+\textbf{Docker} y \textbf{Docker Compose}.
+
+\subsection{ANEXO D.2. Fundamentos de Contenedorización: Docker y Docker
+Compose}\label{anexo-d.2.-fundamentos-de-contenedorizaciuxf3n-docker-y-docker-compose}
+
+Docker es una plataforma de código abierto basada en la tecnología de
+contenedorización, la cual permite empaquetar una aplicación y todas sus
+dependencias (binarios, librerías, archivos de configuración) en una
+unidad estandarizada denominada \textbf{contenedor}. A diferencia de la
+virtualización tradicional, Docker opera mediante la virtualización a
+nivel de sistema operativo, compartiendo el núcleo (kernel) del sistema
+anfitrión pero ejecutando los procesos en espacios de usuario
+completamente aislados a través de namespaces y cgroups. Desde la
+perspectiva de la seguridad, este aislamiento garantiza que los procesos
+del pipeline de auditoría de EVMAudit se ejecuten de forma confinada,
+mitigando el impacto en la infraestructura anfitriona ante la eventual
+ejecución de código arbitrario o inesperado durante el análisis de
+contratos inteligentes.
+
+Por su parte, \textbf{Docker Compose} es la herramienta diseñada para
+definir y orquestar aplicaciones Docker multi-contenedor. Mediante el
+uso de un archivo de configuración declarativo en formato YAML
+(docker-compose.yml), permite definir con precisión los servicios que
+componen el sistema, sus dependencias de arranque, la exposición de
+puertos hacia el exterior, la creación de redes aisladas y la asignación
+de volúmenes persistentes. En el contexto de EVMAudit, actúa como el
+motor de despliegue unificado, permitiendo al administrador inicializar
+toda la infraestructura del TFM (servidor FastAPI, interfaz web y
+almacenamiento de informes) de manera centralizada.
+
+\subsection{ANEXO D.3. Estrategia de Construcción de la Imagen
+(Dockerfile)}\label{anexo-d.3.-estrategia-de-construcciuxf3n-de-la-imagen-dockerfile}
+
+La construcción de la imagen se define en un único Dockerfile
+optimizado. Debido a que el pipeline de análisis requiere interactuar
+con el sistema operativo para invocar compiladores y binarios de
+seguridad, se ha seleccionado \textbf{Ubuntu 22.04} como imagen base,
+proporcionando un entorno estable y con soporte extendido para
+dependencias nativas de Linux en arquitectura amd64.
+
+El proceso de aprovisionamiento de la imagen se divide en las siguientes
+fases críticas: 1. \textbf{Entorno y Variables de Sistema}: Se
+configuran las variables de entorno \texttt{PYTHONDONTWRITEBYTECODE=1} y
+\texttt{PYTHONUNBUFFERED=1} para optimizar la ejecución de Python dentro
+del contenedor, evitando la escritura de residuos binarios y forzando el
+volcado de logs en tiempo real. Asimismo, se establece
+\texttt{DEBIAN\_FRONTEND=noninteractive} para suprimir diálogos
+interactivos durante la instalación de paquetes. 2.
+\textbf{Aprovisionamiento de Compiladores (Solidity):} Se añade el
+repositorio PPA oficial de Ethereum (ppa:ethereum/ethereum) para
+incorporar el compilador nativo de Solidity (solc). Posteriormente, se
+instala la utilidad \texttt{solc-select} mediante el gestor de paquetes
+de Python para automatizar la descarga y conmutación de versiones. 3.
+\textbf{Integración del Fuzzer Echidna:} Dado que Echidna se distribuye
+de manera óptima como un binario estático para Linux, el contenedor
+automatiza su descarga directa (versión v2.3.2) desde los repositorios
+oficiales de \emph{Crytic}, procediendo a su extracción e instalación en
+\texttt{/usr/local/bin/} para garantizar su disponibilidad inmediata en
+el PATH del sistema. 4. \textbf{Optimización de Dependencias con
+\texttt{uv} (Multi-stage Build):} Con el objetivo de minimizar los
+tiempos de construcción y asegurar una gestión eficiente de los paquetes
+de Python, se emplea un mecanismo de construcción en etapas múltiples
+(Multi-stage build), importando los binarios optimizados del gestor uv
+directamente desde su imagen oficial en el registro de GitHub
+(ghcr.io/astral-sh/uv:latest). 5. \textbf{Instalación del Paquete
+Local:} Tras establecer el directorio de trabajo en /app y copiar el
+código fuente , se ejecuta el comando
+\texttt{uv\ sync\ -\/-frozen\ -\/-no-cache}. Esto resuelve de forma
+determinista el grafo de dependencias del archivo uv.lock, registrando
+el paquete local editable evmaudit e instalando el servidor ASGI Uvicorn
+sin almacenar datos residuales en la caché de la imagen.
+
+\subsection{ANEXO D.4. Orquestación de Servicios (Docker
+Compose)}\label{anexo-d.4.-orquestaciuxf3n-de-servicios-docker-compose}
+
+La coordinación del contenedor web y sus dependencias con el sistema
+anfitrión se gestiona de forma declarativa mediante un archivo
+docker-compose.yml. La especificación del servicio, denominado
+evmaudit-web, se fundamenta en tres pilares de ingeniería:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Persistencia de Datos mediante Volúmenes}: Con el fin de dotar
+  al sistema de un estado persistente (pese a la naturaleza efímera de
+  los contenedores), se realiza un mapeo directo de directorios del host
+  hacia el contenedor:
+\item
+  \textbf{\texttt{./jsons/\_uploads:/app/jsons/\_uploads}}: Almacena de
+  forma persistente los contratos Solidity cargados por los usuarios,
+  los wrappers intermedios generados para Echidna y los informes de
+  auditoría finales en formato JSON y Markdown.
+\item
+  \textbf{\texttt{./contracts:/app/contracts}}: Habilita un volumen
+  opcional para la auditoría directa de Smart Contracts locales sin
+  necesidad de interactuar con la interfaz web.
+\item
+  \textbf{Aislamiento de Red y Mapeo de Puertos}: Se expone el puerto
+  8080 del contenedor hacia el puerto 8080 del sistema anfitrión. Esto
+  permite redirigir el tráfico HTTP de la interfaz construida en
+  HTML5/Vanilla JS hacia el backend desarrollado en FastAPI de forma
+  transparente.
+\item
+  \textbf{Tolerancia a Fallos}: Se implementa la política de reinicio
+  restart: unless-stopped. Esta directiva asegura la alta disponibilidad
+  del servicio ante excepciones imprevistas en el motor de ejecución
+  simbólica (Mythril) o caídas del propio demonio de Docker,
+  garantizando que el servicio web vuelva a levantarse de manera
+  automática salvo interrupción explícita del administrador.
+\end{itemize}
+
+\subsection{ANEXO D.5. Flujo de Despliegue y Ciclo de Vida del
+Contenedor}\label{anexo-d.5.-flujo-de-despliegue-y-ciclo-de-vida-del-contenedor}
+
+Para la puesta en marcha de la infraestructura local en entornos de
+desarrollo o evaluación, el ciclo de vida del contenedor se administra
+mediante el estándar de comandos de Docker Compose: 1. \textbf{Fase de
+Construcción (Build):} Compilación de la imagen e instalación del
+entorno virtual determinista:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ compose build}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  \textbf{Fase de Inicialización (Up):} Despliegue e instanciación del
+  servicio en segundo plano (detached mode):
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ compose up }\AttributeTok{{-}d}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  \textbf{Fase de Auditoría de Ejecución (Logs):} Inspección de la
+  salida estándar del contenedor para la monitorización de los análisis
+  en curso:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ExtensionTok{docker}\NormalTok{ compose logs }\AttributeTok{{-}f}\NormalTok{ evmaudit{-}web}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  \textbf{Fase de Parada (Down):} Interrupción y eliminación de los
+  contenedores activos salvaguardando la integridad de los datos de las
+  auditorías gracias a los volúmenes enlazados: docker compose down
+\end{enumerate}

@@ -1,0 +1,332 @@
+\subsection{2.6. Herramientas de
+Análisis}\label{herramientas-de-anuxe1lisis}
+
+\subsubsection{2.6.1. Slither}\label{slither}
+
+\paragraph{2.6.1.1. Descripción y características
+principales}\label{descripciuxf3n-y-caracteruxedsticas-principales}
+
+\textbf{Slither} es un framework de análisis estático de código abierto
+diseñado específicamente para la evaluación de seguridad de contratos
+inteligentes desarrollados en \textbf{Solidity} y \textbf{Vyper}. En la
+actualidad, se posiciona como una de las herramientas más robustas y
+ampliamente adoptadas tanto en el ámbito académico como en la industria
+de la auditoría de protocolos descentralizados.
+
+Desarrollado por la firma de seguridad Trail of Bits, su presentación
+formal tuvo lugar en 2019 a través del artículo de investigación
+Slither: A Static Analysis Framework For Smart Contracts {[}18{]},~
+cuyos autores son Josselin Feist, Gustavo Grieco y Alex Groce
+
+Arquitectura y Funcionamiento
+
+El núcleo de Slither está implementado en \textbf{Python} y su principal
+ventaja competitiva reside en su flujo de análisis. A diferencia de
+otras herramientas que operan directamente sobre el bytecode de la
+Ethereum Virtual Machine (EVM), Slither recupera el Árbol de Sintaxis
+Abstracta (AST) de los contratos y lo traduce a una representación
+intermedia propia denominada \textbf{SlithIR}.
+
+Esta representación, basada en \emph{Static Single Assignment} (SSA),
+permite realizar análisis de flujo de datos y de control con una
+precisión elevada, facilitando la detección de vulnerabilidades
+complejas que los \emph{linters} convencionales suelen omitir.
+
+\paragraph{2.6.1.2. Capacidades y Características
+Principales}\label{capacidades-y-caracteruxedsticas-principales}
+
+De acuerdo con sus especificaciones técnicas y su repositorio oficial
+{[}19{]}, Slither ofrece un conjunto de funcionalidades críticas para el
+desarrollo seguro:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Detección de Vulnerabilidades:} Capacidad para identificar
+  código vulnerable con una tasa reducida de falsos positivos,
+  documentada en una extensa lista de "trofeos" (vulnerabilidades reales
+  detectadas en protocolos principales).
+\item
+  \textbf{Trazabilidad:} Localiza con exactitud el punto del código
+  fuente donde se produce la condición de error, facilitando la
+  remediación inmediata.
+\item
+  \textbf{Integración en el Ciclo de Vida del Software (DevSecOps):} Se
+  integra de forma nativa en entornos de desarrollo como Hardhat y
+  Foundry, además de permitir su implementación en flujos de Integración
+  Continua (CI) y escaneo de código en GitHub.
+\item
+  \textbf{Herramientas de Visualización (Printers):} Incluye funciones
+  integradas para generar informes rápidos sobre la información crucial
+  del contrato (jerarquía de herencia, permisos, etc.).
+\item
+  \textbf{Extensibilidad:} Dispone de una API de detección que permite a
+  los investigadores programar análisis personalizados y detectores
+  específicos en Python.
+\item
+  \textbf{Rendimiento y Compatibilidad:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Soporte para contratos en Solidity desde la versión 0.4 en adelante.
+  \item
+    Capacidad de procesamiento del 99.9\% del código público de
+    Solidity.
+  \item
+    Tiempo de ejecución promedio inferior a 1 segundo por contrato, lo
+    que lo hace ideal para despliegues a gran escala.
+  \end{itemize}
+\end{itemize}
+
+\paragraph{2.6.1.3. Impacto en la Seguridad de Contratos
+Inteligentes}\label{impacto-en-la-seguridad-de-contratos-inteligentes}
+
+La importancia de Slither radica en su equilibrio entre
+\textbf{velocidad y precisión}. Al operar sobre SlithIR, la herramienta
+puede realizar análisis semánticos profundos sin la carga computacional
+que requieren los motores de ejecución simbólica, permitiendo una
+validación constante durante la fase de desarrollo del contrato.
+
+\paragraph{2.6.1.4. Limitaciones de
+Slither}\label{limitaciones-de-slither}
+
+A pesar de su eficiencia, Slither presenta limitaciones propias del
+análisis estático que deben ser consideradas. La herramienta no modela
+interacciones complejas entre múltiples contratos de forma dinámica, lo
+que le impide detectar vulnerabilidades de lógica económica, como la
+manipulación de oráculos o ataques de \emph{flash loans}. Asimismo, en
+entornos de código con alta complejidad, múltiples niveles de herencia o
+uso de ensamblador (\emph{inline assembly}), Slither suele generar una
+tasa elevada de falsos positivos. Esto requiere que el auditor realice
+una validación manual exhaustiva para distinguir las vulnerabilidades
+reales de las falsas alarmas detectadas por el software.
+
+\paragraph{2.6.1.5. Empresas y organizaciones que lo
+utilizan}\label{empresas-y-organizaciones-que-lo-utilizan}
+
+En el sector de la seguridad blockchain, Slither se ha consolidado como
+una herramienta de referencia. Es utilizada de manera sistemática por
+firmas de auditoría líderes como \textbf{ConsenSys Diligence,}
+\textbf{Sigma Prime} y \textbf{OpenZeppelin} para realizar el triaje
+inicial de los contratos. Además, su integración en flujos de trabajo de
+integración continua (CI/CD) es un estándar en los protocolos DeFi más
+relevantes, entre los que destacan \textbf{Aave,} \textbf{Uniswap,}
+\textbf{Yearn Finance} y \textbf{Compound}. Estas organizaciones emplean
+el \emph{framework} para automatizar el escaneo de seguridad en cada
+actualización de sus repositorios antes del despliegue definitivo en la
+red.{[}20{]}, {[}21{]}, {[}22{]}
+
+\subsubsection{2.6.2. Mythril --- Ejecución Simbólica
+(ConsenSys)}\label{mythril-ejecuciuxf3n-simbuxf3lica-consensys}
+
+\paragraph{2.6.2.1. Descripción y características
+principales}\label{descripciuxf3n-y-caracteruxedsticas-principales-1}
+
+Mythril es una herramienta de seguridad de código abierto diseñada para
+el análisis profundo de contratos inteligentes que se ejecutan en la
+Ethereum Virtual Machine (EVM). A diferencia de los analizadores
+estáticos convencionales, Mythril se categoriza como un motor de
+ejecución simbólica, capaz de evaluar la seguridad de los contratos
+tanto a nivel de código fuente (Solidity) como directamente sobre el
+bytecode de la EVM {[}23{]}. Su propósito principal es identificar
+estados del contrato que podrían conducir a vulnerabilidades críticas
+mediante la exploración de rutas de ejecución que no son evidentes
+mediante la simple lectura del código.{[}24{]}
+
+\paragraph{2.6.2.2. Arquitectura y
+Funcionamiento}\label{arquitectura-y-funcionamiento}
+
+El núcleo de Mythril se basa en la \textbf{ejecución simbólica con
+resolución SMT (\emph{Satisfiability Modulo Theories}).} Su
+funcionamiento se puede desglosar en tres fases técnicas:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Desensamblado y Grafo de Flujo de Control (CFG):} Mythril
+  descompone el \emph{bytecode} en instrucciones de la EVM y construye
+  un grafo que representa todos los caminos posibles que puede tomar una
+  transacción.
+\item
+  \textbf{Exploración de Estados Simbólicos:} En lugar de usar valores
+  fijos (ej. enviar 1 ETH), utiliza variables simbólicas (x). La
+  herramienta "ejecuta" el contrato de forma virtual, acumulando
+  restricciones matemáticas sobre estas variables a medida que atraviesa
+  bifurcaciones condicionales (if, require).
+\item
+  \textbf{Resolución mediante Z3:} Para determinar si un estado
+  vulnerable es alcanzable, Mythril consulta a Z3, un potente probador
+  de teoremas desarrollado por Microsoft Research. Si el \emph{solver}
+  encuentra un conjunto de valores que satisfacen las condiciones para
+  un ataque (por ejemplo, que el saldo sea cero y el llamante no sea el
+  propietario), Mythril confirma la existencia de la vulnerabilidad.
+\end{itemize}
+
+\paragraph{2.6.2.3. Capacidades y Características
+Principales}\label{capacidades-y-caracteruxedsticas-principales-1}
+
+En cuanto a su potencial técnico, Mythril sobresale por su capacidad
+para identificar fallos lógicos de alta complejidad que están
+estrechamente vinculados a la manipulación del estado de la cadena de
+bloques.
+
+Entre sus funciones más destacadas se encuentra la detección
+especializada de vulnerabilidades críticas, tales como la reentrancia
+clásica, el uso indebido de la instrucción DELEGATECALL, las
+dependencias de \emph{timestamp} y los desbordamientos de enteros
+(\emph{integer overflows/underflows}), estos últimos especialmente
+relevantes en contratos desarrollados con versiones de Solidity
+anteriores a la 0.8.
+
+Asimismo, la herramienta ofrece una versatilidad notable mediante su
+funcionalidad de análisis de Mainnet, la cual permite recuperar el
+bytecode directamente desde un nodo de Ethereum; esto facilita la
+auditoría de contratos que ya han sido desplegados incluso si el código
+fuente original no está disponible.
+
+Finalmente, una de sus características más valoradas por los auditores
+es la generación detallada de trazas de ejecución, ya que el sistema no
+se limita a reportar la existencia de un error, sino que reconstruye la
+secuencia exacta de transacciones necesaria para recrear el exploit y
+validar la vulnerabilidad.
+
+\paragraph{2.6.2.4. Limitaciones
+Técnicas}\label{limitaciones-tuxe9cnicas}
+
+A pesar de su robustez, Mythril enfrenta desafíos significativos
+derivados de la naturaleza de la ejecución simbólica. El obstáculo más
+crítico es la denominada explosión de caminos (\emph{path explosion}),
+un fenómeno que ocurre en contratos con estructuras de control muy
+ramificadas o bucles complejos. En estos escenarios, el número de
+estados posibles aumenta de forma exponencial, lo que deriva
+frecuentemente en un consumo excesivo de memoria o en la interrupción
+del proceso por tiempo de espera (\emph{timeout}) antes de completar el
+análisis.{[}25{]}
+
+A esta limitación estructural se suma una tasa considerable de falsos
+positivos, la cual se estima en estudios independientes entre el 45\% y
+el 52\%. Esta imprecisión suele deberse a que la herramienta, para
+mantener la viabilidad del cálculo, simplifica ciertos aspectos del
+entorno de la blockchain, como el estado de contratos externos o
+variables ambientales complejas, lo que puede llevar a reportar
+vulnerabilidades que no son explotables en un entorno real.{[}26{]}
+
+Finalmente, el rendimiento operativo de Mythril es notablemente inferior
+al de los analizadores estáticos como Slither. Debido a la carga
+computacional que requiere la resolución de fórmulas matemáticas
+mediante SMT, los tiempos de ejecución oscilan entre los 5 y 300
+segundos por contrato. Esta demora depende directamente de la
+profundidad de exploración configurada, lo que lo hace menos ágil para
+procesos de integración continua que requieren una respuesta inmediata.
+
+\paragraph{2.6.2.5. Ecosistema y
+Adopción}\label{ecosistema-y-adopciuxf3n}
+
+En la actualidad, Mythril se consolida como un pilar fundamental dentro
+de la industria de la seguridad blockchain. Su relevancia técnica y
+trayectoria lo han posicionado como el motor central de \textbf{MythX},
+la plataforma de análisis de seguridad profesional bajo modelo SaaS
+desarrollada por ConsenSys. Esta integración permite a los
+desarrolladores acceder a las capacidades de Mythril directamente desde
+sus entornos de trabajo habituales.
+
+Asimismo, la herramienta se ha convertido en un estándar dentro de los
+flujos de trabajo de \textbf{auditoría profesional}. Firmas de prestigio
+internacional, tales como \textbf{ConsenSys Diligence} y
+\textbf{Halborn}, emplean Mythril de forma sistemática para complementar
+sus revisiones manuales, utilizando su capacidad de exploración de
+estados para detectar errores lógicos que podrían pasar desapercibidos
+en una lectura convencional del código.
+
+Más allá del sector comercial, Mythril posee una fuerte presencia en la
+\textbf{comunidad académica}. Su naturaleza de código abierto y su
+arquitectura basada en el \emph{solver} Z3 lo convierten en una base
+tecnológica recurrente para investigaciones avanzadas. Es utilizado
+frecuentemente en estudios sobre verificación formal y en el desarrollo
+de nuevos protocolos de seguridad destinados a proteger el ecosistema de
+las finanzas descentralizadas (DeFi) {[}24{]}, {[}25{]}.
+
+\subsubsection{2.6.3. Echidna --- Fuzzing Basado en Propiedades (Trail
+of Bits)}\label{echidna-fuzzing-basado-en-propiedades-trail-of-bits}
+
+\paragraph{2.6.3.1. Descripción y características
+principales}\label{descripciuxf3n-y-caracteruxedsticas-principales-2}
+
+Echidna es una herramienta de código abierto desarrollada por Trail of
+Bits, diseñada específicamente para el análisis de seguridad de
+contratos inteligentes en Ethereum mediante la técnica de \emph{fuzzing}
+basado en propiedades. A diferencia de las pruebas unitarias
+tradicionales, que se limitan a verificar resultados ante entradas
+específicas, este marco de trabajo busca falsar invariantes o predicados
+definidos por el usuario, permitiendo identificar fallos lógicos
+complejos que suelen pasar desapercibidos en procesos de testeo
+convencionales. Implementado en Haskell, el programa destaca por su
+facilidad de uso, ya que no requiere configuraciones complejas ni el
+despliegue previo de los contratos en una red local.{[}27{]}
+
+\paragraph{2.6.3.2. Arquitectura y
+Funcionamiento}\label{arquitectura-y-funcionamiento-1}
+
+El funcionamiento de Echidna se fundamenta en la generación de campañas
+de \emph{fuzzing} basadas en gramática, utilizando el ABI
+(\emph{Application Binary Interface}) del contrato para interactuar con
+él. El flujo de trabajo comienza cuando el desarrollador define
+propiedades de seguridad en el código Solidity, normalmente funciones
+con el prefijo \texttt{echidna\_} que deben devolver siempre un valor
+booleano verdadero. A partir de estas definiciones, la herramienta
+ejecuta millones de secuencias de transacciones aleatorias y
+sofisticadas con el objetivo de alcanzar un estado del contrato que
+rompa dichas reglas.{[}28{]}
+
+\paragraph{2.6.3.3. Capacidades y Características
+Principales}\label{capacidades-y-caracteruxedsticas-principales-2}
+
+Una de las capacidades más potentes de este fuzzer es su capacidad de
+reducción de casos de prueba. Cuando Echidna detecta una violación de
+una propiedad o una aserción de Solidity, el sistema realiza una
+simplificación automática para reportar la secuencia mínima de
+transacciones necesaria para reproducir el error. Esta eficiencia en la
+detección y reporte ha quedado demostrada en entornos reales de
+producción; ya en la fecha de publicación de su \emph{paper} original,
+la herramienta había sido validada con éxito en más de diez auditorías
+de seguridad de gran escala, consolidándose como un estándar en el
+ecosistema de seguridad de \emph{smart contracts}.{[}27{]}
+
+\paragraph{2.6.3.4. Limitaciones
+Técnicas}\label{limitaciones-tuxe9cnicas-1}
+
+A pesar de su eficacia, Echidna presenta restricciones técnicas
+inherentes a su metodología de prueba. En primer lugar, la calidad del
+análisis depende de la calidad de las propiedades definidas por el
+usuario; si el desarrollador no define correctamente los invariantes,
+Echidna no podrá identificar fallos de lógica específicos {[}29{]}.
+
+Por otro lado, la herramienta puede enfrentar problemas de rendimiento
+en contratos con funciones extremadamente costosas en términos de gas o
+con estructuras de datos ineficientes, lo que ralentiza la generación de
+transacciones {[}28{]}.
+
+Asimismo, aunque es excelente para detectar errores lógicos, tiene
+dificultades para analizar contratos que dependen de condiciones
+externas muy específicas de la red que no pueden ser fácilmente
+simuladas en su entorno local de pruebas{[}29{]}.
+
+\subsubsection{2.6.3.5. Ecosistema y
+Adopción}\label{ecosistema-y-adopciuxf3n-1}
+
+Debido a su eficacia demostrada, Echidna se ha convertido en una
+herramienta estándar en la industria:
+
+·~~~~~ \textbf{Trail of Bits:} Como creadores de la herramienta, la
+utilizan en todas sus auditorías de alto perfil para protocolos DeFi
+{[}28{]}.
+
+·~~~~~ \textbf{Auditores Profesionales:} Firmas de ciberseguridad
+blockchain emplean Echidna para validar la robustez de protocolos antes
+de su despliegue en la red principal {[}29{]}.
+
+·~~~~~ \textbf{Equipos de Desarrollo:} Proyectos de infraestructura y
+finanzas descentralizadas integran Echidna en sus tuberías de
+\textbf{Integración Continua (CI/CD)} para garantizar que cada
+actualización de código mantenga los invariantes de seguridad {[}27{]}.

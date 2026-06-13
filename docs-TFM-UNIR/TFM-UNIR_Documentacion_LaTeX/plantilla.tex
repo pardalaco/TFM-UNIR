@@ -1,0 +1,105 @@
+\documentclass[11pt,a4paper,spanish]{book}
+\usepackage{estilo_unir-1}
+\usepackage{apacite}
+\usepackage{hyperref}
+
+\numberwithin{equation}{chapter}
+\numberwithin{figure}{chapter}
+
+%---------------------------
+% Datos del trabajo
+%---------------------------
+\title{EVMAudit: Librería multiherramienta para la detección automatizada de vulnerabilidades en contratos inteligentes de Ethereum}
+\titulacion{Máster Universitario en Ciberseguridad}
+\author{Adrián Moreno Martín, Daniel Rovira Martínez,Paula Suárez Prieto }
+\date{Curso 2025-2026}
+\director{Friman Sánchez Castaño}
+\nombreciudad{Madrid}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\renewcommand{\listfigurename}{Índice de Ilustraciones}
+\renewcommand{\listtablename}{Índice de Tablas}
+\renewcommand{\contentsname}{Índice de Contenidos}
+\renewcommand{\figurename}{Figura}
+\renewcommand{\tablename}{Tabla}
+
+\maketitle
+
+\frontmatter
+
+
+\input{capitulos/0.1. Abstract}
+
+
+\input{capitulos/0.2.MecanismosCoordinacion}
+
+
+\newpage
+\tableofcontents
+\listoffigures
+\listoftables
+
+
+\mainmatter
+
+\chapter{Introducción}
+\input{capitulos/1. Introducción}
+
+\chapter{Estado del arte}
+\input{capitulos/2. Estado del arte/2.00.Introduccion}
+\input{capitulos/2. Estado del arte/2.01.Fundamentos blockchain y contratos inteligentes}
+\input{capitulos/2. Estado del arte/2.03.Interoperabilidad blockchain}
+\input{capitulos/2. Estado del arte/2.04.Vulnerabilidades}
+\input{capitulos/2. Estado del arte/2.05.Ataques reales}
+\input{capitulos/2. Estado del arte/2.06.Herramientas de Análisis}
+\input{capitulos/2. Estado del arte/2.07.Sintesis}
+
+\chapter{Objetivos concretos y metodología de trabajo}
+\input{capitulos/3. Objetivos concretos y metodología de trabajo}
+
+\chapter{Desarrollo específico de la contribución}
+\input{capitulos/4. Desarrollo específico de la contribución/4.00.Introducción}
+\input{capitulos/4. Desarrollo específico de la contribución/4.01.Requisitos}
+\input{capitulos/4. Desarrollo específico de la contribución/4.02.Arquitectura}
+\input{capitulos/4. Desarrollo específico de la contribución/4.03.Runner}
+\input{capitulos/4. Desarrollo específico de la contribución/4.04.Normalizer}
+\input{capitulos/4. Desarrollo específico de la contribución/4.05.Correlator}
+\input{capitulos/4. Desarrollo específico de la contribución/4.06.SWC Catalog}
+\input{capitulos/4. Desarrollo específico de la contribución/4.07.Echidna adaptar}
+\input{capitulos/4. Desarrollo específico de la contribución/4.08.Gestion de errores}
+\input{capitulos/4. Desarrollo específico de la contribución/4.09.Integración y distribución}
+\input{capitulos/4. Desarrollo específico de la contribución/4.10. Flujo completo}
+\input{capitulos/4. Desarrollo específico de la contribución/4.11.Evaluación experimental}
+
+\chapter{Conclusiones y trabajo futuro}
+\input{capitulos/5. Conclusiones y trabajo futuro}
+
+\bibliographystyle{apacite}
+\bibliography{bibliografia}
+
+\appendix
+
+\chapter{Ejemplos de vulnerabilidades}
+\input{capitulos/Z0 - Anexo A Ejemplos de vulnerabilidades}
+
+\chapter{Entorno virtual Python}
+\input{capitulos/Z1 - Anexo B Entorno virtual Python}
+
+\chapter{Distribución mediante PyPI}
+\input{capitulos/Z2 - Anexo C Distribucion mediante PYPi}
+
+\chapter{Docker}
+\input{capitulos/Z4 - Anexo D Docker}
+
+\chapter{Aplicación web}
+\input{capitulos/Z3 - Anexo E Aplicación web}
+
+\chapter{CI/CD}
+\input{capitulos/Z5 - Anexo F CI CD}
+
+\chapter{Railway}
+\input{capitulos/Z6 - Anexo G Railway}
+\end{document}

@@ -1,0 +1,118 @@
+\section{4.2.Arquitectura}\label{arquitectura}
+
+\subsection{4.2. Arquitectura general de
+EVMAudit}\label{arquitectura-general-de-evmaudit}
+
+Con el objetivo de satisfacer los requisitos definidos anteriormente, se
+diseñó una arquitectura modular que permitiese separar las distintas
+fases del proceso de análisis y facilitar la incorporación de nuevas
+funcionalidades en futuras versiones.
+
+La arquitectura implementada divide el sistema en varios módulos
+especializados encargados de:
+
+\begin{itemize}
+\tightlist
+\item
+  ejecutar las herramientas externas
+\item
+  procesar y normalizar los resultados obtenidos
+\item
+  correlacionar vulnerabilidades equivalentes
+\item
+  generar propiedades para Echidna
+\item
+  ejecutar pruebas de fuzzing
+\item
+  construir el informe final.
+\end{itemize}
+
+Esta separación de responsabilidades permite reducir el acoplamiento
+entre componentes y facilita la mantenibilidad del sistema.
+
+\subsubsection{4.2.1. Pipeline de
+análisis}\label{pipeline-de-anuxe1lisis}
+
+El flujo general seguido por EVMAudit comienza con la recepción del
+contrato inteligente que se desea analizar. Posteriormente, la
+herramienta ejecuta Slither y Mythril para obtener resultados
+procedentes de análisis estático y ejecución simbólica.
+
+Una vez finalizada esta fase, los resultados generados son normalizados
+y transformados a una estructura común. Posteriormente, se aplica el
+mecanismo de correlación implementado por EVMAudit con el objetivo de
+unificar vulnerabilidades equivalentes y aumentar la confianza de los
+hallazgos obtenidos.
+
+A partir de los resultados correlacionados, se generan automáticamente
+propiedades para Echidna, construyendo un wrapper específico que permite
+realizar una fase adicional de validación mediante fuzzing.
+
+Finalmente, la herramienta genera un informe consolidado que agrupa toda
+la información obtenida durante el proceso.
+
+!TODO: insertar diagrama del pipeline completo.
+
+!TODO: insertar referencia a la Figura X.
+
+\subsubsection{4.2.2. Estructura modular}\label{estructura-modular}
+
+La implementación de EVMAudit se organiza en varios módulos
+independientes, cada uno de ellos responsable de una fase concreta del
+análisis.
+
+Los principales componentes que forman la solución son:
+
+\begin{itemize}
+\tightlist
+\item
+  Runner.
+\item
+  Normalizer.
+\item
+  Correlator.
+\item
+  SWC Catalog.
+\item
+  Echidna Adapter.
+\item
+  Reporter.
+\item
+  Exceptions.
+\end{itemize}
+
+Esta organización permite modificar o ampliar cada componente de forma
+independiente, favoreciendo la reutilización y evolución futura de la
+herramienta.
+
+!TODO: insertar diagrama UML de paquetes.
+
+!TODO: revisar nombres definitivos de los módulos.
+
+\subsubsection{4.2.3. Separación entre lógica de análisis e
+interfaces}\label{separaciuxf3n-entre-luxf3gica-de-anuxe1lisis-e-interfaces}
+
+Uno de los principios de diseño adoptados durante el desarrollo fue
+desacoplar completamente la lógica de análisis de las interfaces de
+usuario.
+
+Por este motivo, EVMAudit fue implementada como una librería
+independiente, permitiendo que la funcionalidad principal pueda ser
+reutilizada desde distintos entornos sin necesidad de modificar el
+código interno.
+
+Esta decisión permitió desarrollar posteriormente una aplicación web que
+utiliza la librería como motor de análisis, demostrando la reutilización
+de la solución propuesta.
+
+Los detalles relacionados con la aplicación web desarrollada y los
+mecanismos de distribución utilizados se describen en los anexos del
+documento.
+
+!TODO: referencia cruzada al apartado 4.9.
+
+!TODO: referencia cruzada al Anexo A.
+
+!TODO: referencia cruzada al Anexo B.
+
+!TODO: referencia cruzada al Anexo C.

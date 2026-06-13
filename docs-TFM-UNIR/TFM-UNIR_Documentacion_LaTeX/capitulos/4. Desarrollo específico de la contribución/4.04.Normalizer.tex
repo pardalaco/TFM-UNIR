@@ -1,0 +1,183 @@
+\section{4.4.Normalizer}\label{normalizer}
+
+\subsection{4.4. Módulo de
+normalización}\label{muxf3dulo-de-normalizaciuxf3n}
+
+Uno de los principales problemas identificados durante el estudio de las
+herramientas existentes fue la heterogeneidad de los formatos utilizados
+para representar las vulnerabilidades detectadas.
+
+Slither y Mythril generan estructuras JSON completamente diferentes,
+tanto en la forma de representar la severidad como en la descripción de
+los hallazgos o la identificación de las localizaciones afectadas.
+
+Esta situación dificulta la comparación directa de resultados y hace
+necesaria una fase previa de transformación antes de poder aplicar
+mecanismos de correlación.
+
+Para resolver este problema se desarrolló un módulo de normalización
+encargado de transformar las salidas heterogéneas en una estructura
+común.
+
+\subsubsection{4.4.1. Objetivos del proceso de
+normalización}\label{objetivos-del-proceso-de-normalizaciuxf3n}
+
+El proceso de normalización persigue varios objetivos:
+
+\begin{itemize}
+\tightlist
+\item
+  unificar la representación de vulnerabilidades;
+\item
+  facilitar la correlación entre herramientas;
+\item
+  preservar las evidencias originales;
+\item
+  simplificar la generación posterior de informes;
+\item
+  desacoplar el resto de módulos de las particularidades de cada
+  herramienta.
+\end{itemize}
+
+Gracias a ello, los componentes posteriores pueden operar sobre una
+estructura homogénea independientemente del origen de los resultados.
+
+\subsubsection{4.4.2. Estructura común de los
+hallazgos}\label{estructura-comuxfan-de-los-hallazgos}
+
+Cada vulnerabilidad normalizada se representa mediante un conjunto común
+de atributos.
+
+Entre los campos principales se encuentran:
+
+\begin{itemize}
+\tightlist
+\item
+  título;
+\item
+  descripción;
+\item
+  severidad;
+\item
+  categoría;
+\item
+  contrato afectado;
+\item
+  función afectada;
+\item
+  localización;
+\item
+  identificador SWC;
+\item
+  herramienta de origen;
+\item
+  evidencia original.
+\end{itemize}
+
+La inclusión de la salida original permite mantener la trazabilidad del
+análisis y facilita la revisión manual de los resultados.
+
+!TODO: insertar diagrama UML del objeto Finding.
+
+!TODO: revisar nombres exactos de los atributos.
+
+\subsubsection{4.4.3. Normalización de resultados de
+Slither}\label{normalizaciuxf3n-de-resultados-de-slither}
+
+La función de normalización correspondiente a Slither transforma la
+estructura JSON generada por la herramienta y extrae la información
+relevante necesaria para construir los hallazgos comunes utilizados por
+EVMAudit.
+
+Durante esta fase se realiza además la asociación de los detectores
+propios de Slither con los identificadores SWC correspondientes.
+
+Este proceso permite traducir la terminología específica de Slither a
+una representación independiente de la herramienta utilizada.
+
+!TODO: insertar fragmento de código de
+\texttt{normalize\_slither\_output()}.
+
+\subsubsection{4.4.4. Normalización de resultados de
+Mythril}\label{normalizaciuxf3n-de-resultados-de-mythril}
+
+De forma análoga, la salida generada por Mythril es procesada para
+obtener una representación equivalente a la utilizada por Slither.
+
+La transformación permite unificar:
+
+\begin{itemize}
+\tightlist
+\item
+  niveles de severidad;
+\item
+  nombres de vulnerabilidades;
+\item
+  identificadores SWC;
+\item
+  información contextual del hallazgo.
+\end{itemize}
+
+Gracias a ello, ambas herramientas pueden ser tratadas posteriormente de
+forma transparente por el módulo de correlación.
+
+!TODO: insertar fragmento de código de
+\texttt{normalize\_mythril\_output()}.
+
+\subsubsection{4.4.5. Clasificación de
+vulnerabilidades}\label{clasificaciuxf3n-de-vulnerabilidades}
+
+Además de unificar la representación de los hallazgos, el módulo de
+normalización clasifica las vulnerabilidades detectadas siguiendo las
+categorías definidas durante el estudio del estado del arte.
+
+Entre las categorías utilizadas se encuentran:
+
+\begin{itemize}
+\tightlist
+\item
+  vulnerabilidades de control de acceso;
+\item
+  vulnerabilidades económicas;
+\item
+  vulnerabilidades relacionadas con la lógica de negocio;
+\item
+  vulnerabilidades asociadas a la ejecución del contrato.
+\end{itemize}
+
+Esta clasificación permite mantener la coherencia entre la parte teórica
+del trabajo y la implementación desarrollada.
+
+!TODO: referencia cruzada a la Sección 2.X (clasificación de
+vulnerabilidades).
+
+\subsubsection{4.4.6. Preservación de
+evidencias}\label{preservaciuxf3n-de-evidencias}
+
+Uno de los principios adoptados durante el diseño de EVMAudit fue evitar
+la pérdida de información durante las fases intermedias del análisis.
+
+Por este motivo, cada hallazgo normalizado conserva una referencia a la
+salida original generada por la herramienta correspondiente.
+
+Esta decisión facilita:
+
+\begin{itemize}
+\tightlist
+\item
+  la revisión manual por parte del auditor;
+\item
+  la trazabilidad del proceso;
+\item
+  la depuración de errores;
+\item
+  la reproducibilidad de los resultados.
+\end{itemize}
+
+La conservación de evidencias resulta especialmente importante en
+entornos de auditoría y análisis forense, donde es necesario justificar
+el origen de cada vulnerabilidad identificada.
+
+!TODO: insertar diagrama del proceso de normalización.
+
+!TODO: insertar referencia a la Figura X.

@@ -1,0 +1,638 @@
+\section{ANEXO A.~Ejemplos de vulnerabilidades en contratos
+inteligentes}\label{anexo-a.-ejemplos-de-vulnerabilidades-en-contratos-inteligentes}
+
+Este anexo presenta ejemplos simplificados de vulnerabilidades
+representativas en contratos inteligentes desarrollados en Solidity. El
+objetivo es ilustrar de forma práctica los principales tipos de
+debilidades descritas en la sección 4.4, facilitando su comprensión y su
+posterior detección mediante herramientas automáticas.
+
+Cada ejemplo incluye: descripción, fragmento de código vulnerable,
+impacto y estrategia de mitigación.
+
+\subsection{ANEXO A.1. Vulnerabilidades técnicas de
+ejecución}\label{anexo-a.1.-vulnerabilidades-tuxe9cnicas-de-ejecuciuxf3n}
+
+\subsubsection{ANEXO A.1.1. Reentrancy}\label{anexo-a.1.1.-reentrancy}
+
+La vulnerabilidad de
+\href{https://www.cyfrin.io/blog/what-is-a-reentrancy-attack-solidity-smart-contracts}{\textbf{reentrancy}}
+se produce cuando un contrato realiza una llamada externa antes de
+actualizar su estado interno, permitiendo que el contrato receptor
+reingrese en la función original en un estado inconsistente.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{contract VulnerableBank \{}
+
+    \FunctionTok{mapping}\NormalTok{(address }\KeywordTok{=\textgreater{}}\NormalTok{ uint256) }\KeywordTok{public}\NormalTok{ balances}\OperatorTok{;}
+
+    \KeywordTok{function} \FunctionTok{deposit}\NormalTok{() }\KeywordTok{public}\NormalTok{ payable \{}
+
+\NormalTok{        balances[msg}\OperatorTok{.}\AttributeTok{sender}\NormalTok{] }\OperatorTok{+=}\NormalTok{ msg}\OperatorTok{.}\AttributeTok{value}\OperatorTok{;}
+
+\NormalTok{    \}}
+
+    \KeywordTok{function} \FunctionTok{withdraw}\NormalTok{(uint256 amount) }\KeywordTok{public}\NormalTok{ \{}
+
+        \PreprocessorTok{require}\NormalTok{(balances[msg}\OperatorTok{.}\AttributeTok{sender}\NormalTok{] }\OperatorTok{\textgreater{}=}\NormalTok{ amount)}\OperatorTok{;}
+
+\FunctionTok{       }\NormalTok{ (bool success}\OperatorTok{,}\NormalTok{ ) }\OperatorTok{=}\NormalTok{ msg}\OperatorTok{.}\AttributeTok{sender}\OperatorTok{.}\AttributeTok{call}\NormalTok{\{}\DataTypeTok{value}\OperatorTok{:}\NormalTok{ amount\}(}\StringTok{""}\NormalTok{)}\OperatorTok{;}
+
+        \PreprocessorTok{require}\NormalTok{(success)}\OperatorTok{;}
+
+\NormalTok{        balances[msg}\OperatorTok{.}\AttributeTok{sender}\NormalTok{] }\OperatorTok{{-}=}\NormalTok{ amount}\OperatorTok{;}
+
+\NormalTok{    \}}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Un atacante puede drenar fondos repitiendo la
+  llamada antes de que el balance sea actualizado.
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Patrón
+    \href{https://fravoll.github.io/solidity-patterns/checks_effects_interactions.html}{\emph{Checks-Effects-Interactions}}
+  \item
+    Uso de ReentrancyGuard
+  \item
+    Actualizar el estado antes de llamadas externas
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{ANEXO A.1.2. Integer Overflow /
+Underflow}\label{anexo-a.1.2.-integer-overflow-underflow}
+
+Errores aritméticos que provocan desbordamientos en operaciones enteras.
+Aunque mitigados en Solidity \textgreater= 0.8, siguen siendo relevantes
+en bloques unchecked.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{increment}\NormalTok{(uint256 x) }\KeywordTok{public}\NormalTok{ pure }\FunctionTok{returns}\NormalTok{ (uint256) \{}
+
+\NormalTok{    unchecked \{}
+
+        \ControlFlowTok{return}\NormalTok{ x }\OperatorTok{+} \DecValTok{1}\OperatorTok{;}
+
+\NormalTok{    \}}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Puede alterar balances o condiciones lógicas
+  críticas.
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Evitar unchecked salvo casos justificados
+  \item
+    Uso de validaciones explícitas
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{ANEXO A.1.3. Uso inseguro de
+delegatecall}\label{anexo-a.1.3.-uso-inseguro-de-delegatecall}
+
+La función delegatecall ejecuta código externo en el contexto de
+almacenamiento del contrato llamador.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{contract }\BuiltInTok{Proxy}\NormalTok{ \{}
+
+\NormalTok{    address }\KeywordTok{public}\NormalTok{ implementation}\OperatorTok{;}
+
+    \KeywordTok{function} \FunctionTok{execute}\NormalTok{(bytes memory data) }\KeywordTok{public}\NormalTok{ \{}
+
+\FunctionTok{       }\NormalTok{ (bool success}\OperatorTok{,}\NormalTok{ ) }\OperatorTok{=}\NormalTok{ implementation}\OperatorTok{.}\FunctionTok{delegatecall}\NormalTok{(data)}\OperatorTok{;}
+
+        \PreprocessorTok{require}\NormalTok{(success)}\OperatorTok{;}
+
+\NormalTok{    \}}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Compromiso total del almacenamiento del contrato.
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Control estricto de la dirección implementation
+  \item
+    Uso de patrones proxy auditados
+    (\href{https://eips.ethereum.org/EIPS/eip-1967}{EIP-1967},
+    \href{https://docs.openzeppelin.com/contracts-stylus/uups-proxy}{UUPS})
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{ANEXO A.1.4. Denegación de servicio
+(DoS)}\label{anexo-a.1.4.-denegaciuxf3n-de-servicio-dos}
+
+Bloqueo de ejecución debido a fallos en llamadas externas o estructuras
+no acotadas.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{payout}\NormalTok{(address[] memory recipients) }\KeywordTok{public}\NormalTok{ \{}
+
+    \ControlFlowTok{for}\NormalTok{ (uint i }\OperatorTok{=} \DecValTok{0}\OperatorTok{;}\NormalTok{ i }\OperatorTok{\textless{}}\NormalTok{ recipients}\OperatorTok{.}\AttributeTok{length}\OperatorTok{;}\NormalTok{ i}\OperatorTok{++}\NormalTok{) \{}
+
+        \FunctionTok{payable}\NormalTok{(recipients[i])}\OperatorTok{.}\FunctionTok{transfer}\NormalTok{(}\DecValTok{1}\NormalTok{ ether)}\OperatorTok{;}
+
+\NormalTok{    \}}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Un solo fallo revierte toda la operación.
+\item
+  Mitigación
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Uso de
+    \href{https://medium.com/@markojauregui/the-pull-over-push-model-in-solidity-a-secure-pattern-for-fund-withdrawals-10c2e6628626}{patrón
+    \emph{pull over push}}
+  \item
+    Evitar bucles dependientes de input externo
+  \end{itemize}
+\end{itemize}
+
+\subsection{ANEXO A.2. Vulnerabilidades técnicas de control y
+privilegios}\label{anexo-a.2.-vulnerabilidades-tuxe9cnicas-de-control-y-privilegios}
+
+\subsubsection{ANEXO A.2.1. Falta de control de
+acceso}\label{anexo-a.2.1.-falta-de-control-de-acceso}
+
+Funciones críticas accesibles por cualquier usuario.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{contract Ownable \{}
+
+\NormalTok{    address }\KeywordTok{public}\NormalTok{ owner}\OperatorTok{;}
+
+    \KeywordTok{function} \FunctionTok{withdrawAll}\NormalTok{() }\KeywordTok{public}\NormalTok{ \{}
+
+        \FunctionTok{payable}\NormalTok{(msg}\OperatorTok{.}\AttributeTok{sender}\NormalTok{)}\OperatorTok{.}\FunctionTok{transfer}\NormalTok{(}\FunctionTok{address}\NormalTok{(}\KeywordTok{this}\NormalTok{)}\OperatorTok{.}\AttributeTok{balance}\NormalTok{)}\OperatorTok{;}
+
+\NormalTok{    \}}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Pérdida total de fondos.
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Uso de onlyOwner
+  \item
+    Librerías como
+    \href{https://docs.openzeppelin.com/contracts/5.x/access-control}{OpenZeppelin
+    AccessControl}
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{ANEXO A.2.2. Uso de
+tx.origin}\label{anexo-a.2.2.-uso-de-tx.origin}
+
+Uso incorrecto de tx.origin para autenticación.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{withdraw}\NormalTok{() }\KeywordTok{public}\NormalTok{ \{}
+
+    \PreprocessorTok{require}\NormalTok{(tx}\OperatorTok{.}\AttributeTok{origin} \OperatorTok{==}\NormalTok{ owner)}\OperatorTok{;}
+
+    \FunctionTok{payable}\NormalTok{(msg}\OperatorTok{.}\AttributeTok{sender}\NormalTok{)}\OperatorTok{.}\FunctionTok{transfer}\NormalTok{(}\FunctionTok{address}\NormalTok{(}\KeywordTok{this}\NormalTok{)}\OperatorTok{.}\AttributeTok{balance}\NormalTok{)}\OperatorTok{;}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Ataques mediante contratos intermediarios.
+\item
+  \textbf{Mitigación}: Usar msg.sender para autenticación
+\end{itemize}
+
+\subsubsection{ANEXO A.2.3. Inicialización insegura (contratos
+upgradeables)}\label{anexo-a.2.3.-inicializaciuxf3n-insegura-contratos-upgradeables}
+
+En contratos upgradeables, la inicialización se realiza mediante
+funciones externas (initialize) en lugar de constructores. Si no están
+protegidas, cualquier usuario puede ejecutarlas y asumir el control del
+contrato.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{initialize}\NormalTok{(address \_owner) }\KeywordTok{public}\NormalTok{ \{}
+
+\NormalTok{    owner }\OperatorTok{=}\NormalTok{ \_owner}\OperatorTok{;}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Un atacante puede inicializar el contrato antes que
+  el legítimo propietario.
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Uso de
+    \href{https://docs.openzeppelin.com/upgrades-plugins/writing-upgradeable}{initializer
+    (OpenZeppelin)}
+  \item
+    Bloqueo de inicialización tras ejecución
+  \end{itemize}
+\end{itemize}
+
+\subsection{ANEXO A.3. Vulnerabilidades económicas y del
+entorno}\label{anexo-a.3.-vulnerabilidades-econuxf3micas-y-del-entorno}
+
+\subsubsection{ANEXO A.3.1. Front-running /
+MEV}\label{anexo-a.3.1.-front-running-mev}
+
+Un atacante observa la mempool y ejecuta transacciones antes que la
+víctimANEXO A.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{buy}\NormalTok{(uint price) }\KeywordTok{public}\NormalTok{ \{}
+
+    \PreprocessorTok{require}\NormalTok{(price }\OperatorTok{==}\NormalTok{ currentPrice)}\OperatorTok{;}
+
+    \CommentTok{// compra}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Manipulación de operaciones (arbitraje,
+  liquidaciones, subastas).
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \href{https://medium.com/coinmonks/commit-reveal-scheme-in-solidity-c06eba4091bb}{\emph{Commit-reveal}}
+  \item
+    Subastas ciegas
+  \item
+    Uso de \emph{relayers} privados
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{ANEXO A.3.2. Dependencia de
+oráculos}\label{anexo-a.3.2.-dependencia-de-oruxe1culos}
+
+Uso de datos externos manipulables.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{getPrice}\NormalTok{() }\KeywordTok{public}\NormalTok{ view }\FunctionTok{returns}\NormalTok{ (uint) \{}
+
+    \ControlFlowTok{return}\NormalTok{ externalOracle}\OperatorTok{.}\FunctionTok{price}\NormalTok{()}\OperatorTok{;}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Manipulación de precios en DeFi.
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Oráculos descentralizados (ej.
+    \href{https://chain.link/}{Chainlink})
+  \item
+    Promedios temporales
+    (\href{https://www.binance.com/es-MX/support/faq/detail/80655cc54d8a4b2bb8ea097001844fd1}{TWAP})
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{ANEXO A.3.3. Uso de
+block.timestamp}\label{anexo-a.3.3.-uso-de-block.timestamp}
+
+El uso de block.timestamp como fuente de aleatoriedad o para decisiones
+críticas es inseguro, ya que su valor puede ser parcialmente manipulado
+por mineros o validadores dentro de ciertos límites.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{random}\NormalTok{() }\KeywordTok{public}\NormalTok{ view }\FunctionTok{returns}\NormalTok{ (uint) \{}
+
+    \ControlFlowTok{return} \FunctionTok{uint}\NormalTok{(}\FunctionTok{keccak256}\NormalTok{(abi}\OperatorTok{.}\FunctionTok{encodePacked}\NormalTok{(block}\OperatorTok{.}\AttributeTok{timestamp}\NormalTok{)))}\OperatorTok{;}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Resultados predecibles o manipulables por
+  mineros/validadores.
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    VRF
+    (\href{https://chain.link/education-hub/verifiable-random-function-vrf}{Verifiable
+    Random Functions})
+  \item
+    Fuentes externas verificables
+  \end{itemize}
+\end{itemize}
+
+\subsection{ANEXO A.4. Errores lógicos de
+negocio}\label{anexo-a.4.-errores-luxf3gicos-de-negocio}
+
+\subsubsection{ANEXO A.4.1. Error en cálculo de
+balances}\label{anexo-a.4.1.-error-en-cuxe1lculo-de-balances}
+
+Errores en operadores lógicos o condiciones de validación pueden
+provocar inconsistencias en la gestión de balances, especialmente en
+casos límite donde las condiciones no cubren todos los escenarios
+posibles.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{withdraw}\NormalTok{(uint amount) }\KeywordTok{public}\NormalTok{ \{}
+
+    \PreprocessorTok{require}\NormalTok{(balances[msg}\OperatorTok{.}\AttributeTok{sender}\NormalTok{] }\OperatorTok{\textgreater{}}\NormalTok{ amount)}\OperatorTok{;}
+
+\NormalTok{    balances[msg}\OperatorTok{.}\AttributeTok{sender}\NormalTok{] }\OperatorTok{{-}=}\NormalTok{ amount}\OperatorTok{;}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Impacto}: Comportamiento incorrecto en condiciones límite.
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Uso de \textgreater{} en lugar de \textgreater=.
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{ANEXO A.4.2. Distribución incorrecta de
+recompensas}\label{anexo-a.4.2.-distribuciuxf3n-incorrecta-de-recompensas}
+
+La lógica de distribución puede introducir errores debido a divisiones
+enteras o falta de gestión de restos, provocando pérdida de precisión y
+fondos no asignados correctamente.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{function} \FunctionTok{distribute}\NormalTok{() }\KeywordTok{public}\NormalTok{ \{}
+
+\NormalTok{    uint reward }\OperatorTok{=}\NormalTok{ total }\OperatorTok{/}\NormalTok{ users}\OperatorTok{.}\AttributeTok{length}\OperatorTok{;}
+
+    \ControlFlowTok{for}\NormalTok{ (uint i }\OperatorTok{=} \DecValTok{0}\OperatorTok{;}\NormalTok{ i }\OperatorTok{\textless{}}\NormalTok{ users}\OperatorTok{.}\AttributeTok{length}\OperatorTok{;}\NormalTok{ i}\OperatorTok{++}\NormalTok{) \{}
+
+\NormalTok{        balances[users[i]] }\OperatorTok{+=}\NormalTok{ reward}\OperatorTok{;}
+
+\NormalTok{    \}}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  Impacto:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Pérdida de fondos debido a errores de redondeo (truncamiento en
+    división entera)
+  \item
+    Acumulación de saldo no distribuido en el contrato
+  \item
+    Distribuciones injustas entre usuarios
+  \item
+    Posibles vectores de explotación si un atacante manipula el número
+    de participantes
+  \end{itemize}
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Uso de patrones de distribución que gestionen residuos (por ejemplo,
+    acumuladores o ``\emph{remainder handling}'')
+  \item
+    Empleo de mayor precisión mediante escalado
+    (\href{https://rareskills.io/post/solidity-fixed-point}{\emph{fixed-point
+    arithmetic}})
+  \item
+    Validación de invariantes económicas (la suma distribuida debe
+    coincidir con el total)
+  \item
+    Testing específico de casos límite (número de usuarios, valores
+    pequeños, etc.)
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{ANEXO A.4.3. Estados
+inconsistentes}\label{anexo-a.4.3.-estados-inconsistentes}
+
+La falta de control adecuado sobre las transiciones de estado puede
+permitir la ejecución de funciones en condiciones no válidas, generando
+comportamientos inconsistentes en el contrato.
+
+Código vulnerable
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{enum}\NormalTok{ State \{ Open}\OperatorTok{,}\NormalTok{ Closed \}}
+
+\NormalTok{State }\KeywordTok{public}\NormalTok{ state}\OperatorTok{;}
+
+\KeywordTok{function} \FunctionTok{close}\NormalTok{() }\KeywordTok{public}\NormalTok{ \{}
+
+\NormalTok{    state }\OperatorTok{=}\NormalTok{ State}\OperatorTok{.}\AttributeTok{Closed}\OperatorTok{;}
+
+\NormalTok{\}}
+
+\KeywordTok{function} \FunctionTok{bid}\NormalTok{() }\KeywordTok{public}\NormalTok{ payable \{}
+
+    \PreprocessorTok{require}\NormalTok{(state }\OperatorTok{==}\NormalTok{ State}\OperatorTok{.}\AttributeTok{Open}\NormalTok{)}\OperatorTok{;}
+
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  Impacto:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Ejecución de funciones en estados no válidos
+  \item
+    Comportamiento inesperado del contrato
+  \item
+    Bloqueo o bypass de lógica de negocio
+  \item
+    Posible explotación combinada con otras vulnerabilidades (por
+    ejemplo, \emph{front-running} o \emph{reentrancy}
+  \end{itemize}
+\item
+  Mitigación:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Implementación de máquinas de estados explícitas y completas
+  \item
+    Uso de modificadores para validar estado (inState(State.Open))
+  \item
+    Restricción de transiciones de estado válidas
+  \item
+    Aplicación de patrones
+    \href{https://fravoll.github.io/solidity-patterns/state_machine.html}{\emph{state
+    machines}}
+  \end{itemize}
+\end{itemize}
+
+\subsection{ANEXO A.5. Resumen de
+vulnerabilidades}\label{anexo-a.5.-resumen-de-vulnerabilidades}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0661}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1074}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1736}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1570}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.0909}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.2479}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1570}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\textbf{\emph{ID}}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Categoría}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Vulnerabilidad}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Tipo}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Impacto}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Detectable automáticamente}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+\textbf{Ejemplo sección}
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\emph{V1} & Técnica & Reentrancy & Ejecución & Crítico & Sí
+(Slither/Mythril) & ANEXO A.1.1 \\
+\emph{V2} & Técnica & Overflow & Aritmético & Medio & Sí (Slither) &
+ANEXO A.1.2 \\
+\emph{V3} & Técnica & Delegatecall & Ejecución & Crítico & Parcial &
+ANEXO A.1.3 \\
+\emph{V4} & Control & Acceso no restringido & Autorización & Crítico &
+Sí & ANEXO A.2.1 \\
+\emph{V5} & Control & tx.origin & Autenticación & Alto & Sí & ANEXO
+A.2.2 \\
+\emph{V6} & Económica & Front-running & MEV & Alto & No & ANEXO A.3.1 \\
+\emph{V7} & Económica & Oráculos & Dependencia externa & Crítico & No &
+ANEXO A.3.2 \\
+\emph{V8} & Lógica & Error de balance & Lógica & Variable & No & ANEXO
+A.4.1 \\
+\end{longtable}
+}

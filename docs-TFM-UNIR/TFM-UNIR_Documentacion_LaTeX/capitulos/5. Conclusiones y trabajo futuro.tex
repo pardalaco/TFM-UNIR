@@ -1,0 +1,67 @@
+\section{5. Conclusiones y trabajo
+futuro}\label{conclusiones-y-trabajo-futuro}
+
+\subsection{5.1 Conclusiones}\label{conclusiones}
+
+\subsection{5.2 Limitaciones de la
+solución}\label{limitaciones-de-la-soluciuxf3n}
+
+\begin{itemize}
+\item
+  \textbf{Dependencia de herramientas externas.} EVMAudit depende del
+  correcto funcionamiento de Slither, Mythril y Echidna. Cualquier
+  modificación en dichas herramientas puede afectar al comportamiento
+  del sistema.
+\item
+  \textbf{Correlación basada en reglas.} La correlación implementada
+  utiliza únicamente:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    contrato
+  \item
+    función
+  \item
+    SWC
+  \end{itemize}
+
+  Esto puede provocar que determinadas vulnerabilidades relacionadas no
+  se agrupen correctamente.
+\item
+  \textbf{Falsos positivos y falsos negativos.} La herramienta no
+  elimina completamente los falsos positivos inherentes a las
+  herramientas integradas.
+\item
+  \textbf{Limitaciones del fuzzing.} Determinadas vulnerabilidades, como
+  la reentrancia, requieren contratos atacantes específicos y no pueden
+  validarse automáticamente.
+\item
+  \textbf{Ausencia de análisis inter-contrato.} Actualmente la
+  herramienta analiza cada contrato de forma independiente.
+\item
+  \textbf{Priorización limitada.} La priorización se basa en la
+  severidad y en el número de herramientas que detectan la
+  vulnerabilidad, sin utilizar métricas más avanzadas como CVSS.
+\end{itemize}
+
+\subsection{5.3 Líneas de trabajo
+futuro}\label{luxedneas-de-trabajo-futuro}
+
+\begin{itemize}
+\tightlist
+\item
+  incorporar nuevas herramientas
+\item
+  análisis inter-contrato\\
+\item
+  CVSS
+\item
+  Machine Learning
+\item
+  Semgrep
+\item
+  Manticore
+\item
+  dashboard web
+\end{itemize}

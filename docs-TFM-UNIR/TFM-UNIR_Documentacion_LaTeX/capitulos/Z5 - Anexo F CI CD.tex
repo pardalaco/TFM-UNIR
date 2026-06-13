@@ -1,0 +1,144 @@
+\section{ANEXO F. ENTORNO DE INTEGRACIÓN CONTINUA (CI/CD) Y PUBLICACIÓN
+AUTOMATIZADA}\label{anexo-f.-entorno-de-integraciuxf3n-continua-cicd-y-publicaciuxf3n-automatizada}
+
+Para garantizar la integridad del software durante el ciclo de vida del
+desarrollo y agilizar el flujo de despliegue, se ha diseñado e
+implementado un pipeline de Integración Continua (CI) basado en
+\textbf{GitHub Actions}. Esta estrategia de ingeniería de software
+permite automatizar la compilación, verificación y empaquetado de la
+aplicación en cada iteración, mitigando los riesgos asociados a la
+integración manual de código y asegurando la disponibilidad inmediata de
+artefactos listos para producción.
+
+\subsection{ANEXO F.1. Arquitectura del Workflow y Disparadores
+(Triggers)}\label{anexo-f.1.-arquitectura-del-workflow-y-disparadores-triggers}
+
+El flujo de trabajo automatizado se define de manera declarativa
+mediante la sintaxis YAML de GitHub Actions. Con el propósito de
+optimizar los recursos de cómputo y mantener un control estricto sobre
+la estabilidad de la rama principal, se han configurado dos disparadores
+específicos:
+
+\begin{itemize}
+\item
+  \textbf{Eventos de Empuje (\emph{Push}):} El pipeline se ejecuta de
+  forma automática ante cualquier consolidación directa de código en la
+  rama \texttt{main}, asegurando que cada incremento de software sea
+  evaluado y empaquetado de inmediato.
+\item
+  \textbf{Solicitudes de Extracción (\emph{Pull Requests}):} La
+  automatización actúa como una barrera de calidad (\emph{quality gate})
+  ante cualquier intento de fusión hacia la rama \texttt{main}. Esto
+  permite validar que las modificaciones propuestas por los
+  desarrolladores no rompan el proceso de construcción del contenedor
+  antes de que el código sea integrado definitivamente.
+\end{itemize}
+
+El entorno de ejecución seleccionado para los trabajos (\emph{jobs}) es
+\texttt{ubuntu-latest}, lo que proporciona un entorno virtual limpio,
+aislado y actualizado de manera nativa por la infraestructura de GitHub.
+
+\subsection{ANEXO F.2. Desglose Técnico de las Etapas del
+Pipeline}\label{anexo-f.2.-desglose-tuxe9cnico-de-las-etapas-del-pipeline}
+
+El ciclo de vida del pipeline se divide en dos trabajos secuenciales y
+dependientes, los cuales ejecutan tareas críticas de aprovisionamiento,
+autenticación y despliegue:
+
+\subsubsection{\texorpdfstring{ANEXO F.2.1. Trabajo de Construcción y
+Publicación
+(\texttt{create-docker-image})}{ANEXO F.2.1. Trabajo de Construcción y Publicación (create-docker-image)}}\label{anexo-f.2.1.-trabajo-de-construcciuxf3n-y-publicaciuxf3n-create-docker-image}
+
+Es el núcleo técnico de la automatización y consta de los siguientes
+pasos detallados:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Clonación del Repositorio y Gestión de Submódulos:} Se utiliza
+  la acción oficial \texttt{actions/checkout@v2}. Debido a la
+  arquitectura desacoplada del proyecto, es indispensable configurar el
+  parámetro
+  \texttt{submodules:\ \textquotesingle{}recursive\textquotesingle{}}.
+  Esta directiva instruye al agente para que descargue e integre de
+  manera automática el repositorio y código de \texttt{evmaudit} dentro
+  de la estructura de directorios del pipeline.
+\item
+  \textbf{Autenticación en el Registro de Contenedores (GHCR):} Mediante
+  la acción \texttt{docker/login-action@v2}, el pipeline establece una
+  conexión segura con el registro oficial de GitHub (\texttt{ghcr.io}).
+  El proceso se autentica de forma dinámica utilizando el actor del
+  ciclo de vida (\texttt{\$\{\{\ github.actor\ \}\}}) y un token de
+  acceso seguro almacenado de forma cifrada en los secretos del
+  repositorio bajo la clave
+  \texttt{\$\{\{\ secrets.IMAGES\_TFM\_UNIR\ \}\}}.
+\item
+  \textbf{Normalización del Espacio de Nombres y Doble Etiquetado
+  (\emph{Multi-tagging}):} Las especificaciones de Docker y el estándar
+  de la Open Container Initiative (OCI) prohíben estrictamente el uso de
+  caracteres en mayúscula para los nombres de las imágenes de
+  contenedores. Para solucionar esto, el pipeline ejecuta un script en
+  Bash que convierte dinámicamente el nombre del repositorio a
+  minúsculas utilizando el comando
+  \texttt{tr\ \textquotesingle{}{[}:upper:{]}\textquotesingle{}\ \textquotesingle{}{[}:lower:{]}\textquotesingle{}}.
+  Posteriormente, se implementa una estrategia de doble etiquetado para
+  optimizar la trazabilidad y la inmutabilidad:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Etiqueta por SHA (}\texttt{IMAGE\_SHA}\textbf{):} Vincula de
+    forma unívoca el contenedor con el hash del \emph{commit} específico
+    de Git que originó la compilación
+    (\texttt{\$\{\{\ github.sha\ \}\}}). Esto permite realizar
+    auditorías retrospectivas y despliegues deterministas en caso de
+    fallos.
+  \item
+    \textbf{Etiqueta de Última Versión
+    (}\texttt{IMAGE\_LATEST}\textbf{):} Sobrescribe el puntero
+    \texttt{:latest} con la versión más reciente del software que haya
+    superado la fase de construcción con éxito.
+  \end{itemize}
+\item
+  \textbf{Construcción y \emph{Push} Multiplataforma:} Se invoca de
+  manera directa el comando \texttt{docker\ build}, forzando la
+  compilación bajo la arquitectura destino
+  \texttt{-\/-platform\ linux/amd64} utilizando el \texttt{Dockerfile}
+  del proyecto como plano de construcción. Una vez generadas las
+  imágenes locales con sus respectivas etiquetas, se ejecutan las
+  instrucciones de empuje (\emph{push}) hacia el registro seguro de
+  GitHub, quedando el artefacto disponible para su consumo.
+\end{enumerate}
+
+\subsubsection{ANEXO F.2.2. Trabajo de Despliegue (deploy) y
+Limitaciones del
+Entorno}\label{anexo-f.2.2.-trabajo-de-despliegue-deploy-y-limitaciones-del-entorno}
+
+Para garantizar una separación formal de conceptos en la arquitectura de
+la integración, el pipeline implementa un segundo trabajo secuencial
+denominado \texttt{deploy}. Utilizando la directiva
+\texttt{needs:\ create-docker-image}, se establece una restricción de
+dependencia estricta: esta etapa no puede inicializarse si el
+empaquetado y la publicación previa de la imagen en el registro han
+fallado.
+
+En la fase actual del proyecto, \textbf{esta etapa automatizada no ha
+sido implementada de forma activa y opera estrictamente como un punto de
+anclaje (\emph{placeholder}) arquitectónico}. La justificación de esta
+decisión de diseño radica en las limitaciones técnicas del entorno de
+alojamiento seleccionado para las pruebas de concepto. La
+infraestructura de EVMAudit se despliega externamente en la plataforma
+PaaS \textbf{Railway} utilizando su modalidad de suscripción gratuita.
+Este nivel de servicio impone restricciones en las interfaces de
+programación (APIs) y en el uso de \emph{webhooks}, impidiendo la
+ejecución de despliegues totalmente automatizados (\emph{Automated CD
+Triggers}) desencadenados de forma directa mediante agentes de terceros
+como GitHub Actions.
+
+Por consiguiente, el flujo de trabajo en este punto se limita a
+verificar la integridad de la secuencia de comandos en consola, quedando
+el aprovisionamiento de la infraestructura supeditado a los mecanismos
+nativos de la plataforma de destino. En el \textbf{siguiente apartado
+(X.5. Despliegue de la Infraestructura)}, se expondrá de manera más
+amplia la configuración, el aprovisionamiento y las características
+operativas de dicho entorno en Railway.

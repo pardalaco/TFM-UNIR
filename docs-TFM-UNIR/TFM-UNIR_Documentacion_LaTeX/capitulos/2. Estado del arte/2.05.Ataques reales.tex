@@ -1,0 +1,173 @@
+\subsection{2.5. Ataques Reales}\label{ataques-reales}
+
+El estudio de incidentes reales constituye una fuente de conocimiento
+imprescindible en el ámbito de la seguridad de contratos inteligentes. A
+diferencia de los entornos de prueba, los ataques producidos en redes de
+producción demuestran cómo las vulnerabilidades teóricas se traducen en
+pérdidas económicas concretas e irreversibles.
+
+En esta sección se analizan cuatro casos históricos representativos,
+seleccionados por su relevancia técnica y su correspondencia directa con
+cada una de las categorías de vulnerabilidades descritas en la sección
+anterior (4.4. Vulnerabilidades de seguridad en contratos inteligentes
+de Ethereum).
+
+\subsubsection{2.5.1. Vulnerabilidad técnica de ejecución: The DAO
+(2016)}\label{vulnerabilidad-tuxe9cnica-de-ejecuciuxf3n-the-dao-2016}
+
+El ataque contra The DAO, producido en junio de 2016, representa el caso
+más paradigmático de explotación de una vulnerabilidad de
+\emph{reentrancy} en la historia de Ethereum {[}36{]}. The DAO era un
+fondo de inversión descentralizado desplegado sobre Ethereum que había
+recaudado aproximadamente 150 millones de dólares en ETH procedentes de
+más de once mil participantes, convirtiéndose en uno de los mayores
+proyectos de financiación colectiva hasta ese momento {[}37{]}.
+
+La vulnerabilidad residía en la función withdraw() del contrato. El
+flujo de ejecución enviaba los fondos en ETH al destinatario antes de
+actualizar el balance interno correspondiente. Esta secuencia incorrecta
+permitió a un atacante desplegar un contrato receptor cuya función de
+\emph{fallback} re-invocaba withdraw() de forma recursiva, extrayendo
+fondos de manera repetida mientras el saldo del contrato permanecía sin
+modificar. El ataque se ejecutó en múltiples iteraciones dentro de una
+misma cadena de llamadas, drenando aproximadamente 3,6 millones de ETH
+{[}38{]}.
+
+Las consecuencias del incidente trascendieron lo puramente económico. La
+comunidad de Ethereum debatió durante semanas sobre cómo dar respuesta
+al ataque, dado el carácter inmutable del protocolo. Finalmente, se
+ejecutó un \emph{hard fork} en el bloque 1.920.000, el 20 de julio de
+2016, que revirtió el estado de la cadena para recuperar los fondos. Una
+fracción de la comunidad rechazó esta intervención por considerarla
+contraria a los principios de inmutabilidad de la tecnología blockchain,
+lo que dio lugar a la bifurcación conocida como Ethereum Classic
+{[}37{]}.
+
+Este caso puso de manifiesto que el patrón de diseño correcto para
+gestionar transferencias es el denominado
+\emph{checks-effects-interactions}: primero verificar condiciones,
+después actualizar el estado del contrato y, por último, realizar
+cualquier llamada externa. Su incumplimiento en The DAO, a pesar de la
+aparente sencillez del principio, resultó en pérdidas valoradas en torno
+a 60 millones de dólares al precio del momento {[}36{]}.
+
+\subsubsection{2.5.2. Vulnerabilidad de control y privilegios: Poly
+Network
+(2021)}\label{vulnerabilidad-de-control-y-privilegios-poly-network-2021}
+
+El ataque a Poly Network, ocurrido el 10 de agosto de 2021, ilustra con
+especial claridad las consecuencias de un control de acceso deficiente
+en contratos que gestionan operaciones críticas de alto valor {[}39{]}.
+Poly Network es un protocolo de interoperabilidad \emph{cross-chain} que
+conecta diversas redes blockchain, lo que amplía considerablemente su
+superficie de ataque.
+
+El vector de explotación se basó en una ausencia de restricciones en la
+cadena de llamadas entre contratos del protocolo. La función
+verifyHeaderAndExecuteTx(), presente en el contrato
+EthCrossChainManager, permitía invocar internamente la función
+PutCurEpochConPubKeyBytes() del contrato EthCrossChainData, encargada de
+actualizar la clave pública del grupo de \emph{keepers} con permisos
+para ejecutar transacciones \emph{cross-chain}. Al no existir ninguna
+comprobación que restringiese qué direcciones podían realizar esta
+invocación de forma indirecta, el atacante fue capaz de sustituir los
+\emph{keepers} legítimos por una dirección bajo su propio control.
+
+La operación se replicó de forma simultánea en tres redes: Ethereum, BNB
+Chain y Polygon; lo que supuso un control inmediato sobre la práctica
+totalidad de los fondos bloqueados en el protocolo, con un valor
+estimado de 611 millones de dólares, convirtiéndose en el mayor robo de
+la historia del ecosistema DeFi hasta esa fecha.
+
+El desenlace del incidente fue inusual: el atacante devolvió la
+totalidad de los fondos en los días posteriores, argumentando haber
+actuado con el propósito de demostrar la vulnerabilidad. No obstante, el
+caso evidencia que errores de diseño en el modelo de permisos
+(independientemente de su recuperabilidad) pueden comprometer
+completamente la integridad de un protocolo. Una correcta implementación
+de control de acceso, mediante modificadores de autorización explícitos
+y separación de privilegios entre contratos, habría impedido la escalada
+de permisos aprovechada en este ataque {[}40{]}.
+
+\subsubsection{2.5.3. Vulnerabilidad económica y dependencia del
+entorno: bZx
+(2020)}\label{vulnerabilidad-econuxf3mica-y-dependencia-del-entorno-bzx-2020}
+
+Los ataques contra el protocolo bZx, producidos en febrero de 2020,
+constituyen uno de los primeros ejemplos documentados de explotación
+combinada de \emph{flash loans} y manipulación de oráculos de precio a
+escala en el ecosistema DeFi. Su relevancia radica no solo en las
+pérdidas económicas, sino en haber demostrado que la composabilidad de
+los protocolos DeFi puede convertirse en un vector de ataque cuando los
+componentes individuales no contemplan escenarios de manipulación
+externa {[}41{]}.
+
+En el primero de los dos incidentes, acaecido el 14 de febrero de 2020,
+el atacante obtuvo un préstamo flash de 10.000 ETH a través del
+protocolo dYdX sin necesidad de aportar colateral alguno. Con una parte
+de estos fondos abrió simultáneamente una posición corta apalancada
+sobre el par WBTC/ETH en bZx y utilizó el volumen restante para adquirir
+WBTC en Uniswap, manipulando artificialmente el precio de mercado del
+par en ese pool. El protocolo bZx, al depender de Uniswap como fuente de
+precios en tiempo real, calculó incorrectamente la valoración de la
+posición del atacante, quien la cerró obteniendo un beneficio aproximado
+de 350.000 dólares una vez devuelto el préstamo flash, todo dentro de
+una única transacción {[}42{]}.
+
+El segundo ataque, cuatro días después, siguió una mecánica similar pero
+orientada a la manipulación del precio del token sUSD en Kyber Network.
+Al inflar artificialmente su cotización, el atacante logró depositar
+colateral sobrevalorado en bZx y extraer en préstamo un volumen de
+activos muy superior al que le habría correspondido según condiciones de
+mercado normales {[}42{]}.
+
+Ambos ataques pusieron de manifiesto que la seguridad de un protocolo
+DeFi no puede analizarse de forma aislada: la dependencia de precios
+obtenidos de fuentes únicas y manipulables en tiempo real constituye una
+vulnerabilidad estructural. La adopción de oráculos descentralizados con
+agregación de múltiples fuentes de precio (como los proporcionados por
+protocolos del tipo Chainlink) y el uso de precios promediados en el
+tiempo (TWAP, \emph{Time-Weighted Average Price}) son las principales
+contramedidas frente a este patrón de ataque.
+
+\subsubsection{2.5.4. Error lógico de negocio: Euler Finance
+(2023)}\label{error-luxf3gico-de-negocio-euler-finance-2023}
+
+El ataque a Euler Finance, ejecutado el 13 de marzo de 2023, representa
+un ejemplo de elevada complejidad técnica dentro de la categoría de
+errores lógicos, precisamente porque la vulnerabilidad no residía en un
+patrón de codificación inseguro clásico, sino en una interacción no
+prevista entre mecanismos financieros del propio protocolo {[}43{]}.
+
+Euler Finance era un protocolo de préstamos descentralizado en Ethereum
+que introducía el concepto de \emph{sub-cuentas} para gestionar
+posiciones de colateral y deuda de forma independiente. La
+vulnerabilidad se encontraba en la función donateToReserves(),
+incorporada en una actualización anterior. Esta función permitía a un
+usuario transferir sus propios activos a las reservas del protocolo,
+pero no verificaba que dicha operación no dejase la cuenta del donante
+en un estado de insolvencia. En condiciones normales, esta situación
+habría sido detectada por el sistema de liquidación, pero el atacante
+aprovechó el mecanismo de autoliquidación del protocolo de una forma no
+contemplada en su diseño {[}44{]}.
+
+El flujo del ataque comenzó con la obtención de un préstamo flash de 30
+millones de DAI desde el protocolo Aave. Con estos fondos, el atacante
+depositó colateral en Euler y, mediante operaciones de apalancamiento
+repetidas, construyó posiciones de aproximadamente 195 millones de eDAI
+(depósitos) y 200 millones de dDAI (deuda). A continuación, utilizó
+donateToReserves() para crear intencionalmente una posición insolvente y
+acto seguido activó la autoliquidación. El sistema de Euler, al calcular
+el bonus de liquidación sobre una posición de ese tamaño, transfirió al
+atacante los fondos de las reservas del protocolo en una cuantía muy
+superior a la deuda original {[}45{]}.
+
+La pérdida total ascendió a aproximadamente 197 millones de dólares. Sin
+embargo, el atacante devolvió la práctica totalidad de los fondos
+semanas después, tras una negociación directa con el equipo de Euler
+mediante mensajes publicados en la cadena de bloques. El incidente
+ilustra cómo la ausencia de validaciones sobre invariantes de negocio
+(en este caso, que ninguna operación debería permitir dejar una cuenta
+en estado de insolvencia) puede generar vulnerabilidades que escapan
+tanto a la revisión manual del código como a las herramientas de
+análisis estático-convencionales {[}44{]}.

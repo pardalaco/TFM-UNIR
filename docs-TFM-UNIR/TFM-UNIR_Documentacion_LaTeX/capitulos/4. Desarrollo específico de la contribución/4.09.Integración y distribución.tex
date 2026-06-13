@@ -1,0 +1,188 @@
+\section{4.9.Integración y
+distribución}\label{integraciuxf3n-y-distribuciuxf3n}
+
+\subsection{4.9. Distribución e integración de la
+solución}\label{distribuciuxf3n-e-integraciuxf3n-de-la-soluciuxf3n}
+
+Uno de los objetivos perseguidos durante el desarrollo de EVMAudit fue
+diseñar una solución desacoplada de cualquier interfaz concreta y
+suficientemente flexible para poder ser reutilizada en distintos
+contextos.
+
+Por este motivo, la lógica principal de análisis se implementó como una
+librería independiente, separando completamente las funcionalidades
+relacionadas con la detección y procesamiento de vulnerabilidades de los
+mecanismos de interacción con el usuario.
+
+Esta decisión permitió demostrar la reutilización de la solución
+desarrollada mediante su integración en otros componentes software sin
+necesidad de modificar el núcleo de la herramienta.
+
+\subsubsection{4.9.1. Distribución de la
+librería}\label{distribuciuxf3n-de-la-libreruxeda}
+
+La implementación de EVMAudit como una librería independiente permite
+desacoplar el motor de análisis de cualquier entorno concreto de
+ejecución.
+
+Este enfoque proporciona diversas ventajas:
+
+\begin{itemize}
+\tightlist
+\item
+  reutilización de la herramienta desde otros proyectos
+\item
+  separación entre lógica de negocio e interfaces de usuario
+\item
+  facilidad de mantenimiento
+\item
+  posibilidad de incorporar nuevas interfaces en el futuro.
+\end{itemize}
+
+La distribución de la librería permite que el proceso de análisis pueda
+ejecutarse desde aplicaciones externas sin necesidad de duplicar
+funcionalidades.
+
+!TODO: referencia cruzada al Anexo A (publicación en PyPI).
+
+\subsubsection{4.9.2. Aplicación web como caso de
+uso}\label{aplicaciuxf3n-web-como-caso-de-uso}
+
+Con el objetivo de validar la reutilización de la arquitectura
+desarrollada, se implementó una aplicación web que utiliza EVMAudit como
+motor de análisis.
+
+La aplicación no implementa mecanismos propios de detección de
+vulnerabilidades, sino que delega completamente las tareas de análisis
+en la librería desarrollada.
+
+Esta aproximación permite mantener una única implementación del proceso
+de análisis y garantiza la consistencia de los resultados obtenidos.
+
+La aplicación actúa, por tanto, como una capa de presentación encargada
+de:
+
+\begin{itemize}
+\tightlist
+\item
+  recibir contratos inteligentes proporcionados por el usuario
+\item
+  invocar las funciones de EVMAudit
+\item
+  mostrar el progreso del análisis
+\item
+  presentar los resultados obtenidos.
+\end{itemize}
+
+De esta forma, la aplicación web constituye una demostración práctica de
+la reutilización de la solución desarrollada.
+
+\subsubsection{4.9.3. Flujo de funcionamiento de la
+aplicación}\label{flujo-de-funcionamiento-de-la-aplicaciuxf3n}
+
+La aplicación desarrollada permite dos mecanismos de entrada:
+
+\begin{itemize}
+\tightlist
+\item
+  carga de contratos Solidity mediante fichero
+\item
+  introducción directa del código fuente a través de la interfaz web.
+\end{itemize}
+
+Una vez recibido el contrato, la aplicación inicia el proceso de
+análisis y ejecuta internamente el pipeline implementado por EVMAudit.
+
+Las distintas fases del proceso se ejecutan de forma secuencial:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  ejecución de Slither
+\item
+  ejecución de Mythril
+\item
+  normalización de resultados
+\item
+  correlación de vulnerabilidades
+\item
+  generación de propiedades
+\item
+  ejecución de Echidna
+\item
+  generación del informe final.
+\end{enumerate}
+
+Durante la ejecución, la aplicación informa al usuario del progreso
+alcanzado y permite recuperar el informe una vez finalizado el análisis.
+
+Este comportamiento demuestra que la arquitectura modular adoptada
+permite integrar EVMAudit en aplicaciones externas sin modificar la
+lógica interna del sistema.
+
+!TODO: insertar diagrama simplificado de la aplicación web.
+
+!TODO: insertar captura de pantalla de la interfaz.
+
+!TODO: referencia cruzada al Anexo B (aplicación web).
+
+\subsubsection{4.9.4. Separación entre presentación y lógica de
+análisis}\label{separaciuxf3n-entre-presentaciuxf3n-y-luxf3gica-de-anuxe1lisis}
+
+La decisión de implementar EVMAudit como una librería independiente
+permite mantener separadas las responsabilidades del sistema.
+
+Mientras que la librería se encarga de:
+
+\begin{itemize}
+\tightlist
+\item
+  ejecutar herramientas externas
+\item
+  procesar resultados
+\item
+  correlacionar vulnerabilidades
+\item
+  generar informes
+\end{itemize}
+
+la aplicación web únicamente proporciona los mecanismos de interacción
+con el usuario.
+
+Esta separación favorece:
+
+\begin{itemize}
+\tightlist
+\item
+  la mantenibilidad del sistema
+\item
+  la reutilización de la solución
+\item
+  la incorporación de nuevas interfaces
+\item
+  la evolución independiente de cada componente.
+\end{itemize}
+
+En consecuencia, la aplicación web debe entenderse como una demostración
+de la capacidad de integración de EVMAudit y no como la contribución
+principal del trabajo.
+
+\subsubsection{4.9.5. Consideraciones sobre
+infraestructura}\label{consideraciones-sobre-infraestructura}
+
+Los aspectos relacionados con la publicación de la librería, el
+despliegue de la aplicación y la infraestructura utilizada no
+constituyen el núcleo de la contribución desarrollada en este Trabajo
+Fin de Máster.
+
+Por este motivo, dichos elementos se incluyen en los anexos del
+documento.
+
+!TODO: referencia cruzada al Anexo A (PyPI).
+
+!TODO: referencia cruzada al Anexo B (Aplicación web).
+
+!TODO: referencia cruzada al Anexo C (Docker).
+
+!TODO: referencia cruzada al Anexo D (Despliegue).

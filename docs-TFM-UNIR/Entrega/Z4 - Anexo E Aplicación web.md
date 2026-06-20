@@ -59,7 +59,7 @@ La interfaz adopta un diseño en modo oscuro inspirado en herramientas de análi
 - **Sección de resultados**: círculo con la puntuación de riesgo (`risk_score`) en una escala de 0 a 10, coloreado en verde, naranja o rojo según el nivel de riesgo; tres indicadores numéricos (hallazgos totales, hallazgos confirmados y hallazgos de severidad alta); tabla de hallazgos correlacionados (severidad, categoría, función afectada, código SWC y nivel de confianza); tabla de resultados de las propiedades ejecutadas por Echidna.
 - **Sección de error**: mensaje descriptivo del fallo y botón para reiniciar el análisis.
 
-!TODO: insertar captura de pantalla de la interfaz web.
+![Interfaz principal de EVMAudit](Diagramas/imagenes/webapp_interfaz.png)
 
 ## Ejemplo de uso real: análisis de MultiVuln.sol
 
@@ -71,7 +71,9 @@ Cuando el estado pasa a `done`, el frontend solicita `GET /result/{job_id}` y re
 
 Este resultado confirma que la aplicación web no introduce ninguna divergencia respecto al pipeline subyacente: ambas interfaces son dos formas de acceso al mismo análisis.
 
-!TODO: insertar captura de pantalla del resultado de MultiVuln.sol en la interfaz web.
+![Progreso del análisis de MultiVuln.sol en la interfaz web](Diagramas/imagenes/webapp_progreso.png)
+
+![Resultado del análisis de MultiVuln.sol — risk score 8.3/10](Diagramas/imagenes/webapp_resultado_multivuln.png)
 
 ## Pila tecnológica y ejecución
 
